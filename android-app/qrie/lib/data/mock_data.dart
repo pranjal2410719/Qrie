@@ -368,7 +368,7 @@ class MockData {
       hint: 'Add 5 to both sides first: 3x = 21, then divide by 3.',
       scaffoldSubstep: 'Step 1: 3x = 16 + 5 = 21.\nStep 2: Divide both sides by 3.',
       explanation:
-          '3x - 5 = 16 ➔ 3x = 16 + 5 ➔ 3x = 21 ➔ x = 21 / 3 = 7. Excellent algebraic transposition!',
+          '3x - 5 = 16 -> 3x = 16 + 5 -> 3x = 21 -> x = 21 / 3 = 7. Excellent algebraic transposition!',
       xpReward: 25,
       category: 'Algebra',
     ),
@@ -466,7 +466,7 @@ class MockData {
     {
       'subject': 'Mathematics',
       'title': 'Linear Equation Standard Form',
-      'formula': 'ax + b = c  ➔  x = (c - b) / a',
+      'formula': 'ax + b = c  ->  x = (c - b) / a',
       'unit': 'Algebraic root',
       'tip': 'Always verify LHS equals RHS after computing your answer.',
     },
@@ -480,7 +480,7 @@ class MockData {
     {
       'subject': 'Science',
       'title': 'Photosynthesis Equation',
-      'formula': '6CO₂ + 6H₂O + Sunlight ➔ C₆H₁₂O₆ + 6O₂',
+      'formula': '6CO₂ + 6H₂O + Sunlight -> C₆H₁₂O₆ + 6O₂',
       'unit': 'Chemical equilibrium',
       'tip': 'Takes place inside the thylakoid discs of chloroplasts.',
     },

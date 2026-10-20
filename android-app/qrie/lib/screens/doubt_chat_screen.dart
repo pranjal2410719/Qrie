@@ -3,8 +3,8 @@ import '../models/doubt_message.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
-import '../widgets/duolingo_button.dart';
-import '../widgets/mascot_avatar.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
 
 class DoubtChatScreen extends StatefulWidget {
   const DoubtChatScreen({super.key});
@@ -43,12 +43,12 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     });
   }
 
-  void _showSnapDoubtModal(StudentState state) {
+  void _showSnapDoubtModal(StudentState state, Color primaryColor) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.paperWhite,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
         return SafeArea(
@@ -60,10 +60,10 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
               children: [
                 Center(
                   child: Container(
-                    width: 44,
-                    height: 5,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.lineGray,
+                      color: AppColors.borderLight,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -71,21 +71,28 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.camera_alt_rounded, color: AppColors.sparkBlue, size: 28),
+                    Icon(Icons.camera_alt_outlined, color: primaryColor, size: 24),
                     const SizedBox(width: 10),
-                    Text('Snap Textbook Doubt', style: AppTypography.headingSmall()),
+                    Expanded(
+                      child: Text(
+                        'Snap Textbook Doubt',
+                        style: AppTypography.headingSmall(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Select or simulate photo capture of a question from your textbook:',
-                  style: AppTypography.bodySmall(),
+                  'Select or simulate camera capture of a textbook question:',
+                  style: AppTypography.bodySmall(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
                 _buildSampleDoubtTile(
                   icon: Icons.functions_rounded,
-                  title: 'Quadratic & Linear Equation Problem',
+                  title: 'Linear Equation Problem',
                   subtitle: 'Page 48, Ex 2.3: Solve 4(x - 3) = 28',
+                  primaryColor: primaryColor,
                   onTap: () {
                     Navigator.pop(ctx);
                     state.addDoubt(
@@ -97,8 +104,9 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                 const SizedBox(height: 10),
                 _buildSampleDoubtTile(
                   icon: Icons.science_rounded,
-                  title: 'Plant Anatomy Diagram Problem',
-                  subtitle: 'Label parts of chloroplast in diagram',
+                  title: 'Plant Anatomy & Cell Biology',
+                  subtitle: 'Chloroplast structure, stroma, and grana functions',
+                  primaryColor: primaryColor,
                   onTap: () {
                     Navigator.pop(ctx);
                     state.addDoubt(
@@ -108,10 +116,10 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                DuolingoButton(
+                AppButton(
                   text: 'CLOSE',
-                  fullWidth: true,
-                  style: DuolingoButtonStyle.outlineGray,
+                  isFullWidth: true,
+                  variant: AppButtonVariant.outline,
                   onPressed: () => Navigator.pop(ctx),
                 ),
               ],
@@ -126,40 +134,38 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
+    required Color primaryColor,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return AppCard(
+      padding: const EdgeInsets.all(12),
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.cloudGray,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.lineGray, width: 2),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.storybookGreen,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: AppColors.eagerGreenDark, size: 22),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.schoolMint,
+              borderRadius: BorderRadius.circular(10),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: AppTypography.pillLabel(color: AppColors.charcoal)),
-                  Text(subtitle, style: AppTypography.caption()),
-                ],
-              ),
+            child: Icon(icon, color: primaryColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                ),
+                const SizedBox(height: 1),
+                Text(subtitle, style: AppTypography.caption(color: AppColors.textMuted)),
+              ],
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.pencilGray),
-          ],
-        ),
+          ),
+          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textDisabled),
+        ],
       ),
     );
   }
@@ -168,193 +174,229 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final messages = state.doubtMessages;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
-    return Column(
-      children: [
-        // AI Tutor Status Bar
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: const BoxDecoration(
-            color: AppColors.cloudGray,
-            border: Border(bottom: BorderSide(color: AppColors.lineGray, width: 1.5)),
-          ),
-          child: Row(
-            children: [
-              const MascotAvatar(size: 32, expression: MascotExpression.studying),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Qrie AI Tutor', style: AppTypography.pillLabel(color: AppColors.charcoal)),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.eagerGreen,
-                            shape: BoxShape.circle,
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          // AI Tutor Status Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(bottom: BorderSide(color: AppColors.borderLight, width: 1.2)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.schoolMint,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.psychology_rounded, color: primaryColor, size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Qrie AI Academic Tutor',
+                        style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: const BoxDecoration(
+                              color: AppColors.success,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            '24/7 Step-by-Step Doubt Resolution',
-                            style: AppTypography.caption(color: AppColors.pencilGray),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Instant step-by-step doubt resolution',
+                              style: AppTypography.caption(color: AppColors.textMuted),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Snap Doubt Quick Button
+                InkWell(
+                  onTap: () => _showSnapDoubtModal(state, primaryColor),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.camera_alt_outlined, size: 16, color: primaryColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          'SNAP',
+                          style: AppTypography.caption(color: primaryColor).copyWith(
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              // Snap Doubt Quick Button
-              GestureDetector(
-                onTap: () => _showSnapDoubtModal(state),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.paperWhite,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.sparkBlue, width: 1.5),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.camera_alt_rounded, size: 16, color: AppColors.sparkBlue),
-                      const SizedBox(width: 4),
-                      Text('SNAP', style: AppTypography.buttonLabel(color: AppColors.sparkBlue).copyWith(fontSize: 11)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Chat Message List
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(16),
-            itemCount: messages.length,
-            itemBuilder: (context, index) {
-              final msg = messages[index];
-              return _buildMessageItem(context, msg, state);
-            },
-          ),
-        ),
-
-        // Quick Suggestion Chips
-        SizedBox(
-          height: 38,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _buildSuggestionChip('Explain cell membrane', state),
-              const SizedBox(width: 8),
-              _buildSuggestionChip('Solve 3x - 5 = 16', state),
-              const SizedBox(width: 8),
-              _buildSuggestionChip('Why is the sky blue?', state),
-              const SizedBox(width: 8),
-              _buildSuggestionChip('Formula of pressure', state),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Input Bar
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: const BoxDecoration(
-            color: AppColors.paperWhite,
-            border: Border(top: BorderSide(color: AppColors.lineGray, width: 2)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.camera_alt_rounded, color: AppColors.sparkBlue),
-                  onPressed: () => _showSnapDoubtModal(state),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(
-                      hintText: 'Type your doubt or question...',
-                      hintStyle: AppTypography.bodySmall(color: AppColors.pencilGray),
-                      filled: true,
-                      fillColor: AppColors.cloudGray,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.lineGray, width: 1.5),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.lineGray, width: 1.5),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppColors.eagerGreen, width: 2),
-                      ),
-                    ),
-                    onSubmitted: (text) => _sendMessage(state, text),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                DuolingoButton(
-                  text: 'ASK',
-                  height: 44,
-                  borderRadius: 12,
-                  style: DuolingoButtonStyle.primaryGreen,
-                  icon: Icons.send_rounded,
-                  onPressed: () => _sendMessage(state, _textController.text),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+
+          // Chat Message List
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final msg = messages[index];
+                return _buildMessageItem(context, msg, state, primaryColor);
+              },
+            ),
+          ),
+
+          // Quick Suggestion Chips
+          SizedBox(
+            height: 36,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _buildSuggestionChip('Explain cell membrane', state, primaryColor),
+                const SizedBox(width: 8),
+                _buildSuggestionChip('Solve 3x - 5 = 16', state, primaryColor),
+                const SizedBox(width: 8),
+                _buildSuggestionChip('Photosynthesis equation', state, primaryColor),
+                const SizedBox(width: 8),
+                _buildSuggestionChip('Formula of pressure', state, primaryColor),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Input Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(top: BorderSide(color: AppColors.borderLight, width: 1.2)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.camera_alt_outlined, color: primaryColor),
+                    onPressed: () => _showSnapDoubtModal(state, primaryColor),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      style: AppTypography.bodyMedium(color: AppColors.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Ask any textbook question...',
+                        hintStyle: AppTypography.bodySmall(color: AppColors.textDisabled),
+                        filled: true,
+                        fillColor: AppColors.background,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.borderLight),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.borderLight),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: primaryColor, width: 1.5),
+                        ),
+                      ),
+                      onSubmitted: (text) => _sendMessage(state, text),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  AppButton(
+                    text: 'ASK',
+                    height: 42,
+                    variant: AppButtonVariant.primary,
+                    icon: Icons.send_rounded,
+                    onPressed: () => _sendMessage(state, _textController.text),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildSuggestionChip(String label, StudentState state) {
-    return GestureDetector(
-      onTap: () {
-        _sendMessage(state, label);
-      },
+  Widget _buildSuggestionChip(String label, StudentState state, Color primaryColor) {
+    return InkWell(
+      onTap: () => _sendMessage(state, label),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.paperWhite,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.lineGray, width: 1.5),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.borderLight),
         ),
         child: Text(
           label,
-          style: AppTypography.caption(color: AppColors.charcoal),
+          style: AppTypography.caption(color: AppColors.textSecondary),
         ),
       ),
     );
   }
 
-  Widget _buildMessageItem(BuildContext context, DoubtMessage msg, StudentState state) {
+  Widget _buildMessageItem(
+    BuildContext context,
+    DoubtMessage msg,
+    StudentState state,
+    Color primaryColor,
+  ) {
     final isStudent = msg.isStudent;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 14.0),
       child: Row(
         mainAxisAlignment: isStudent ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isStudent) ...[
-            const MascotAvatar(size: 38, expression: MascotExpression.happy),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: AppColors.schoolMint,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.school_rounded, color: primaryColor, size: 16),
+            ),
             const SizedBox(width: 8),
           ],
           Flexible(
@@ -362,25 +404,26 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
               crossAxisAlignment: isStudent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isStudent ? AppColors.sparkBlue : AppColors.paperWhite,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isStudent ? primaryColor : AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isStudent ? AppColors.sparkBlueDark : AppColors.lineGray,
-                      width: 2,
+                      color: isStudent ? primaryColor : AppColors.borderLight,
+                      width: 1.2,
                     ),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
-                        color: (isStudent ? AppColors.sparkBlueDark : AppColors.lineGray).withValues(alpha: 0.4),
-                        offset: const Offset(0, 3),
+                        color: Color(0x06000000),
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
                   child: Text(
                     msg.text,
-                    style: AppTypography.bodySmall(
-                      color: isStudent ? AppColors.paperWhite : AppColors.charcoal,
+                    style: AppTypography.bodyMedium(
+                      color: isStudent ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -392,24 +435,29 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.storybookGreen.withValues(alpha: 0.5),
+                      color: AppColors.schoolMint,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.freshLeaf, width: 1.5),
+                      border: Border.all(color: primaryColor.withValues(alpha: 0.25), width: 1.2),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.lightbulb_rounded, size: 16, color: AppColors.eagerGreenDark),
-                            const SizedBox(width: 4),
-                            Text('KEY FORMULA', style: AppTypography.caption(color: AppColors.eagerGreenDark)),
+                            Icon(Icons.lightbulb_outline_rounded, size: 16, color: primaryColor),
+                            const SizedBox(width: 6),
+                            Text(
+                              'CORE FORMULA / RULE',
+                              style: AppTypography.caption(color: primaryColor).copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
                           msg.formulaOrSnippet!,
-                          style: AppTypography.buttonLabel(color: AppColors.nightInk).copyWith(fontSize: 13),
+                          style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 13),
                         ),
                       ],
                     ),
@@ -423,18 +471,21 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                     spacing: 6,
                     runSpacing: 6,
                     children: msg.followUpSuggestions!.map((sug) {
-                      return GestureDetector(
+                      return InkWell(
                         onTap: () => _sendMessage(state, sug),
+                        borderRadius: BorderRadius.circular(8),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.cloudGray,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.sparkBlue.withValues(alpha: 0.4), width: 1.5),
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
                           ),
                           child: Text(
                             sug,
-                            style: AppTypography.caption(color: AppColors.sparkBlue),
+                            style: AppTypography.caption(color: primaryColor).copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       );

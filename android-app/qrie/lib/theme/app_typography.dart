@@ -2,92 +2,102 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-/// Duolingo Design Tokens — Typography
-/// Uses Nunito (rounded display like Feather) and Nunito Sans for clean legibility.
+/// Qrie Design System — Typography Tokens
+/// Uses Nunito for friendly, rounded headings and clean legibility.
 class AppTypography {
   AppTypography._();
 
-  // Display Headlines (Feather / Nunito ExtraBold)
-  static TextStyle display({Color color = AppColors.eagerGreen}) =>
+  // Screen & Feature Titles
+  static TextStyle display({Color color = AppColors.schoolPrimary}) =>
       GoogleFonts.nunito(
-        fontSize: 48,
-        fontWeight: FontWeight.w900,
-        height: 1.2,
-        letterSpacing: -0.96,
-        color: color,
-      );
-
-  static TextStyle headingLarge({Color color = AppColors.eagerGreen}) =>
-      GoogleFonts.nunito(
-        fontSize: 36,
-        fontWeight: FontWeight.w900,
-        height: 1.2,
-        letterSpacing: -0.8,
-        color: color,
-      );
-
-  static TextStyle headingSmall({Color color = AppColors.charcoal}) =>
-      GoogleFonts.nunito(
-        fontSize: 26,
+        fontSize: 32,
         fontWeight: FontWeight.w800,
         height: 1.25,
+        letterSpacing: -0.5,
         color: color,
       );
 
-  static TextStyle subheading({Color color = AppColors.charcoal}) =>
+  static TextStyle headingLarge({Color color = AppColors.textPrimary}) =>
+      GoogleFonts.nunito(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        height: 1.3,
+        letterSpacing: -0.3,
+        color: color,
+      );
+
+  static TextStyle headingSmall({Color color = AppColors.textPrimary}) =>
       GoogleFonts.nunito(
         fontSize: 19,
         fontWeight: FontWeight.w800,
         height: 1.35,
+        letterSpacing: -0.2,
         color: color,
       );
 
-  static TextStyle bodyMedium({Color color = AppColors.pencilGray}) =>
+  static TextStyle subheading({Color color = AppColors.textPrimary}) =>
       GoogleFonts.nunito(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
-        height: 1.25,
+        fontWeight: FontWeight.w700,
+        height: 1.4,
         color: color,
       );
 
-  static TextStyle bodySmall({Color color = AppColors.pencilGray}) =>
+  // Body Content (Highly legible for textbook reading & problem solving)
+  static TextStyle bodyLarge({Color color = AppColors.textPrimary}) =>
+      GoogleFonts.nunito(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        height: 1.5,
+        color: color,
+      );
+
+  static TextStyle bodyMedium({Color color = AppColors.textSecondary}) =>
       GoogleFonts.nunito(
         fontSize: 14,
-        fontWeight: FontWeight.w600,
-        height: 1.25,
+        fontWeight: FontWeight.w500,
+        height: 1.45,
         color: color,
       );
 
-  // Sticker & Button labels (Uppercase with tracking)
-  static TextStyle buttonLabel({Color color = AppColors.paperWhite}) =>
-      GoogleFonts.nunito(
-        fontSize: 15,
-        fontWeight: FontWeight.w900,
-        letterSpacing: 0.8,
-        color: color,
-      );
-
-  static TextStyle navLabel({Color color = AppColors.pencilGray}) =>
+  static TextStyle bodySmall({Color color = AppColors.textMuted}) =>
       GoogleFonts.nunito(
         fontSize: 13,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.6,
+        fontWeight: FontWeight.w500,
+        height: 1.4,
         color: color,
       );
 
-  static TextStyle pillLabel({Color color = AppColors.charcoal}) =>
+  // Interactive Labels & Buttons
+  static TextStyle buttonLabel({Color color = AppColors.surface}) =>
       GoogleFonts.nunito(
         fontSize: 14,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.5,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.4,
         color: color,
       );
 
-  static TextStyle caption({Color color = AppColors.pencilGray}) =>
+  static TextStyle navLabel({Color color = AppColors.textMuted}) =>
+      GoogleFonts.nunito(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.3,
+        color: color,
+      );
+
+  static TextStyle pillLabel({Color color = AppColors.textPrimary}) =>
+      GoogleFonts.nunito(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.2,
+        color: color,
+      );
+
+  static TextStyle caption({Color color = AppColors.textMuted}) =>
       GoogleFonts.nunito(
         fontSize: 12,
-        fontWeight: FontWeight.w700,
-        height: 1.2,
+        fontWeight: FontWeight.w600,
+        height: 1.3,
         color: color,
       );
 }

@@ -14,6 +14,7 @@ import 'screens/profile_screen.dart';
 import 'state/student_state.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_typography.dart';
+import 'widgets/app_button.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 void main() {
@@ -232,21 +233,14 @@ class _MainScaffoldState extends State<MainScaffold> {
                         }).toList(),
                       ),
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: widget.themeProvider.branding.primaryColor,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () {
-                            state.updateGradeAndBoard(tempGrade, tempBoard);
-                            Navigator.pop(ctx);
-                          },
-                          child: Text('APPLY SYLLABUS', style: AppTypography.buttonLabel()),
-                        ),
+                      AppButton(
+                        text: 'APPLY SYLLABUS',
+                        isFullWidth: true,
+                        variant: AppButtonVariant.primary,
+                        onPressed: () {
+                          state.updateGradeAndBoard(tempGrade, tempBoard);
+                          Navigator.pop(ctx);
+                        },
                       ),
                     ],
                   ),
@@ -267,19 +261,16 @@ class _MainScaffoldState extends State<MainScaffold> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: StudentWelcomeHeader(
-          branding: branding,
-          studentName: profile.name,
-          gradeAndBoard: '${profile.grade} ${profile.board}',
-          streakDays: profile.streakDays,
-          gems: profile.gems,
-          onGradeTap: () => _showGradeSwitcherDialog(context, state),
-          onProfileTap: () {
-            setState(() => _currentIndex = 4);
-          },
-        ),
+      appBar: StudentWelcomeHeader(
+        branding: branding,
+        studentName: profile.name,
+        gradeAndBoard: '${profile.grade} ${profile.board}',
+        streakDays: profile.streakDays,
+        gems: profile.gems,
+        onGradeTap: () => _showGradeSwitcherDialog(context, state),
+        onProfileTap: () {
+          setState(() => _currentIndex = 4);
+        },
       ),
       body: IndexedStack(
         index: _currentIndex,

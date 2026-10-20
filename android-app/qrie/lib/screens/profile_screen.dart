@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../data/mock_data.dart';
+import '../features/school_branding/models/school_branding_config.dart';
+import '../features/school_branding/presentation/widgets/school_logo.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
-import '../widgets/duolingo_button.dart';
-import '../widgets/mascot_avatar.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -13,372 +15,333 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final profile = state.profile;
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+    final dpsBranding = SchoolBrandingConfig.dpsDefault();
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Profile Hero Sticker Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.paperWhite,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.lineGray, width: 2.5),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0F000000),
-                  offset: Offset(0, 4),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Student Identity Card
+            AppCard(
+              padding: const EdgeInsets.all(18),
+              hasShadow: true,
+              child: Row(
+                children: [
+                  SchoolLogo(
+                    logoUrl: dpsBranding.logoUrl,
+                    size: 60,
+                    borderColor: primaryColor.withValues(alpha: 0.3),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profile.name,
+                          style: AppTypography.headingSmall(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.schoolMint,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${profile.grade} • ${profile.board} Curriculum',
+                            style: AppTypography.caption(color: primaryColor).copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Delhi Public School, R.K. Puram • Scholar Level 4',
+                          style: AppTypography.caption(color: AppColors.textMuted),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // 2. 4-Metric Stats Grid
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    title: 'DAY STREAK',
+                    value: '${profile.streakDays} Days',
+                    icon: Icons.local_fire_department_rounded,
+                    iconColor: AppColors.warning,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildMetricCard(
+                    title: 'TOTAL XP',
+                    value: '${profile.totalXp}',
+                    icon: Icons.bolt_rounded,
+                    iconColor: AppColors.schoolGold,
+                  ),
                 ),
               ],
             ),
-            child: Row(
+            const SizedBox(height: 10),
+            Row(
               children: [
-                const MascotAvatar(
-                  size: 72,
-                  expression: MascotExpression.celebration,
-                  showBadge: true,
-                ),
-                const SizedBox(width: 16),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: _buildMetricCard(
+                    title: 'GEMS EARNED',
+                    value: '${profile.gems}',
+                    icon: Icons.diamond_rounded,
+                    iconColor: AppColors.info,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildMetricCard(
+                    title: 'LESSONS DONE',
+                    value: '${profile.completedLessonIds.length}',
+                    icon: Icons.task_alt_rounded,
+                    iconColor: primaryColor,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 22),
+
+            // 3. Weekly Study Activity Chart
+            Text('Weekly Study Activity', style: AppTypography.subheading()),
+            const SizedBox(height: 10),
+            AppCard(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        profile.name,
-                        style: AppTypography.headingSmall(),
+                        '14.6 HOURS THIS WEEK',
+                        style: AppTypography.caption(color: AppColors.textMuted).copyWith(fontWeight: FontWeight.w700),
                       ),
-                      const SizedBox(height: 2),
+                      Text(
+                        'Avg 2.1 hrs/day',
+                        style: AppTypography.caption(color: primaryColor).copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(7, (index) {
+                      final hours = MockData.weeklyStudyHours[index];
+                      final day = MockData.weekDays[index];
+                      final heightFactor = (hours / 4.0).clamp(0.18, 1.0);
+                      final isToday = (index == 5); // Saturday
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${hours}h',
+                            style: AppTypography.caption(color: AppColors.textMuted).copyWith(fontSize: 10),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 20,
+                            height: 75 * heightFactor,
+                            decoration: BoxDecoration(
+                              color: isToday ? primaryColor : AppColors.schoolMint,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            day,
+                            style: AppTypography.caption(
+                              color: isToday ? AppColors.textPrimary : AppColors.textMuted,
+                            ).copyWith(
+                              fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            // 4. Badges & Achievements
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Academic Badges', style: AppTypography.subheading()),
+                Text(
+                  '${MockData.badges.where((b) => b['unlocked'] == true).length} of ${MockData.badges.length} Unlocked',
+                  style: AppTypography.caption(color: primaryColor).copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.15,
+              ),
+              itemCount: MockData.badges.length,
+              itemBuilder: (context, index) {
+                final badge = MockData.badges[index];
+                final isUnlocked = badge['unlocked'] as bool;
+                final Color color = isUnlocked ? primaryColor : AppColors.textDisabled;
+
+                return AppCard(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.storybookGreen,
-                          borderRadius: BorderRadius.circular(6),
+                          color: isUnlocked ? AppColors.schoolMint : AppColors.surfaceSubtle,
+                          shape: BoxShape.circle,
                         ),
-                        child: Text(
-                          '${profile.grade} • ${profile.board} Curriculum',
-                          style: AppTypography.caption(color: AppColors.eagerGreenDark),
+                        child: Icon(
+                          isUnlocked ? (badge['icon'] as IconData) : Icons.lock_outline_rounded,
+                          color: color,
+                          size: 22,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Member since Oct 2026 • Scholar Level 4',
-                        style: AppTypography.caption(color: AppColors.pencilGray),
+                        badge['name'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.subheading(
+                          color: isUnlocked ? AppColors.textPrimary : AppColors.textDisabled,
+                        ).copyWith(fontSize: 12),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        badge['description'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.caption(color: AppColors.textMuted).copyWith(fontSize: 10),
                       ),
                     ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
-          // 2. Stats 2x2 Grid (Duolingo Sticker Cards)
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  title: 'DAY STREAK',
-                  value: '${profile.streakDays}',
-                  icon: Icons.local_fire_department_rounded,
-                  borderColor: AppColors.fireOrange,
-                  shadowColor: AppColors.fireOrangeDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatCard(
-                  title: 'TOTAL XP',
-                  value: '${profile.totalXp}',
-                  icon: Icons.bolt_rounded,
-                  borderColor: AppColors.goldYellow,
-                  shadowColor: const Color(0xFFC78900),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  title: 'GEMS EARNED',
-                  value: '${profile.gems}',
-                  icon: Icons.diamond_rounded,
-                  borderColor: AppColors.sparkBlue,
-                  shadowColor: AppColors.sparkBlueDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatCard(
-                  title: 'LESSONS DONE',
-                  value: '${profile.completedLessonIds.length}',
-                  icon: Icons.menu_book_rounded,
-                  borderColor: AppColors.eagerGreen,
-                  shadowColor: AppColors.eagerGreenDark,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // 3. Weekly Study Hours Bar Chart
-          Text('Weekly Study Activity', style: AppTypography.headingSmall()),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppColors.paperWhite,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.lineGray, width: 2),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A000000),
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '14.6 HOURS THIS WEEK',
-                        style: AppTypography.caption(color: AppColors.pencilGray),
-                        overflow: TextOverflow.ellipsis,
+            // 5. School Organization & Credentials Card
+            AppCard(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.verified_rounded, color: primaryColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'SCHOOL ORGANIZATION CREDENTIALS',
+                        style: AppTypography.caption(color: primaryColor).copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text('Avg 2.1 hrs/day', style: AppTypography.buttonLabel(color: AppColors.eagerGreenDark).copyWith(fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(7, (index) {
-                    final hours = MockData.weeklyStudyHours[index];
-                    final day = MockData.weekDays[index];
-                    final heightFactor = (hours / 4.0).clamp(0.15, 1.0);
-                    final isToday = (index == 5); // Saturday
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('${hours}h', style: AppTypography.caption(color: AppColors.pencilGray).copyWith(fontSize: 10)),
-                        const SizedBox(height: 6),
-                        Container(
-                          width: 22,
-                          height: 90 * heightFactor,
-                          decoration: BoxDecoration(
-                            color: isToday ? AppColors.eagerGreen : AppColors.storybookGreen,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: isToday ? AppColors.eagerGreenDark : AppColors.freshLeaf,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          day,
-                          style: AppTypography.buttonLabel(
-                            color: isToday ? AppColors.charcoal : AppColors.pencilGray,
-                          ).copyWith(fontSize: 12),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
-          // 4. Badges Room
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  'Badges & Achievements',
-                  style: AppTypography.headingSmall(),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${MockData.badges.where((b) => b['unlocked'] == true).length}/${MockData.badges.length}',
-                style: AppTypography.buttonLabel(color: AppColors.sparkBlue),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 0.95,
-            ),
-            itemCount: MockData.badges.length,
-            itemBuilder: (context, index) {
-              final badge = MockData.badges[index];
-              final isUnlocked = badge['unlocked'] as bool;
-              final Color color = isUnlocked ? (badge['color'] as Color) : AppColors.fadedGray;
-
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.paperWhite,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isUnlocked ? color : AppColors.lineGray,
-                    width: 2,
+                    ],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isUnlocked ? color.withValues(alpha: 0.3) : const Color(0x0A000000),
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: isUnlocked ? color.withValues(alpha: 0.15) : AppColors.cloudGray,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isUnlocked ? (badge['icon'] as IconData) : Icons.lock_rounded,
-                        color: color,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      badge['name'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.buttonLabel(
-                        color: isUnlocked ? AppColors.charcoal : AppColors.fadedGray,
-                      ).copyWith(fontSize: 11),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      badge['description'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.caption(color: AppColors.pencilGray).copyWith(fontSize: 9),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          const SizedBox(height: 28),
-
-          // 5. Instant Profile Switcher (No Auth / Sign-in required)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.cloudGray,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.lineGray, width: 2),
+                  const SizedBox(height: 10),
+                  _buildCredentialRow('Institution', 'Delhi Public School, R.K. Puram'),
+                  _buildCredentialRow('School Code', 'DPS-RKP-042'),
+                  _buildCredentialRow('Official Motto', 'Service Before Self'),
+                  _buildCredentialRow('Affiliation', 'CBSE Board Affiliation #2730017'),
+                  _buildCredentialRow('Offline Mode', 'SQLite Outbox Active & Sync Ready'),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.tune_rounded, color: AppColors.charcoal, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'GRADE & CURRICULUM PREFERENCES',
-                        style: AppTypography.buttonLabel(color: AppColors.charcoal),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Instantly customize your academic grade and syllabus anytime without passwords or login hurdles.',
-                  style: AppTypography.bodySmall(),
-                ),
-                const SizedBox(height: 12),
-                DuolingoButton(
-                  text: 'SWITCH GRADE / BOARD',
-                  fullWidth: true,
-                  style: DuolingoButtonStyle.outlineGray,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Tap the "Class 8 CBSE" pill at the top of the screen to change grades!',
-                          style: AppTypography.buttonLabel(color: AppColors.paperWhite),
-                        ),
-                        backgroundColor: AppColors.charcoal,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
 
-          const SizedBox(height: 30),
-        ],
+            const SizedBox(height: 16),
+
+            // 6. Grade Switcher Action
+            AppButton(
+              text: 'CHANGE GRADE & SYLLABUS',
+              isFullWidth: true,
+              variant: AppButtonVariant.outline,
+              icon: Icons.tune_rounded,
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Tap the grade badge in the top app bar to personalize your syllabus anytime.',
+                      style: AppTypography.bodySmall(color: Colors.white),
+                    ),
+                    backgroundColor: AppColors.textPrimary,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 28),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatCard({
+  Widget _buildMetricCard({
     required String title,
     required String value,
     required IconData icon,
-    required Color borderColor,
-    required Color shadowColor,
+    required Color iconColor,
   }) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.paperWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
       child: Row(
         children: [
-          Icon(icon, color: borderColor, size: 24),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,17 +349,38 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: AppTypography.subheading(color: AppColors.charcoal).copyWith(fontSize: 17),
+                  style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 16),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   title,
-                  style: AppTypography.caption(color: AppColors.pencilGray).copyWith(fontSize: 10),
+                  style: AppTypography.caption(color: AppColors.textMuted).copyWith(fontSize: 10),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCredentialRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: AppTypography.caption(color: AppColors.textMuted)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: AppTypography.bodySmall(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

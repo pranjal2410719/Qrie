@@ -4,8 +4,8 @@ import '../models/chapter.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
-import '../widgets/duolingo_button.dart';
-import '../widgets/mascot_avatar.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
 import 'quiz_solver_screen.dart';
 
 class LessonScreen extends StatefulWidget {
@@ -29,175 +29,181 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final isCompleted = state.profile.completedLessonIds.contains(widget.lesson.id);
     final isBookmarked = state.profile.bookmarkedLessonIds.contains(widget.lesson.id);
 
     return Scaffold(
-      backgroundColor: AppColors.paperWhite,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(
-          widget.chapter.title,
-          style: AppTypography.navLabel(color: AppColors.charcoal),
-          overflow: TextOverflow.ellipsis,
+        backgroundColor: AppColors.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.chapter.title.toUpperCase(),
+              style: AppTypography.caption(color: primaryColor).copyWith(
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              widget.lesson.title,
+              style: AppTypography.subheading(color: AppColors.textPrimary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.charcoal),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
+            tooltip: isBookmarked ? 'Remove Bookmark' : 'Save for Revision',
             icon: Icon(
-              isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
-              color: isBookmarked ? AppColors.sparkBlue : AppColors.pencilGray,
+              isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+              color: isBookmarked ? AppColors.schoolGold : AppColors.textMuted,
             ),
             onPressed: () {
               state.toggleBookmark(widget.lesson.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    isBookmarked ? 'Removed from bookmarks' : 'Added to Revision Bookmarks',
-                    style: AppTypography.buttonLabel(color: AppColors.paperWhite),
+                    isBookmarked ? 'Removed from revision bookmarks' : 'Saved to Revision Bookmarks',
+                    style: AppTypography.bodySmall(color: Colors.white),
                   ),
-                  backgroundColor: AppColors.charcoal,
+                  backgroundColor: AppColors.textPrimary,
                   duration: const Duration(seconds: 1),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               );
             },
           ),
         ],
         bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(2),
-          child: Divider(height: 2, thickness: 2, color: AppColors.lineGray),
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, thickness: 1, color: AppColors.borderLight),
         ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Lesson Title & Badges
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.storybookGreen,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.eagerGreen, width: 1.5),
-                    ),
-                    child: Text(
-                      '${widget.lesson.durationMinutes} MINS',
-                      style: AppTypography.caption(color: AppColors.eagerGreenDark),
-                    ),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Metadata chips (Duration, XP, Completion Status)
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceSubtle,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.borderLight),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.schedule_rounded, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${widget.lesson.durationMinutes} mins',
+                        style: AppTypography.caption(color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.schoolGoldLight,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.schoolGold.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.bolt_rounded, size: 15, color: AppColors.schoolGold),
+                      const SizedBox(width: 2),
+                      Text(
+                        '+${widget.lesson.xpReward} XP',
+                        style: AppTypography.caption(color: AppColors.textPrimary).copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                if (isCompleted)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.cloudGray,
+                      color: AppColors.successSurface,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.lineGray, width: 1.5),
+                      border: Border.all(color: AppColors.successBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('⚡ ', style: TextStyle(fontSize: 12)),
+                        const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 15),
+                        const SizedBox(width: 4),
                         Text(
-                          '+${widget.lesson.xpReward} XP',
-                          style: AppTypography.caption(color: AppColors.charcoal),
+                          'COMPLETED',
+                          style: AppTypography.caption(color: AppColors.success).copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  if (isCompleted)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.storybookGreen,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.check_circle_rounded, color: AppColors.eagerGreen, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'COMPLETED',
-                            style: AppTypography.caption(color: AppColors.eagerGreenDark),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+              ],
+            ),
 
-              const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
-              Text(
-                widget.lesson.title,
-                style: AppTypography.headingSmall(),
-              ),
+            // Lesson Header
+            Text(
+              widget.lesson.title,
+              style: AppTypography.headingSmall(),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              widget.lesson.subtitle,
+              style: AppTypography.bodyMedium(color: AppColors.textSecondary),
+            ),
 
-              const SizedBox(height: 4),
+            const SizedBox(height: 18),
 
-              Text(
-                widget.lesson.subtitle,
-                style: AppTypography.bodySmall(color: AppColors.pencilGray),
-              ),
-
-              const SizedBox(height: 18),
-
-              // Mock Video Lesson Player (BYJU'S Visual Concept Player)
-              Container(
-                height: 210,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.nightInk,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      offset: Offset(0, 4),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
+            // Visual Concept Player Card
+            AppCard(
+              padding: EdgeInsets.zero,
+              backgroundColor: const Color(0xFF0F172A), // Slate 900
+              borderRadius: 16,
+              child: SizedBox(
+                height: 190,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Background Illustration Mock
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                const Color(0xFF0D1B2A),
-                                AppColors.nightInk,
-                                const Color(0xFF1B263B),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.biotech_rounded,
-                              size: 80,
-                              color: AppColors.freshLeaf.withValues(alpha: 0.18),
-                            ),
-                          ),
-                        ),
+                    // Educational Background Graphic
+                    Center(
+                      child: Icon(
+                        Icons.science_rounded,
+                        size: 72,
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
 
-                    // Center Play/Pause 3D Sticker Button
+                    // Play / Pause Control Button
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -208,24 +214,24 @@ class _LessonScreenState extends State<LessonScreen> {
                         });
                       },
                       child: Container(
-                        width: 64,
-                        height: 64,
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
-                          color: AppColors.eagerGreen,
+                          color: primaryColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.paperWhite, width: 3),
+                          border: Border.all(color: Colors.white, width: 2.5),
                           boxShadow: const [
                             BoxShadow(
-                              color: AppColors.eagerGreenDark,
-                              offset: Offset(0, 4),
-                              blurRadius: 0,
+                              color: Color(0x33000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
                         child: Icon(
                           _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                          color: AppColors.paperWhite,
-                          size: 36,
+                          color: Colors.white,
+                          size: 32,
                         ),
                       ),
                     ),
@@ -241,23 +247,23 @@ class _LessonScreenState extends State<LessonScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.black.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'BYJU\'S Concept Visual',
-                              style: AppTypography.caption(color: AppColors.paperWhite),
+                              'Visual Concept Guide',
+                              style: AppTypography.caption(color: Colors.white),
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.rubyRed,
-                              borderRadius: BorderRadius.circular(8),
+                              color: primaryColor.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'HD 1080P',
-                              style: AppTypography.caption(color: AppColors.paperWhite),
+                              'HD Visuals',
+                              style: AppTypography.caption(color: Colors.white),
                             ),
                           ),
                         ],
@@ -277,11 +283,11 @@ class _LessonScreenState extends State<LessonScreen> {
                             children: [
                               Text(
                                 '${(_playbackProgress * widget.lesson.durationMinutes).toStringAsFixed(1)}m',
-                                style: AppTypography.caption(color: AppColors.paperWhite),
+                                style: AppTypography.caption(color: Colors.white),
                               ),
                               Text(
                                 '${widget.lesson.durationMinutes}:00m',
-                                style: AppTypography.caption(color: AppColors.fadedGray),
+                                style: AppTypography.caption(color: AppColors.textDisabled),
                               ),
                             ],
                           ),
@@ -290,9 +296,9 @@ class _LessonScreenState extends State<LessonScreen> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: _playbackProgress,
-                              minHeight: 6,
+                              minHeight: 5,
                               backgroundColor: Colors.white24,
-                              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.eagerGreen),
+                              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                             ),
                           ),
                         ],
@@ -301,156 +307,159 @@ class _LessonScreenState extends State<LessonScreen> {
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-              // Summary Box (Storybook Format)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
+            // Concept Summary Card
+            AppCard(
+              padding: const EdgeInsets.all(18),
+              backgroundColor: AppColors.surface,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.lightbulb_outline_rounded, color: primaryColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'CORE CONCEPT SUMMARY',
+                        style: AppTypography.caption(color: primaryColor).copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.lesson.summaryText,
+                    style: AppTypography.bodyLarge(color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // Key Takeaways Section
+            Text('Key Principles', style: AppTypography.subheading()),
+            const SizedBox(height: 10),
+            ...widget.lesson.keyPoints.asMap().entries.map((entry) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: AppColors.cloudGray,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.lineGray, width: 2),
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.borderLight),
                 ),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.auto_stories_rounded, color: AppColors.charcoal, size: 20),
-                        const SizedBox(width: 8),
-                        Text('CONCEPT SUMMARY', style: AppTypography.buttonLabel(color: AppColors.charcoal)),
-                      ],
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: AppColors.schoolMint,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+                      ),
+                      child: Icon(Icons.check, size: 13, color: primaryColor),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      widget.lesson.summaryText,
-                      style: AppTypography.bodyMedium(color: AppColors.pencilGray),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        entry.value,
+                        style: AppTypography.bodyMedium(color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(height: 14),
+
+            // Academic Highlight / Study Note
+            if (widget.lesson.funFact.isNotEmpty)
+              AppCard(
+                padding: const EdgeInsets.all(16),
+                backgroundColor: AppColors.schoolMint,
+                borderColor: primaryColor.withValues(alpha: 0.25),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.school_rounded, color: primaryColor, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'EXAM PREPARATION NOTE',
+                            style: AppTypography.caption(color: primaryColor).copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.lesson.funFact,
+                            style: AppTypography.bodySmall(color: AppColors.textPrimary),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-              // Key Takeaways List
-              Text('Key Takeaways', style: AppTypography.subheading()),
-              const SizedBox(height: 12),
-              ...widget.lesson.keyPoints.asMap().entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.storybookGreen,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.eagerGreen, width: 1.5),
-                        ),
-                        child: const Icon(Icons.check, size: 14, color: AppColors.eagerGreenDark),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          entry.value,
-                          style: AppTypography.bodySmall(color: AppColors.charcoal),
-                        ),
-                      ),
-                    ],
+            // Action Buttons
+            AppButton(
+              text: 'PRACTICE THIS CONCEPT',
+              isFullWidth: true,
+              icon: Icons.quiz_rounded,
+              variant: AppButtonVariant.primary,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizSolverScreen(subjectId: widget.chapter.subjectId),
                   ),
                 );
-              }),
+              },
+            ),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
-              // Qrie Mascot Fun Fact Callout
-              if (widget.lesson.funFact.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.storybookGreen.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.freshLeaf, width: 2),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const MascotAvatar(
-                        size: 48,
-                        expression: MascotExpression.excited,
+            AppButton(
+              text: isCompleted ? 'LESSON COMPLETED' : 'MARK LESSON COMPLETE (+${widget.lesson.xpReward} XP)',
+              isFullWidth: true,
+              icon: isCompleted ? Icons.check_circle_outline : Icons.task_alt_rounded,
+              variant: isCompleted ? AppButtonVariant.outline : AppButtonVariant.secondary,
+              onPressed: () {
+                if (!isCompleted) {
+                  state.completeLesson(widget.lesson.id, widget.lesson.xpReward);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Lesson complete! Earned +${widget.lesson.xpReward} XP',
+                        style: AppTypography.bodySmall(color: Colors.white),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'DID YOU KNOW?',
-                              style: AppTypography.buttonLabel(color: AppColors.eagerGreenDark),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.lesson.funFact,
-                              style: AppTypography.bodySmall(color: AppColors.charcoal),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              const SizedBox(height: 28),
-
-              // Action Buttons
-              DuolingoButton(
-                text: isCompleted ? 'LESSON COMPLETED ✓' : 'COMPLETE LESSON (+${widget.lesson.xpReward} XP)',
-                fullWidth: true,
-                style: isCompleted ? DuolingoButtonStyle.outlineGray : DuolingoButtonStyle.primaryGreen,
-                icon: isCompleted ? Icons.check_circle : Icons.verified_rounded,
-                onPressed: () {
-                  if (!isCompleted) {
-                    state.completeLesson(widget.lesson.id, widget.lesson.xpReward);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Lesson complete! Earned +${widget.lesson.xpReward} XP!',
-                          style: AppTypography.buttonLabel(color: AppColors.paperWhite),
-                        ),
-                        backgroundColor: AppColors.eagerGreen,
-                        duration: const Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
-                  }
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              DuolingoButton(
-                text: 'TAKE CHAPTER QUIZ',
-                fullWidth: true,
-                style: DuolingoButtonStyle.secondaryBlue,
-                icon: Icons.quiz_rounded,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => QuizSolverScreen(subjectId: widget.chapter.subjectId),
+                      backgroundColor: primaryColor,
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   );
-                },
-              ),
+                }
+              },
+            ),
 
-              const SizedBox(height: 30),
-            ],
-          ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );

@@ -14,63 +14,83 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+
     final items = [
-      _NavItem(icon: Icons.school_rounded, label: 'LEARN'),
-      _NavItem(icon: Icons.track_changes_rounded, label: 'PRACTICE'),
-      _NavItem(icon: Icons.psychology_rounded, label: 'ASK QRIE'),
-      _NavItem(icon: Icons.menu_book_rounded, label: 'LIBRARY'),
-      _NavItem(icon: Icons.military_tech_rounded, label: 'BADGES'),
+      _NavItem(icon: Icons.school_outlined, activeIcon: Icons.school_rounded, label: 'Learn'),
+      _NavItem(icon: Icons.track_changes_outlined, activeIcon: Icons.track_changes_rounded, label: 'Practice'),
+      _NavItem(icon: Icons.chat_bubble_outline_rounded, activeIcon: Icons.chat_bubble_rounded, label: 'Ask Qrie'),
+      _NavItem(icon: Icons.menu_book_outlined, activeIcon: Icons.menu_book_rounded, label: 'Library'),
+      _NavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Profile'),
     ];
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.paperWhite,
-        border: Border(
-          top: BorderSide(color: AppColors.lineGray, width: 2),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: const Border(
+          top: BorderSide(color: AppColors.borderLight, width: 1.2),
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x05000000),
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6.0),
+        child: SizedBox(
+          height: 60,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (index) {
               final item = items[index];
               final isSelected = (index == currentIndex);
+              final activeColor = primary;
+
               return Expanded(
-                child: InkWell(
-                  onTap: () => onTap(index),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                child: Semantics(
+                  selected: isSelected,
+                  button: true,
+                  label: '${item.label} tab',
+                  child: InkWell(
+                    onTap: () => onTap(index),
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeOut,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.storybookGreen.withValues(alpha: 0.5) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          border: isSelected
-                              ? Border.all(color: AppColors.eagerGreen.withValues(alpha: 0.4), width: 1.5)
-                              : null,
+                          color: isSelected ? activeColor.withValues(alpha: 0.1) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Icon(
-                          item.icon,
-                          size: 22,
-                          color: isSelected ? AppColors.eagerGreen : AppColors.fadedGray,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              size: 22,
+                              color: isSelected ? activeColor : AppColors.textMuted,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.navLabel(
+                                color: isSelected ? activeColor : AppColors.textMuted,
+                              ).copyWith(
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.navLabel(
-                          color: isSelected ? AppColors.eagerGreen : AppColors.fadedGray,
-                        ).copyWith(fontSize: 10),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               );
@@ -84,7 +104,12 @@ class BottomNavBar extends StatelessWidget {
 
 class _NavItem {
   final IconData icon;
+  final IconData activeIcon;
   final String label;
 
-  const _NavItem({required this.icon, required this.label});
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }

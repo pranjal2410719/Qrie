@@ -91,7 +91,7 @@ class StudentState extends ChangeNotifier {
     if (q.contains('cell') || q.contains('membrane')) {
       responseText =
           'Great question about cell biology. The cell membrane acts as a selective gatekeeper (selectively permeable). It allows essential nutrients, water, and oxygen to diffuse in while pumping out metabolic waste products.';
-      formula = 'Diffusion & Osmosis: Solvent flows from High ➔ Low concentration';
+      formula = 'Diffusion & Osmosis: Solvent flows from High -> Low concentration';
       concept = 'Selective Permeability & Homeostasis';
       followUps = [
         'What happens when a cell is placed in salt water?',
@@ -100,7 +100,7 @@ class StudentState extends ChangeNotifier {
     } else if (q.contains('equation') || q.contains('solve') || q.contains('x')) {
       responseText =
           'Here is the systematic breakdown for solving linear equations:\n1. Move all variable terms to the Left Hand Side by changing signs.\n2. Move all numerical constants to the Right Hand Side.\n3. Simplify both sides and isolate the variable.\n4. Verify your work by substituting the value back into the original equation.';
-      formula = 'ax + b = cx + d  ➔  (a - c)x = d - b';
+      formula = 'ax + b = cx + d  ->  (a - c)x = d - b';
       concept = 'Algebraic Balancing & Transposition';
       followUps = [
         'Solve 4(x - 2) = 12',
@@ -109,7 +109,7 @@ class StudentState extends ChangeNotifier {
     } else if (q.contains('photosynthesis') || q.contains('plant')) {
       responseText =
           'Photosynthesis is the process green plants use to convert light energy into chemical energy. Inside the chloroplasts, green chlorophyll captures photons and combines Carbon Dioxide with Water to create Glucose and Oxygen.';
-      formula = '6CO₂ + 6H₂O + Sunlight ➔ C₆H₁₂O₆ + 6O₂';
+      formula = '6CO₂ + 6H₂O + Sunlight -> C₆H₁₂O₆ + 6O₂';
       concept = 'Light-dependent and Light-independent reactions';
       followUps = [
         'Why do leaves turn yellow in autumn?',
