@@ -21,7 +21,7 @@ class TeacherHomeworkDashboardScreen extends StatefulWidget {
 }
 
 class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboardScreen> {
-  String _selectedClass = 'Class 9-A';
+  String _selectedClass = 'Class 10-A';
   String? _expandedAssignmentId;
 
   void _showGradeDialog(
@@ -152,16 +152,26 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
                     isFullWidth: true,
                     variant: AppButtonVariant.primary,
                     onPressed: () {
+                      final enteredScore = int.tryParse(scoreController.text.trim());
+                      if (enteredScore == null || enteredScore < 0 || enteredScore > 100) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter a valid score between 0 and 100.'),
+                            backgroundColor: Color(0xFFEF4444),
+                          ),
+                        );
+                        return;
+                      }
                       state.updateAssignmentStatusByTeacher(
                         assignmentId: assignment.id,
                         status: HomeworkStatus.completed,
                         feedback: feedbackController.text.trim(),
-                        gradePoints: int.tryParse(scoreController.text) ?? 95,
+                        gradePoints: enteredScore,
                       );
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Graded and approved submission for $studentName!'),
+                          content: Text('Graded ($enteredScore/100) and approved submission for $studentName!'),
                           backgroundColor: const Color(0xFF059669),
                         ),
                       );
@@ -180,6 +190,38 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final assignments = state.homeworkAssignments;
+
+    final displayAssignments = _selectedClass == 'All Classes'
+        ? assignments
+        : assignments.where((hw) => hw.className == _selectedClass).toList();
+
+    int assignedCount = 0;
+    int inProgressCount = 0;
+    int awaitingCount = 0;
+    int completedCount = 0;
+    int overdueCount = 0;
+
+    for (final hw in displayAssignments) {
+      final effectiveStatus = state.getEffectiveStatus(hw);
+      switch (effectiveStatus) {
+        case HomeworkStatus.assigned:
+          assignedCount++;
+          break;
+        case HomeworkStatus.inProgress:
+          inProgressCount++;
+          break;
+        case HomeworkStatus.readyForVerification:
+        case HomeworkStatus.submittedAwaitingReview:
+          awaitingCount++;
+          break;
+        case HomeworkStatus.completed:
+          completedCount++;
+          break;
+        case HomeworkStatus.overdue:
+          overdueCount++;
+          break;
+      }
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -228,7 +270,7 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: ['Class 9-A', 'Class 9-B', 'Class 10-A'].map((cls) {
+                children: ['Class 10-A', 'All Classes', 'Class 9-A', 'Class 9-B'].map((cls) {
                   final isSel = cls == _selectedClass;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -254,13 +296,17 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  _buildMetricTile('34', 'Assigned', AppColors.accentCobalt),
+                  _buildMetricTile('$assignedCount', 'Assigned', AppColors.accentCobalt),
                   const SizedBox(width: 8),
-                  _buildMetricTile('24', 'In Progress', AppColors.accentTangerine),
+                  _buildMetricTile('$inProgressCount', 'In Progress', AppColors.accentTangerine),
                   const SizedBox(width: 8),
-                  _buildMetricTile('6', 'Awaiting', const Color(0xFF8B5CF6)),
+                  _buildMetricTile('$awaitingCount', 'Awaiting', const Color(0xFF8B5CF6)),
                   const SizedBox(width: 8),
-                  _buildMetricTile('4', 'Overdue', const Color(0xFFEF4444)),
+                  _buildMetricTile(
+                    overdueCount > 0 ? '$overdueCount' : '$completedCount',
+                    overdueCount > 0 ? 'Overdue' : 'Completed',
+                    overdueCount > 0 ? const Color(0xFFEF4444) : const Color(0xFF059669),
+                  ),
                 ],
               ),
             ),
@@ -268,11 +314,34 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
 
             // Assignments List
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                itemCount: assignments.length,
-                itemBuilder: (context, index) {
-                  final hw = assignments[index];
+              child: displayAssignments.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.assignment_turned_in_outlined, size: 48, color: AppColors.textMuted.withValues(alpha: 0.6)),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No Assignments Found',
+                              style: AppTypography.cardTitle(color: AppColors.textPrimary),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'There are no homework assignments for $_selectedClass yet.\nCreate one or switch to "All Classes".',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.caption(color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      itemCount: displayAssignments.length,
+                      itemBuilder: (context, index) {
+                        final hw = displayAssignments[index];
                   final isExpanded = _expandedAssignmentId == hw.id;
                   final progress = state.getProgressForAssignment(hw.id);
 

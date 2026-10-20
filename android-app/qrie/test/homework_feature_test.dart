@@ -108,6 +108,8 @@ void main() {
     expect(find.text('START VERIFICATION TEST'), findsOneWidget);
 
     // 2. Start Test
+    await tester.ensureVisible(find.text('START VERIFICATION TEST'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('START VERIFICATION TEST'));
     await tester.pumpAndSettle();
 
@@ -115,39 +117,49 @@ void main() {
     expect(find.textContaining('QUESTION 1 OF'), findsOneWidget);
 
     // Answer Question 1 (option B is '6', correct)
+    await tester.ensureVisible(find.text('6'));
     await tester.tap(find.text('6'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('NEXT QUESTION'));
     await tester.tap(find.text('NEXT QUESTION'));
     await tester.pumpAndSettle();
 
     // Answer Question 2 (option C is '9', correct)
     expect(find.textContaining('QUESTION 2 OF'), findsOneWidget);
+    await tester.ensureVisible(find.text('9'));
     await tester.tap(find.text('9'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('NEXT QUESTION'));
     await tester.tap(find.text('NEXT QUESTION'));
     await tester.pumpAndSettle();
 
     // Answer Question 3 (option C is 'Parallel lines', correct)
     expect(find.textContaining('QUESTION 3 OF'), findsOneWidget);
+    await tester.ensureVisible(find.text('Parallel lines'));
     await tester.tap(find.text('Parallel lines'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('NEXT QUESTION'));
     await tester.tap(find.text('NEXT QUESTION'));
     await tester.pumpAndSettle();
 
     // Answer Question 4 (option A is '1.8', correct)
     expect(find.textContaining('QUESTION 4 OF'), findsOneWidget);
+    await tester.ensureVisible(find.text('1.8'));
     await tester.tap(find.text('1.8'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('NEXT QUESTION'));
     await tester.tap(find.text('NEXT QUESTION'));
     await tester.pumpAndSettle();
 
     // Answer Question 5 (option B is '5', correct)
     expect(find.textContaining('QUESTION 5 OF'), findsOneWidget);
+    await tester.ensureVisible(find.text('5'));
     await tester.tap(find.text('5'));
     await tester.pumpAndSettle();
 
     // Submit Test
     expect(find.text('SUBMIT TEST'), findsOneWidget);
+    await tester.ensureVisible(find.text('SUBMIT TEST'));
     await tester.tap(find.text('SUBMIT TEST'));
     await tester.pumpAndSettle();
 
@@ -155,6 +167,9 @@ void main() {
     expect(find.text('Verification Passed!'), findsOneWidget);
     expect(find.text('100%'), findsOneWidget);
     expect(find.text('RETURN TO HOMEWORK'), findsOneWidget);
+    await tester.ensureVisible(find.text('RETURN TO HOMEWORK'));
+    await tester.tap(find.text('RETURN TO HOMEWORK'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Teacher Mode switch toggles dashboard and allows viewing roster', (tester) async {

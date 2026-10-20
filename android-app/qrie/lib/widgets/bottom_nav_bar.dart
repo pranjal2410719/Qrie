@@ -70,7 +70,7 @@ class BottomNavBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 60,
+          height: 64,
           child: Row(
             children: List.generate(items.length, (index) {
               final item = items[index];
@@ -78,89 +78,94 @@ class BottomNavBar extends StatelessWidget {
               final showBadge = index == 2 && unreadCount > 0;
 
               return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onTap(index);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.bgSurfaceSoft
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            alignment: Alignment.center,
-                            children: [
-                              AnimatedScale(
-                                scale: isSelected ? 1.08 : 1.0,
-                                duration: const Duration(milliseconds: 200),
-                                curve: Curves.easeOutBack,
-                                child: Icon(
-                                  isSelected ? item.activeIcon : item.icon,
-                                  size: 21,
-                                  color: isSelected ? activeColor : inactiveColor,
+                child: Semantics(
+                  button: true,
+                  selected: isSelected,
+                  label: item.label,
+                  child: GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onTap(index);
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.bgSurfaceSoft
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              clipBehavior: Clip.none,
+                              alignment: Alignment.center,
+                              children: [
+                                AnimatedScale(
+                                  scale: isSelected ? 1.08 : 1.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOutBack,
+                                  child: Icon(
+                                    isSelected ? item.activeIcon : item.icon,
+                                    size: 21,
+                                    color: isSelected ? activeColor : inactiveColor,
+                                  ),
                                 ),
-                              ),
-                              if (showBadge)
-                                Positioned(
-                                  top: -2,
-                                  right: -5,
-                                  child: Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.accentRose,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: AppColors.bgCanvas,
-                                        width: 1.2,
+                                if (showBadge)
+                                  Positioned(
+                                    top: -2,
+                                    right: -5,
+                                    child: Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accentRose,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.bgCanvas,
+                                          width: 1.2,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            style: TextStyle(
-                              fontFamily: AppTypography.primaryFont,
-                              fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? activeColor : inactiveColor,
-                              letterSpacing: -0.1,
-                              height: 1.1,
+                              ],
                             ),
-                            child: Text(
-                              item.label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            const SizedBox(height: 3),
+                            AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              style: TextStyle(
+                                fontFamily: AppTypography.primaryFont,
+                                fontSize: 10,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isSelected ? activeColor : inactiveColor,
+                                letterSpacing: -0.1,
+                                height: 1.1,
+                              ),
+                              child: Text(
+                                item.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: isSelected ? 4 : 0,
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: isSelected ? activeAccent : Colors.transparent,
-                              borderRadius: BorderRadius.circular(999),
+                            const SizedBox(height: 2),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: isSelected ? 4 : 0,
+                              height: 2,
+                              decoration: BoxDecoration(
+                                color: isSelected ? activeAccent : Colors.transparent,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

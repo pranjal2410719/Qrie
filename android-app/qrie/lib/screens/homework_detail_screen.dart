@@ -11,13 +11,13 @@ import 'homework_mini_test_screen.dart';
 
 /// Teacher-Assigned Homework Detail Screen
 ///
-/// Implements:
-/// - Section A: Assignment Overview & Teacher Instructions
-/// - Section B: Rich Structured Content (Headings, Equations, Diagrams, Attachments, Problem Prompts)
-/// - Section C: Learning Objectives
-/// - Section D: 5-Step Completion Checklist
-/// - Section E: Floating Study Materials CTA & Bottom Action Bar
-/// - Section F: Floating Qrie AI Tutor with contextual awareness
+/// Features:
+/// - Section A: Assignment Overview, Due Date & Completed Mastery Banner
+/// - Section B: Formatted Content Blocks (Formulas, Graphic Diagrams, Attachments)
+/// - Section C: Learning Objectives Checklist
+/// - Section D: 5-Step Restricted Completion Checklist
+/// - Section E: Interactive Submission Sheet with Camera/Gallery/PDF selector
+/// - Section F: Floating Study Materials Pill & Context-Aware Floating AI Tutor
 class HomeworkDetailScreen extends StatefulWidget {
   final HomeworkAssignment assignment;
 
@@ -54,7 +54,8 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
 
   void _showSubmissionModal(BuildContext context, StudentState state) {
     final textController = TextEditingController();
-    bool simulatedUpload = false;
+    String? attachedFileName;
+    String? attachedFileSize;
 
     showModalBottomSheet(
       context: context,
@@ -96,51 +97,102 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Upload Area
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setModalState(() {
-                            simulatedUpload = !simulatedUpload;
-                          });
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: simulatedUpload ? const Color(0xFFECFDF5) : AppColors.bgSurfaceSoft,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: simulatedUpload ? const Color(0xFF32C787) : AppColors.bgSurfaceMuted,
-                              style: BorderStyle.solid,
-                              width: 1.5,
+                      // Interactive File Picker Trigger / Preview
+                      if (attachedFileName == null) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildUploadOption(
+                                icon: Icons.camera_alt_rounded,
+                                label: 'Camera',
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  setModalState(() {
+                                    attachedFileName = 'Notebook_Photo_${DateTime.now().millisecondsSinceEpoch % 10000}.jpg';
+                                    attachedFileSize = '2.8 MB';
+                                  });
+                                },
+                              ),
                             ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildUploadOption(
+                                icon: Icons.photo_library_rounded,
+                                label: 'Gallery',
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  setModalState(() {
+                                    attachedFileName = 'Scan_Solution_${widget.assignment.subject}_p1.jpg';
+                                    attachedFileSize = '3.2 MB';
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildUploadOption(
+                                icon: Icons.picture_as_pdf_rounded,
+                                label: 'PDF Doc',
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  setModalState(() {
+                                    attachedFileName = '${widget.assignment.chapter}_Assignment.pdf';
+                                    attachedFileSize = '1.4 MB';
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFECFDF5),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFF32C787), width: 1.5),
                           ),
-                          child: Column(
+                          child: Row(
                             children: [
-                              Icon(
-                                simulatedUpload ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
-                                size: 36,
-                                color: simulatedUpload ? const Color(0xFF059669) : AppColors.accentCobalt,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                simulatedUpload
-                                    ? 'Attached: Notebook_Solution_Ex3.2.jpg (2.4 MB)'
-                                    : 'Tap to capture or upload notebook pages',
-                                style: AppTypography.body(
-                                  color: simulatedUpload ? const Color(0xFF065F46) : AppColors.textPrimary,
-                                ).copyWith(fontWeight: FontWeight.w600, fontSize: 13),
-                              ),
-                              if (!simulatedUpload)
-                                Text(
-                                  'Supports JPG, PNG, PDF up to 15MB',
-                                  style: AppTypography.caption(color: AppColors.textMuted),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF32C787),
+                                  shape: BoxShape.circle,
                                 ),
+                                child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      attachedFileName!,
+                                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      'Ready to submit • $attachedFileSize',
+                                      style: AppTypography.caption(color: const Color(0xFF047857)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close_rounded, color: Colors.red),
+                                onPressed: () {
+                                  setModalState(() {
+                                    attachedFileName = null;
+                                    attachedFileSize = null;
+                                  });
+                                },
+                              ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 16),
 
                       // Notes Input
@@ -165,11 +217,11 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                         text: 'CONFIRM & SUBMIT WRITTEN WORK',
                         isFullWidth: true,
                         variant: AppButtonVariant.primary,
-                        onPressed: simulatedUpload
+                        onPressed: attachedFileName != null
                             ? () {
                                 state.submitWrittenWork(
                                   widget.assignment.id,
-                                  ['Notebook_Solution_Ex3.2.jpg'],
+                                  [attachedFileName!],
                                   textController.text,
                                 );
                                 Navigator.pop(ctx);
@@ -193,10 +245,118 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
     );
   }
 
+  Widget _buildUploadOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.bgSurfaceSoft,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.bgSurfaceMuted),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: AppColors.accentCobalt, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAttachmentDialog(BuildContext context, String attachmentTitle) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFEF4444)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                attachmentTitle,
+                style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 15),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.bgSurfaceSoft,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.bgSurfaceMuted),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.description_outlined, size: 36, color: AppColors.accentCobalt),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Document Reader Preview',
+                      style: AppTypography.caption(color: AppColors.textSecondary),
+                    ),
+                    const Text('Official NCERT Syllabus Worksheet • 4 Pages', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'This attachment contains the teacher-provided problem set and reference questions. Open in full view to read offline.',
+              style: TextStyle(fontSize: 12, height: 1.4),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Viewing $attachmentTitle offline.')),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.bgSurfaceOnyx,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Open in Viewer'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final progress = state.getProgressForAssignment(widget.assignment.id);
+    final effectiveStatus = state.getEffectiveStatus(widget.assignment);
+    final isCompleted = effectiveStatus == HomeworkStatus.completed;
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
@@ -232,10 +392,19 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined, color: AppColors.textSecondary),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Assignment link copied to clipboard')),
+            onPressed: () async {
+              await Clipboard.setData(
+                ClipboardData(text: 'https://qrie.school/homework/${widget.assignment.id}'),
               );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Assignment link copied to clipboard!'),
+                    backgroundColor: AppColors.bgSurfaceOnyx,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -244,12 +413,18 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
         children: [
           SingleChildScrollView(
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Completed Work Review Banner (if completed)
+                if (isCompleted) ...[
+                  _buildCompletedMasteryBanner(progress),
+                  const SizedBox(height: 16),
+                ],
+
                 // SECTION A: Assignment Overview
-                _buildOverviewSection(progress),
+                _buildOverviewSection(progress, effectiveStatus),
                 const SizedBox(height: 20),
 
                 // SECTION B: Rich Structured Content
@@ -260,7 +435,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                 _buildLearningObjectivesSection(),
                 const SizedBox(height: 20),
 
-                // SECTION D: 5-Step Completion Checklist
+                // SECTION D: 5-Step Restricted Completion Checklist
                 _buildCompletionChecklistSection(state, progress),
                 const SizedBox(height: 20),
 
@@ -273,7 +448,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
             ),
           ),
 
-          // SECTION E: Floating Study Materials Button (Pinned on top right/bottom)
+          // SECTION E: Floating Study Materials Button
           Positioned(
             right: 16,
             top: 16,
@@ -310,9 +485,9 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
             ),
           ),
 
-          // Floating Qrie AI Tutor Button
+          // Floating Qrie AI Tutor Button positioned safely
           FloatingAITutorWidget(
-            bottomOffset: 84,
+            bottomOffset: 92,
             rightOffset: 16,
             contextualHomework: widget.assignment,
             isTestMode: false,
@@ -323,7 +498,52 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: _buildBottomActionBar(context, state, progress),
+            child: _buildBottomActionBar(context, state, progress, isCompleted),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompletedMasteryBanner(HomeworkStudentProgress progress) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFECFDF5),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFF32C787), width: 1.5),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              color: Color(0xFF32C787),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.verified_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'COMPLETED WORK VERIFIED',
+                  style: TextStyle(
+                    color: Color(0xFF047857),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'All mandatory requirements satisfied. Verification Test score: ${progress.highestTestScore ?? 100}%.',
+                  style: const TextStyle(color: Color(0xFF065F46), fontSize: 12.5),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -331,7 +551,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
   }
 
   // ================= SECTION A: OVERVIEW =================
-  Widget _buildOverviewSection(HomeworkStudentProgress progress) {
+  Widget _buildOverviewSection(HomeworkStudentProgress progress, HomeworkStatus status) {
     final formattedDue = '${widget.assignment.dueDate.day}/${widget.assignment.dueDate.month}/${widget.assignment.dueDate.year} at ${widget.assignment.dueDate.hour.toString().padLeft(2, '0')}:${widget.assignment.dueDate.minute.toString().padLeft(2, '0')}';
 
     return Container(
@@ -353,7 +573,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                   children: [
                     Text(
                       widget.assignment.title,
-                      style: AppTypography.headline(color: AppColors.textPrimary).copyWith(fontSize: 20),
+                      style: AppTypography.headline(color: AppColors.textPrimary).copyWith(fontSize: 19),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -364,7 +584,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              _buildStatusPill(progress.status),
+              _buildStatusPill(status),
             ],
           ),
           const SizedBox(height: 14),
@@ -408,7 +628,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                     const Icon(Icons.timer_outlined, size: 16, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
-                      '${widget.assignment.estimatedMinutes} min est.',
+                      '${widget.assignment.estimatedMinutes} min',
                       style: AppTypography.caption(color: AppColors.textSecondary),
                     ),
                   ],
@@ -450,7 +670,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.article_rounded, size: 18, color: AppColors.accentCobalt),
+              const Icon(Icons.menu_book_rounded, size: 18, color: AppColors.accentCobalt),
               const SizedBox(width: 8),
               Text(
                 'ASSIGNMENT CONTENT',
@@ -463,20 +683,20 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
           ),
           const SizedBox(height: 14),
 
-          ...widget.assignment.contentBlocks.map((block) => _buildContentBlock(block)),
+          ...widget.assignment.contentBlocks.map((block) => _buildContentBlockItem(block)),
         ],
       ),
     );
   }
 
-  Widget _buildContentBlock(HomeworkContentBlock block) {
+  Widget _buildContentBlockItem(HomeworkContentBlock block) {
     switch (block.type) {
       case HomeworkBlockType.heading:
         return Padding(
-          padding: const EdgeInsets.only(top: 14, bottom: 8),
+          padding: const EdgeInsets.only(top: 12, bottom: 6),
           child: Text(
             block.content,
-            style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 16),
+            style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 15),
           ),
         );
       case HomeworkBlockType.paragraph:
@@ -494,7 +714,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: const Color(0xFFE2E8F0)),
           ),
           child: Column(
@@ -504,18 +724,27 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                 Text(
                   block.caption!.toUpperCase(),
                   style: AppTypography.caption(color: AppColors.accentCobalt).copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
                 ),
-              const SizedBox(height: 4),
-              Text(
-                block.content,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                ),
+                child: Text(
+                  block.content,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
               ),
             ],
@@ -526,30 +755,49 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
           margin: const EdgeInsets.symmetric(vertical: 10),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.accentMint.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(14),
+            color: AppColors.accentMint.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.accentMint.withValues(alpha: 0.4)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.image_outlined, color: Color(0xFF059669), size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      block.caption ?? 'Visual Diagram',
-                      style: AppTypography.body(color: AppColors.textPrimary).copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+              Row(
+                children: [
+                  const Icon(Icons.schema_outlined, color: Color(0xFF059669), size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    block.caption ?? 'Visual Concept Diagram',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF065F46),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 100,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.account_tree_outlined, color: AppColors.accentCobalt, size: 32),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Diagrammatic Schematic: ${block.content}',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    Text(
-                      block.content,
-                      style: AppTypography.caption(color: AppColors.textSecondary),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -561,7 +809,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.bgSurfaceSoft,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.bgSurfaceMuted),
           ),
           child: Row(
@@ -579,13 +827,18 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Downloading ${block.content}...')),
-                  );
-                },
-                child: const Text('View', style: TextStyle(fontWeight: FontWeight.w700)),
+              ElevatedButton(
+                onPressed: () => _showAttachmentDialog(context, block.content),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.bgSurfaceOnyx,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('View', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -686,14 +939,39 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
     );
   }
 
-  // ================= SECTION D: 5-STEP CHECKLIST =================
+  // ================= SECTION D: 5-STEP RESTRICTED CHECKLIST =================
   Widget _buildCompletionChecklistSection(StudentState state, HomeworkStudentProgress progress) {
     final steps = [
-      {'id': 'step_1', 'title': 'Review assignment & study materials', 'desc': 'Examine teacher prompt and linked chapter notes'},
-      {'id': 'step_2', 'title': 'Complete exercise problems', 'desc': 'Solve all assigned textbook/worksheet problems'},
-      {'id': 'step_3', 'title': 'Upload written notebook work', 'desc': progress.writtenWorkSubmitted ? 'Work uploaded' : 'Attach photo or scanned solution'},
-      {'id': 'step_4', 'title': 'Pass Topic Verification Mini-Test', 'desc': progress.highestTestScore != null ? 'Best score: ${progress.highestTestScore}%' : 'Score ≥ 70% to satisfy verification'},
-      {'id': 'step_5', 'title': 'Teacher review & grading', 'desc': widget.assignment.requiresTeacherReview ? 'Pending teacher approval' : 'Not required for this task'},
+      {
+        'id': 'step_1',
+        'title': 'Review assignment & study materials',
+        'desc': 'Examine teacher prompt and linked chapter notes',
+        'action': 'Toggleable',
+      },
+      {
+        'id': 'step_2',
+        'title': 'Complete exercise problems',
+        'desc': 'Solve all assigned textbook/worksheet problems',
+        'action': 'Toggleable',
+      },
+      {
+        'id': 'step_3',
+        'title': 'Upload written notebook work',
+        'desc': progress.writtenWorkSubmitted ? 'Work uploaded and verified' : 'Tap to upload written solutions',
+        'action': 'Action: Upload',
+      },
+      {
+        'id': 'step_4',
+        'title': 'Pass Topic Verification Mini-Test',
+        'desc': progress.highestTestScore != null ? 'Best score: ${progress.highestTestScore}%' : 'Score ≥ 70% to satisfy verification',
+        'action': 'Action: Take Test',
+      },
+      {
+        'id': 'step_5',
+        'title': 'Teacher review & grading',
+        'desc': widget.assignment.requiresTeacherReview ? 'Pending teacher approval' : 'Not required for this task',
+        'action': 'Teacher Only',
+      },
     ];
 
     return Container(
@@ -721,7 +999,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'All required steps must be satisfied to complete this assignment.',
+            'All mandatory steps must be verified before marking completed.',
             style: AppTypography.caption(color: AppColors.textMuted),
           ),
           const SizedBox(height: 14),
@@ -733,7 +1011,25 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
             return InkWell(
               onTap: () {
                 HapticFeedback.selectionClick();
-                state.toggleChecklistItem(widget.assignment.id, stepId);
+                if (stepId == 'step_1' || stepId == 'step_2') {
+                  state.toggleChecklistItem(widget.assignment.id, stepId);
+                } else if (stepId == 'step_3') {
+                  _showSubmissionModal(context, state);
+                } else if (stepId == 'step_4') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => HomeworkMiniTestScreen(assignment: widget.assignment),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Teacher evaluation is granted upon instructor review.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
               borderRadius: BorderRadius.circular(12),
               child: Padding(
@@ -748,12 +1044,12 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                         color: isDone ? const Color(0xFF32C787) : Colors.transparent,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isDone ? const Color(0xFF32C787) : AppColors.textMuted,
+                          color: isDone ? const Color(0xFF32C787) : const Color(0xFFCBD5E1),
                           width: 1.8,
                         ),
                       ),
                       child: isDone
-                          ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                          ? const Icon(Icons.check, size: 14, color: Colors.white)
                           : null,
                     ),
                     const SizedBox(width: 12),
@@ -761,14 +1057,46 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            s['title']!,
-                            style: AppTypography.body(color: AppColors.textPrimary).copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              decoration: isDone ? TextDecoration.lineThrough : null,
-                            ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  s['title']!,
+                                  style: AppTypography.cardTitle(
+                                    color: isDone ? const Color(0xFF065F46) : AppColors.textPrimary,
+                                  ).copyWith(fontSize: 13),
+                                ),
+                              ),
+                              if (stepId == 'step_3' && !isDone)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentCobalt.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text('UPLOAD', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: AppColors.accentCobalt)),
+                                ),
+                              if (stepId == 'step_4' && !isDone)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFD97706).withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text('START TEST', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFFD97706))),
+                                ),
+                              if (stepId == 'step_5')
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bgSurfaceSoft,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text('TEACHER', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                                ),
+                            ],
                           ),
+                          const SizedBox(height: 2),
                           Text(
                             s['desc']!,
                             style: AppTypography.caption(color: AppColors.textSecondary),
@@ -786,54 +1114,42 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
     );
   }
 
-  // ================= TEACHER FEEDBACK =================
   Widget _buildTeacherFeedbackSection(HomeworkStudentProgress progress) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF86EFAC)),
+        color: const Color(0xFFF3E8FF),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD8B4FE)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: const [
-              Icon(Icons.rate_review_rounded, color: Color(0xFF16A34A), size: 18),
+              Icon(Icons.rate_review_rounded, color: Color(0xFF7C3AED), size: 18),
               SizedBox(width: 8),
               Text(
-                'Teacher Feedback',
+                'TEACHER FEEDBACK & GRADE',
                 style: TextStyle(
-                  color: Color(0xFF15803D),
+                  color: Color(0xFF6B21A8),
                   fontWeight: FontWeight.w800,
-                  fontSize: 13,
+                  fontSize: 12,
+                  letterSpacing: 0.6,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             progress.teacherFeedback!,
-            style: AppTypography.body(color: const Color(0xFF166534)).copyWith(fontSize: 13),
+            style: const TextStyle(color: Color(0xFF581C87), fontSize: 13, height: 1.4),
           ),
-          if (progress.gradePoints != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Grade: ${progress.gradePoints} / 100',
-              style: const TextStyle(
-                color: Color(0xFF15803D),
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 
-  // ================= STATUS PILL =================
   Widget _buildStatusPill(HomeworkStatus status) {
     Color bg;
     Color text;
@@ -853,7 +1169,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
       case HomeworkStatus.readyForVerification:
         bg = const Color(0xFFFEF3C7);
         text = const Color(0xFFB45309);
-        label = 'Verify Ready';
+        label = 'Ready to Verify';
         break;
       case HomeworkStatus.completed:
         bg = const Color(0xFFECFDF5);
@@ -890,6 +1206,7 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
     BuildContext context,
     StudentState state,
     HomeworkStudentProgress progress,
+    bool isCompleted,
   ) {
     final hasMiniTest = widget.assignment.miniTest != null;
     final testPassed = progress.highestTestScore != null &&
@@ -910,38 +1227,57 @@ class _HomeworkDetailScreenState extends State<HomeworkDetailScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            // Submit Written Work Button
-            Expanded(
-              child: AppButton(
-                text: progress.writtenWorkSubmitted ? 'WORK UPLOADED' : 'SUBMIT WRITTEN WORK',
-                variant: progress.writtenWorkSubmitted
-                    ? AppButtonVariant.outline
-                    : AppButtonVariant.secondary,
-                onPressed: () => _showSubmissionModal(context, state),
-              ),
-            ),
-            const SizedBox(width: 12),
+        child: isCompleted
+            ? Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      text: 'COMPLETED • REVIEW TEST',
+                      variant: AppButtonVariant.primary,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HomeworkMiniTestScreen(assignment: widget.assignment),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  // Submit Written Work Button
+                  Expanded(
+                    child: AppButton(
+                      text: progress.writtenWorkSubmitted ? 'WORK UPLOADED' : 'SUBMIT WRITTEN WORK',
+                      variant: progress.writtenWorkSubmitted
+                          ? AppButtonVariant.outline
+                          : AppButtonVariant.secondary,
+                      onPressed: () => _showSubmissionModal(context, state),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
 
-            // Mini-Test Button
-            if (hasMiniTest)
-              Expanded(
-                child: AppButton(
-                  text: testPassed ? 'RETAKE TEST' : 'TAKE MINI-TEST',
-                  variant: AppButtonVariant.primary,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomeworkMiniTestScreen(assignment: widget.assignment),
+                  // Mini-Test Button
+                  if (hasMiniTest)
+                    Expanded(
+                      child: AppButton(
+                        text: testPassed ? 'RETAKE TEST' : 'TAKE MINI-TEST',
+                        variant: AppButtonVariant.primary,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HomeworkMiniTestScreen(assignment: widget.assignment),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+                    ),
+                ],
               ),
-          ],
-        ),
       ),
     );
   }

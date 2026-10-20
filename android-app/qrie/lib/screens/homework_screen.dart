@@ -52,13 +52,15 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
     if (_selectedFilter == 'All') return assignments;
 
     return assignments.where((hw) {
-      final progress = state.getProgressForAssignment(hw.id);
-      final status = progress.status;
+      final status = state.getEffectiveStatus(hw);
 
       switch (_selectedFilter) {
         case 'Due Soon':
           final hoursLeft = hw.dueDate.difference(DateTime.now()).inHours;
-          return hoursLeft > 0 && hoursLeft <= 72 && status != HomeworkStatus.completed;
+          return hoursLeft > 0 &&
+              hoursLeft <= 72 &&
+              status != HomeworkStatus.completed &&
+              status != HomeworkStatus.overdue;
         case 'In Progress':
           return status == HomeworkStatus.inProgress;
         case 'Ready to Verify':
@@ -66,8 +68,7 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
         case 'Completed':
           return status == HomeworkStatus.completed;
         case 'Overdue':
-          return status == HomeworkStatus.overdue ||
-              (hw.dueDate.isBefore(DateTime.now()) && status != HomeworkStatus.completed);
+          return status == HomeworkStatus.overdue;
         default:
           return true;
       }
@@ -218,7 +219,7 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
     HomeworkAssignment hw,
     HomeworkStudentProgress progress,
   ) {
-    final status = progress.status;
+    final status = state.getEffectiveStatus(hw);
     final isCompleted = status == HomeworkStatus.completed;
     final isOverdue = status == HomeworkStatus.overdue;
 
@@ -639,32 +640,49 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: const BoxDecoration(
-              color: AppColors.bgSurfaceSoft,
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: AppColors.bgSurfaceSoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.assignment_turned_in_outlined,
+                size: 44,
+                color: AppColors.textMuted,
+              ),
             ),
-            child: const Icon(
-              Icons.assignment_turned_in_outlined,
-              size: 44,
-              color: AppColors.textMuted,
+            const SizedBox(height: 16),
+            Text(
+              'No assignments in "$_selectedFilter"',
+              style: AppTypography.cardTitle(color: AppColors.textPrimary),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No assignments in this filter',
-            style: AppTypography.cardTitle(color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Try selecting "All" to view all active homework assignments.',
-            style: AppTypography.caption(color: AppColors.textSecondary),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              'There are no homework tasks currently categorized under "$_selectedFilter".',
+              textAlign: TextAlign.center,
+              style: AppTypography.caption(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedFilter = 'All');
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.accentCobalt,
+                side: const BorderSide(color: AppColors.accentCobalt),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Show All Assignments', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
       ),
     );
   }

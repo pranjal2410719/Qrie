@@ -452,7 +452,9 @@ class HomeworkAssignment {
       return isDeadlinePassed ? HomeworkStatus.overdue : HomeworkStatus.assigned;
     }
 
-    if (progress.status != HomeworkStatus.assigned) {
+    // If completed or awaiting review, that takes precedence
+    if (progress.status == HomeworkStatus.completed ||
+        progress.status == HomeworkStatus.submittedAwaitingReview) {
       return progress.status;
     }
 
@@ -463,15 +465,24 @@ class HomeworkAssignment {
       return HomeworkStatus.completed;
     }
 
+    // If deadline has passed and work is incomplete, it is Overdue
     if (isDeadlinePassed) {
       return HomeworkStatus.overdue;
+    }
+
+    if (progress.status != HomeworkStatus.assigned) {
+      return progress.status;
     }
 
     if (progress.writtenWorkSubmitted && !progress.hasPassedMiniTest) {
       return HomeworkStatus.readyForVerification;
     }
 
-    if (progress.readInstructions || progress.studiedMaterial || progress.writtenWorkSubmitted || progress.testAttempts.isNotEmpty) {
+    if (progress.readInstructions ||
+        progress.studiedMaterial ||
+        progress.writtenWorkSubmitted ||
+        progress.testAttempts.isNotEmpty ||
+        progress.completedStepIds.isNotEmpty) {
       return HomeworkStatus.inProgress;
     }
 

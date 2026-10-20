@@ -398,6 +398,15 @@ class _HomeScreenState extends State<HomeScreen> {
           '${lesson.title}, ${isCompleted ? "Completed" : isCurrent ? "Current topic" : "Locked"}',
       child: InkWell(
         onTap: () {
+          if (isLocked) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Complete previous lessons to unlock this topic!'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            return;
+          }
           if (lesson.type == LessonType.quiz) {
             Navigator.push(
               context,

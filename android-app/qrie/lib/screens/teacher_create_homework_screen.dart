@@ -46,6 +46,130 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
     super.dispose();
   }
 
+  List<HomeworkMiniQuestion> _buildQuestionsForSubject(String subject, String chapter) {
+    if (subject == 'Science') {
+      return const [
+        HomeworkMiniQuestion(
+          id: 'q1_sci',
+          subjectId: 'science',
+          question: 'Which cell organelle is known as the powerhouse of the cell?',
+          options: ['Nucleus', 'Mitochondria', 'Ribosome', 'Golgi apparatus'],
+          correctIndex: 1,
+          explanation: 'Mitochondria generate most of the chemical energy needed by the cell in the form of ATP.',
+          hint: 'Think about which organelle synthesizes ATP.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q2_sci',
+          subjectId: 'science',
+          question: "According to Ohm's Law, what is the mathematical relationship between Voltage (V), Current (I), and Resistance (R)?",
+          options: ['V = I / R', 'V = I * R', 'I = V * R', 'R = V * I'],
+          correctIndex: 1,
+          explanation: "Ohm's Law states that V = I * R.",
+          hint: 'Potential difference is directly proportional to current.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q3_sci',
+          subjectId: 'science',
+          question: 'What is the SI unit of electric current?',
+          options: ['Volt', 'Ohm', 'Ampere', 'Watt'],
+          correctIndex: 2,
+          explanation: 'The SI unit of electric current is the Ampere (A).',
+          hint: 'Named after French physicist André-Marie Ampère.',
+        ),
+      ];
+    } else if (subject == 'English') {
+      return const [
+        HomeworkMiniQuestion(
+          id: 'q1_eng',
+          subjectId: 'english',
+          question: "Identify the figure of speech in: 'The wind whispered through the dark trees.'",
+          options: ['Metaphor', 'Simile', 'Personification', 'Hyperbole'],
+          correctIndex: 2,
+          explanation: 'Personification attributes human characteristics (whispering) to non-human things (the wind).',
+          hint: 'Think of human traits given to nature.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q2_eng',
+          subjectId: 'english',
+          question: "Which of the following is the direct antonym of the word 'Meticulous'?",
+          options: ['Careless', 'Diligent', 'Accurate', 'Precise'],
+          correctIndex: 0,
+          explanation: 'Meticulous means very careful and precise; its antonym is careless.',
+          hint: 'Look for the word meaning negligent or not paying attention.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q3_eng',
+          subjectId: 'english',
+          question: 'What literary device is used when words start with the same consonant sound?',
+          options: ['Alliteration', 'Assonance', 'Onomatopoeia', 'Irony'],
+          correctIndex: 0,
+          explanation: 'Alliteration is the repetition of initial consonant sounds in neighboring words.',
+          hint: 'Example: Peter Piper picked a peck of pickled peppers.',
+        ),
+      ];
+    } else if (subject == 'Social Science') {
+      return const [
+        HomeworkMiniQuestion(
+          id: 'q1_soc',
+          subjectId: 'social',
+          question: 'Which articles of the Indian Constitution guarantee the Right to Equality?',
+          options: ['Articles 14-18', 'Articles 19-22', 'Articles 23-24', 'Articles 25-28'],
+          correctIndex: 0,
+          explanation: 'Articles 14 to 18 of the Indian Constitution guarantee the Right to Equality.',
+          hint: 'It is the first fundamental right group in Part III.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q2_soc',
+          subjectId: 'social',
+          question: 'What is the imaginary line at 0 degrees latitude dividing Earth into two hemispheres?',
+          options: ['Tropic of Cancer', 'Equator', 'Prime Meridian', 'Tropic of Capricorn'],
+          correctIndex: 1,
+          explanation: 'The Equator is the line of 0 degrees latitude dividing the Northern and Southern Hemispheres.',
+          hint: 'It is equidistant from both North and South poles.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q3_soc',
+          subjectId: 'social',
+          question: 'Which economic sector contributes the largest share to modern GDP in India?',
+          options: ['Agriculture', 'Manufacturing', 'Services Sector', 'Mining'],
+          correctIndex: 2,
+          explanation: "The tertiary or services sector contributes over 53% to India's GDP.",
+          hint: 'Also known as the tertiary sector.',
+        ),
+      ];
+    } else {
+      return const [
+        HomeworkMiniQuestion(
+          id: 'q1_math',
+          subjectId: 'math',
+          question: 'Solve for x: 3x - 5 = 16. What is the value of x?',
+          options: ['x = 5', 'x = 7', 'x = 9', 'x = 11'],
+          correctIndex: 1,
+          explanation: '3x - 5 = 16 => 3x = 21 => x = 7.',
+          hint: 'Add 5 to both sides, then divide by 3.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q2_math',
+          subjectId: 'math',
+          question: 'In a linear equation ax + b = 0, what is the degree of the variable x?',
+          options: ['0', '1', '2', 'Variable'],
+          correctIndex: 1,
+          explanation: 'A linear equation has highest power/degree equal to 1.',
+          hint: 'Look at the exponent of x.',
+        ),
+        HomeworkMiniQuestion(
+          id: 'q3_math',
+          subjectId: 'math',
+          question: 'If 2(y + 3) = 14, what is the value of y?',
+          options: ['y = 4', 'y = 5', 'y = 3', 'y = 7'],
+          correctIndex: 0,
+          explanation: '2y + 6 = 14 => 2y = 8 => y = 4.',
+          hint: 'Distribute 2 first or divide both sides by 2.',
+        ),
+      ];
+    }
+  }
+
   void _publishAssignment(StudentState state) {
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.heavyImpact();
@@ -61,35 +185,7 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
         passingPercentage: _passingThreshold,
         maxAttempts: _maxAttempts,
         estimatedMinutes: 8,
-        questions: [
-          const HomeworkMiniQuestion(
-            id: 'q1',
-            subjectId: 'math',
-            question: 'Solve for x: 3x - 5 = 16. What is the value of x?',
-            options: ['x = 5', 'x = 7', 'x = 9', 'x = 11'],
-            correctIndex: 1,
-            explanation: '3x - 5 = 16 => 3x = 21 => x = 7.',
-            hint: 'Add 5 to both sides, then divide by 3.',
-          ),
-          const HomeworkMiniQuestion(
-            id: 'q2',
-            subjectId: 'math',
-            question: 'In a linear equation ax + b = 0, what is the degree of the variable x?',
-            options: ['0', '1', '2', 'Variable'],
-            correctIndex: 1,
-            explanation: 'A linear equation has highest power/degree equal to 1.',
-            hint: 'Look at the exponent of x.',
-          ),
-          const HomeworkMiniQuestion(
-            id: 'q3',
-            subjectId: 'math',
-            question: 'If 2(y + 3) = 14, what is the value of y?',
-            options: ['y = 4', 'y = 5', 'y = 3', 'y = 7'],
-            correctIndex: 0,
-            explanation: '2y + 6 = 14 => 2y = 8 => y = 4.',
-            hint: 'Distribute 2 first or divide both sides by 2.',
-          ),
-        ],
+        questions: _buildQuestionsForSubject(_selectedSubject, _chapterController.text.trim()),
       );
     }
 
@@ -210,7 +306,22 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
                       label: 'SUBJECT',
                       value: _selectedSubject,
                       items: ['Mathematics', 'Science', 'English', 'Social Science'],
-                      onChanged: (val) => setState(() => _selectedSubject = val!),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedSubject = val;
+                            if (val == 'Science') {
+                              _chapterController.text = 'Chapter 12: Electricity & Circuits';
+                            } else if (val == 'English') {
+                              _chapterController.text = 'Unit 4: Shakespearean Drama';
+                            } else if (val == 'Social Science') {
+                              _chapterController.text = 'Chapter 2: Democratic Rights';
+                            } else {
+                              _chapterController.text = 'Chapter 3: Linear Equations';
+                            }
+                          });
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -247,6 +358,7 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
 
               // Estimated Time & Due Date
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: _buildTextField(
@@ -254,6 +366,14 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
                       controller: _estMinutesController,
                       hintText: '35',
                       keyboardType: TextInputType.number,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Enter minutes';
+                        final mins = int.tryParse(val.trim());
+                        if (mins == null || mins < 5 || mins > 240) {
+                          return '5 - 240 mins';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -262,7 +382,7 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'DUE DATE',
+                          'DUE DATE & TIME',
                           style: AppTypography.caption(color: AppColors.textSecondary).copyWith(
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.6,
@@ -277,14 +397,18 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
                               firstDate: DateTime.now(),
                               lastDate: DateTime.now().add(const Duration(days: 90)),
                             );
-                            if (pickedDate != null) {
+                            if (pickedDate != null && context.mounted) {
+                              final pickedTime = await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay(hour: _dueDate.hour, minute: _dueDate.minute),
+                              );
                               setState(() {
                                 _dueDate = DateTime(
                                   pickedDate.year,
                                   pickedDate.month,
                                   pickedDate.day,
-                                  _dueDate.hour,
-                                  _dueDate.minute,
+                                  pickedTime?.hour ?? _dueDate.hour,
+                                  pickedTime?.minute ?? _dueDate.minute,
                                 );
                               });
                             }
@@ -298,12 +422,12 @@ class _TeacherCreateHomeworkScreenState extends State<TeacherCreateHomeworkScree
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today_rounded, size: 16, color: AppColors.accentCobalt),
+                                const Icon(Icons.schedule_rounded, size: 16, color: AppColors.accentCobalt),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    '${_dueDate.day}/${_dueDate.month}/${_dueDate.year}',
-                                    style: AppTypography.body(color: AppColors.textPrimary).copyWith(fontSize: 13),
+                                    '${_dueDate.day}/${_dueDate.month}/${_dueDate.year} • ${_dueDate.hour.toString().padLeft(2, '0')}:${_dueDate.minute.toString().padLeft(2, '0')}',
+                                    style: AppTypography.body(color: AppColors.textPrimary).copyWith(fontSize: 12),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),

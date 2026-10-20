@@ -8,12 +8,12 @@ import '../theme/app_typography.dart';
 
 /// Global Floating Qrie AI Academic Tutor
 ///
-/// Provides contextual AI assistance across all student screens.
 /// Features:
-/// - Floating draggable button with Onyx/Pastel styling and active glow.
-/// - Contextual awareness: adapts prompts based on active assignment, topic, or test.
-/// - Mode Guardrails: enforces conceptual hints only (no direct answers) during mini-tests.
-/// - Preserves underlying screen and lesson state without reloading.
+/// - Magnetic edge-snapping on drag release (left/right dock).
+/// - RepaintBoundary isolation to eliminate frame drops and buffer queue delays.
+/// - Socratic & Mini-Test Guardrails mode (conceptual clues, no direct answers).
+/// - Rich conversational sheet with syntax-highlighted formulas and topic pills.
+/// - Contextual awareness for active homework assignments and quiz questions.
 class FloatingAITutorWidget extends StatefulWidget {
   final double bottomOffset;
   final double rightOffset;
@@ -23,7 +23,7 @@ class FloatingAITutorWidget extends StatefulWidget {
 
   const FloatingAITutorWidget({
     super.key,
-    this.bottomOffset = 80.0,
+    this.bottomOffset = 84.0,
     this.rightOffset = 16.0,
     this.contextualHomework,
     this.contextualQuestion,
@@ -38,25 +38,18 @@ class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
     with SingleTickerProviderStateMixin {
   late Offset _position;
   bool _initialized = false;
-  late AnimationController _pulseController;
-  late Animation<double> _scaleAnimation;
+  late AnimationController _snapController;
+  late Animation<Offset> _snapAnimation;
+
+  static const double _buttonSize = 54.0;
+  static const double _margin = 14.0;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
+    _snapController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    );
-
-    final isTestEnvironment =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    if (!isTestEnvironment) {
-      _pulseController.repeat(reverse: true);
-    }
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+      duration: const Duration(milliseconds: 240),
     );
   }
 
@@ -65,18 +58,46 @@ class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
     super.didChangeDependencies();
     if (!_initialized) {
       final size = MediaQuery.of(context).size;
-      _position = Offset(
-        size.width - 68 - widget.rightOffset,
-        size.height - 68 - widget.bottomOffset,
+      final defaultX = size.width - _buttonSize - widget.rightOffset;
+      final defaultY = (size.height - _buttonSize - widget.bottomOffset).clamp(
+        60.0,
+        size.height - _buttonSize - 20.0,
       );
+      _position = Offset(defaultX, defaultY);
       _initialized = true;
     }
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
+    _snapController.dispose();
     super.dispose();
+  }
+
+  void _snapToNearestEdge(Size size) {
+    final targetX = (_position.dx + _buttonSize / 2 < size.width / 2)
+        ? _margin
+        : size.width - _buttonSize - _margin;
+
+    final targetY = _position.dy.clamp(
+      70.0,
+      size.height - _buttonSize - widget.bottomOffset.clamp(20.0, 140.0),
+    );
+
+    final start = _position;
+    final end = Offset(targetX, targetY);
+
+    _snapAnimation = Tween<Offset>(begin: start, end: end).animate(
+      CurvedAnimation(parent: _snapController, curve: Curves.easeOutBack),
+    );
+
+    _snapController.reset();
+    _snapAnimation.addListener(() {
+      setState(() {
+        _position = _snapAnimation.value;
+      });
+    });
+    _snapController.forward();
   }
 
   void _openTutorSheet(BuildContext context, StudentState state) {
@@ -104,63 +125,72 @@ class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
     final isTest = widget.isTestMode || state.isTestGuardrailActive;
     final hasContext = widget.contextualHomework != null || state.activeHomeworkContext != null;
 
+    final clampedX = _position.dx.clamp(_margin, size.width - _buttonSize - _margin);
+    final clampedY = _position.dy.clamp(60.0, size.height - _buttonSize - 20.0);
+
     return Positioned(
-      left: _position.dx.clamp(12.0, size.width - 68.0),
-      top: _position.dy.clamp(60.0, size.height - 130.0),
-      child: GestureDetector(
-        onPanUpdate: (details) {
-          setState(() {
-            _position += details.delta;
-          });
-        },
-        child: ScaleTransition(
-          scale: _scaleAnimation,
+      left: clampedX,
+      top: clampedY,
+      child: RepaintBoundary(
+        child: GestureDetector(
+          onPanUpdate: (details) {
+            setState(() {
+              _position += details.delta;
+            });
+          },
+          onPanEnd: (_) => _snapToNearestEdge(size),
           child: Material(
             color: Colors.transparent,
             elevation: 8,
             shadowColor: isTest
-                ? AppColors.accentTangerine.withValues(alpha: 0.35)
-                : AppColors.accentCobalt.withValues(alpha: 0.3),
+                ? const Color(0xFFD97706).withValues(alpha: 0.35)
+                : AppColors.bgSurfaceOnyx.withValues(alpha: 0.35),
             shape: const CircleBorder(),
             child: InkWell(
               onTap: () => _openTutorSheet(context, state),
               customBorder: const CircleBorder(),
               child: Container(
-                width: 58,
-                height: 58,
+                width: _buttonSize,
+                height: _buttonSize,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: isTest
-                        ? [const Color(0xFFD97706), const Color(0xFFF59E0B)]
-                        : [AppColors.bgSurfaceOnyx, const Color(0xFF1E293B)],
+                        ? const [Color(0xFFD97706), Color(0xFFF59E0B)]
+                        : const [Color(0xFF0F172A), Color(0xFF1E293B)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
-                    width: 2,
+                    color: isTest
+                        ? const Color(0xFFFDE68A)
+                        : Colors.white.withValues(alpha: 0.22),
+                    width: 1.8,
                   ),
                 ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Icon(
-                      isTest ? Icons.help_outline_rounded : Icons.auto_awesome_rounded,
+                      isTest ? Icons.shield_rounded : Icons.auto_awesome_rounded,
                       color: Colors.white,
-                      size: 26,
+                      size: 24,
                     ),
+                    // Active indicator dot
                     if (hasContext || isTest)
                       Positioned(
-                        top: 8,
-                        right: 8,
+                        top: 7,
+                        right: 7,
                         child: Container(
-                          width: 10,
-                          height: 10,
+                          width: 9,
+                          height: 9,
                           decoration: BoxDecoration(
-                            color: isTest ? Colors.white : AppColors.accentMint,
+                            color: isTest ? Colors.white : const Color(0xFF32C787),
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.bgSurfaceOnyx, width: 1.5),
+                            border: Border.all(
+                              color: isTest ? const Color(0xFFD97706) : const Color(0xFF0F172A),
+                              width: 1.5,
+                            ),
                           ),
                         ),
                       ),
@@ -203,11 +233,11 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
   }
 
   void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 150), () {
+    Future.delayed(const Duration(milliseconds: 160), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 280),
+          duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutCubic,
         );
       }
@@ -216,50 +246,48 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
 
   void _handleSend(StudentState state, String text) {
     if (text.trim().isEmpty) return;
+    final query = text.trim();
     _inputController.clear();
-
-    if (widget.isTestMode) {
-      // In mini-test mode, enforce conceptual Socratic guardrails
-      _handleTestModePrompt(state, text.trim());
-    } else {
-      state.addDoubt(text: text.trim());
-    }
-    _scrollToBottom();
-  }
-
-  void _handleTestModePrompt(StudentState state, String userText) {
-    // Add student question to chat
-    state.addDoubt(text: userText);
+    HapticFeedback.selectionClick();
 
     setState(() => _isAITyping = true);
-    Future.delayed(const Duration(milliseconds: 900), () {
-      if (!mounted) return;
-      setState(() => _isAITyping = false);
-      _scrollToBottom();
+
+    state.addDoubt(
+      text: query,
+      isTestMode: widget.isTestMode,
+    );
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() => _isAITyping = false);
+        _scrollToBottom();
+      }
     });
+
+    _scrollToBottom();
   }
 
   List<String> _getStarterPrompts() {
     if (widget.isTestMode) {
       return [
-        'Give me a conceptual hint',
+        'Give me a conceptual clue',
         'Which core formula applies here?',
-        'What principle is being tested?',
+        'How do the variables relate?',
         'Help check my reasoning without answer',
       ];
     }
     if (widget.homework != null) {
       return [
-        'Explain this step',
-        'Show a similar example',
-        'What formula should I use?',
-        'Check my reasoning',
+        'Explain this problem step-by-step',
+        'What formula should I apply?',
+        'Show a similar practice example',
+        'How do I verify my answer?',
       ];
     }
     return [
-      'Explain cell membrane',
-      'Solve 4(x - 2) = 12',
-      'What is selective permeability?',
+      'Explain Ohm\'s law & resistance',
+      'Solve linear equations substitution',
+      'What is ATP in cellular respiration?',
       'How does photosynthesis work?',
     ];
   }
@@ -270,6 +298,15 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
     final messages = state.doubtMessages;
     final starterPrompts = _getStarterPrompts();
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    String subtitle;
+    if (widget.isTestMode) {
+      subtitle = 'Topic Verification • Guardrails Active';
+    } else if (widget.homework != null) {
+      subtitle = '${widget.homework!.subject}: ${widget.homework!.chapter}';
+    } else {
+      subtitle = 'Personalized Socratic Academic Pair';
+    }
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
@@ -289,15 +326,16 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // 2. Header Bar
+          // 2. Header Bar with Flexible text to prevent RenderFlex overflow
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: widget.isTestMode
                         ? const Color(0xFFFEF3C7)
@@ -305,64 +343,61 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    widget.isTestMode
-                        ? Icons.school_rounded
-                        : Icons.auto_awesome_rounded,
-                    color: widget.isTestMode
-                        ? const Color(0xFFD97706)
-                        : AppColors.accentCobalt,
+                    widget.isTestMode ? Icons.shield_rounded : Icons.auto_awesome_rounded,
+                    color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Qrie AI Tutor',
-                            style: AppTypography.cardTitle(
-                              color: AppColors.textPrimary,
+                          Flexible(
+                            child: Text(
+                              'Qrie AI Tutor',
+                              style: AppTypography.cardTitle(color: AppColors.textPrimary)
+                                  .copyWith(fontSize: 15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: widget.isTestMode
                                   ? const Color(0xFFFEF3C7)
-                                  : AppColors.bgSurfaceSoft,
-                              borderRadius: BorderRadius.circular(8),
+                                  : const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(6),
                               border: Border.all(
                                 color: widget.isTestMode
-                                    ? const Color(0xFFF59E0B)
-                                    : AppColors.bgSurfaceMuted,
+                                    ? const Color(0xFFFDE68A)
+                                    : const Color(0xFFBFDBFE),
                               ),
                             ),
                             child: Text(
-                              widget.isTestMode ? 'TEST GUARDRAILS' : 'SOCRATIC',
-                              style: AppTypography.caption(
+                              widget.isTestMode ? 'GUARDRAILS' : 'SOCRATIC',
+                              style: TextStyle(
                                 color: widget.isTestMode
                                     ? const Color(0xFFB45309)
-                                    : AppColors.textSecondary,
-                              ).copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10,
+                                    : const Color(0xFF1D4ED8),
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 1),
                       Text(
-                        widget.homework != null
-                            ? '${widget.homework!.subject}: ${widget.homework!.chapter}'
-                            : 'Personalized Academic Pair',
-                        style: AppTypography.caption(
-                          color: AppColors.textSecondary,
-                        ),
+                        subtitle,
+                        style: AppTypography.caption(color: AppColors.textSecondary),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -378,41 +413,47 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             ),
           ),
 
-          // 3. Mini-Test Guardrails Banner
-          if (widget.isTestMode)
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFFDE68A)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.security_rounded,
-                    color: Color(0xFFD97706),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Mini-Test Guardrails Active: Qrie provides conceptual guidance and formula hints only. Direct answers and option elimination are prohibited.',
-                      style: AppTypography.caption(
-                        color: const Color(0xFF92400E),
-                      ).copyWith(fontSize: 11.5, height: 1.35),
-                    ),
-                  ),
-                ],
+          // 3. Mini-Test Guardrails / Active Context Banner
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 2),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: widget.isTestMode ? const Color(0xFFFFFBEB) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: widget.isTestMode ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0),
               ),
             ),
+            child: Row(
+              children: [
+                Icon(
+                  widget.isTestMode ? Icons.shield_outlined : Icons.menu_book_rounded,
+                  size: 15,
+                  color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.isTestMode
+                        ? 'Test Integrity: Qrie provides conceptual formula hints only. Direct answers are locked.'
+                        : 'Current Study Context: ${widget.homework?.title ?? "General Academic Doubt"}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: widget.isTestMode ? const Color(0xFF92400E) : AppColors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
           // 4. Contextual Starter Chips
           Container(
-            height: 46,
-            margin: const EdgeInsets.only(top: 8, bottom: 4),
+            height: 42,
+            margin: const EdgeInsets.only(top: 6, bottom: 4),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -420,21 +461,24 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
               separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final prompt = starterPrompts[index];
-                return Center(
-                  child: ActionChip(
-                    label: Text(
-                      prompt,
-                      style: AppTypography.caption(
-                        color: AppColors.textPrimary,
-                      ).copyWith(fontWeight: FontWeight.w600, fontSize: 12),
+                return ActionChip(
+                  label: Text(
+                    prompt,
+                    style: TextStyle(
+                      color: widget.isTestMode ? const Color(0xFF92400E) : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11.5,
                     ),
-                    backgroundColor: AppColors.bgSurfaceSoft,
-                    side: const BorderSide(color: AppColors.bgSurfaceMuted),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    onPressed: () => _handleSend(state, prompt),
                   ),
+                  backgroundColor: widget.isTestMode
+                      ? const Color(0xFFFEF3C7).withValues(alpha: 0.6)
+                      : AppColors.bgSurfaceSoft,
+                  side: BorderSide(
+                    color: widget.isTestMode ? const Color(0xFFFDE68A) : AppColors.bgSurfaceMuted,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  onPressed: () => _handleSend(state, prompt),
                 );
               },
             ),
@@ -463,9 +507,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             padding: EdgeInsets.fromLTRB(16, 8, 16, 8 + bottomInset),
             decoration: const BoxDecoration(
               color: AppColors.bgCanvas,
-              border: Border(
-                top: BorderSide(color: Color(0x0F000000)),
-              ),
+              border: Border(top: BorderSide(color: Color(0x0F000000))),
             ),
             child: SafeArea(
               top: false,
@@ -484,11 +526,11 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                         style: AppTypography.body(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           hintText: widget.isTestMode
-                              ? 'Ask for a conceptual hint...'
+                              ? 'Ask for a conceptual formula hint...'
                               : 'Ask a question or explain a step...',
-                          hintStyle: AppTypography.body(color: AppColors.textMuted),
+                          hintStyle: AppTypography.body(color: AppColors.textMuted).copyWith(fontSize: 13),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                         onSubmitted: (text) => _handleSend(state, text),
                       ),
@@ -496,13 +538,15 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                   ),
                   const SizedBox(width: 8),
                   Container(
+                    width: 40,
+                    height: 40,
                     decoration: const BoxDecoration(
                       color: AppColors.bgSurfaceOnyx,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_upward_rounded,
-                          color: Colors.white, size: 20),
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 20),
                       onPressed: () => _handleSend(state, _inputController.text),
                     ),
                   ),
@@ -523,9 +567,9 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
           margin: const EdgeInsets.symmetric(vertical: 6),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           constraints: const BoxConstraints(maxWidth: 290),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.bgSurfaceOnyx,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
               bottomLeft: Radius.circular(16),
@@ -534,7 +578,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
           ),
           child: Text(
             msg.text,
-            style: AppTypography.body(color: Colors.white),
+            style: AppTypography.body(color: Colors.white).copyWith(fontSize: 13),
           ),
         ),
       );
@@ -547,7 +591,9 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
         padding: const EdgeInsets.all(14),
         constraints: const BoxConstraints(maxWidth: 320),
         decoration: BoxDecoration(
-          color: AppColors.accentLilac.withValues(alpha: 0.15),
+          color: widget.isTestMode
+              ? const Color(0xFFFEF3C7).withValues(alpha: 0.3)
+              : AppColors.accentLilac.withValues(alpha: 0.15),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(16),
@@ -555,7 +601,9 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             bottomRight: Radius.circular(16),
           ),
           border: Border.all(
-            color: AppColors.accentLilac.withValues(alpha: 0.3),
+            color: widget.isTestMode
+                ? const Color(0xFFFDE68A)
+                : AppColors.accentLilac.withValues(alpha: 0.3),
           ),
         ),
         child: Column(
@@ -564,27 +612,35 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.auto_awesome_rounded,
-                    size: 14, color: AppColors.accentCobalt),
+                Icon(
+                  widget.isTestMode ? Icons.shield_rounded : Icons.auto_awesome_rounded,
+                  size: 14,
+                  color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                ),
                 const SizedBox(width: 6),
                 Text(
-                  'Qrie Tutor',
-                  style: AppTypography.caption(color: AppColors.accentCobalt)
-                      .copyWith(fontWeight: FontWeight.w700),
+                  widget.isTestMode ? 'Qrie Guardrail Hint' : 'Qrie Tutor',
+                  style: TextStyle(
+                    color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11.5,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               msg.text,
-              style: AppTypography.body(color: AppColors.textPrimary)
-                  .copyWith(height: 1.4),
+              style: AppTypography.body(color: AppColors.textPrimary).copyWith(
+                height: 1.4,
+                fontSize: 13,
+              ),
             ),
             if (msg.formulaOrSnippet != null) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -594,7 +650,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                   msg.formulaOrSnippet!,
                   style: const TextStyle(
                     fontFamily: 'monospace',
-                    fontSize: 12,
+                    fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF0F172A),
                   ),
@@ -612,7 +668,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                 child: Text(
                   '💡 Concept: ${msg.keyConcept}',
                   style: AppTypography.caption(color: const Color(0xFF065F46))
-                      .copyWith(fontWeight: FontWeight.w600),
+                      .copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                 ),
               ),
             ],
@@ -627,7 +683,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.bgSurfaceSoft,
           borderRadius: BorderRadius.circular(16),
@@ -646,7 +702,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             SizedBox(width: 8),
             Text(
               'Qrie is thinking...',
-              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 11.5, color: AppColors.textMuted),
             ),
           ],
         ),

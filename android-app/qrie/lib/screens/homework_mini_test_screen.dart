@@ -11,11 +11,11 @@ import '../widgets/homework_study_materials_sheet.dart';
 /// Topic Verification Mini-Test Screen
 ///
 /// Features:
-/// - Overview card showing passing threshold, question count, and attempt policies.
-/// - Step-by-step question examination with answer selection.
-/// - Guardrailed Socratic hints powered by Qrie AI Tutor.
-/// - Immediate scoring with Pass/Fail results and remediation guidance on failure.
-/// - State transition in StudentState upon passing.
+/// - Pastel Bento intro card with mastery threshold, item counts, and attempt limits.
+/// - Interactive step-by-step quiz with question jumper pills and smooth option selection.
+/// - Integrated Qrie AI Socratic hint trigger preloaded with active question context.
+/// - Safe floating AI tutor placement (94dp bottom offset) ensuring zero overlap with action CTAs.
+/// - Comprehensive results dashboard with celebratory mastery ring or study remediation links.
 class HomeworkMiniTestScreen extends StatefulWidget {
   final HomeworkAssignment assignment;
 
@@ -48,24 +48,16 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   void _submitTest(StudentState state) {
     HapticFeedback.heavyImpact();
     final miniTest = widget.assignment.miniTest;
     if (miniTest == null) return;
 
     int correctCount = 0;
-    final List<bool> answerResults = [];
-
     for (int i = 0; i < miniTest.questions.length; i++) {
       final selected = _selectedAnswers[i];
       final isCorrect = (selected != null && selected == miniTest.questions[i].correctIndex);
       if (isCorrect) correctCount++;
-      answerResults.add(isCorrect);
     }
 
     final scorePct = ((correctCount / miniTest.questions.length) * 100).round();
@@ -102,6 +94,128 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     });
   }
 
+  void _openQrieHint(BuildContext context, StudentState state) {
+    HapticFeedback.lightImpact();
+    final miniTest = widget.assignment.miniTest;
+    final currentQ = (miniTest != null && _currentQuestionIndex < miniTest.questions.length)
+        ? miniTest.questions[_currentQuestionIndex]
+        : null;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _buildHintSheet(context, state, currentQ),
+    );
+  }
+
+  Widget _buildHintSheet(BuildContext context, StudentState state, dynamic currentQ) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      decoration: const BoxDecoration(
+        color: AppColors.bgCanvas,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.bgSurfaceMuted,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.shield_rounded, color: Color(0xFFD97706), size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Qrie Socratic Hint',
+                        style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 15),
+                      ),
+                      Text(
+                        'Topic Verification Guardrails Active',
+                        style: AppTypography.caption(color: const Color(0xFFB45309)),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.lightbulb_outline_rounded, color: Color(0xFFD97706), size: 16),
+                      SizedBox(width: 6),
+                      Text(
+                        'Conceptual Guidance',
+                        style: TextStyle(
+                          color: Color(0xFF92400E),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    (currentQ != null && currentQ.hint.isNotEmpty)
+                        ? currentQ.hint
+                        : 'Recall the core principle connecting the variables. Focus on what constraints are kept constant and eliminate choices that violate the fundamental law.',
+                    style: const TextStyle(
+                      color: Color(0xFF78350F),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            AppButton(
+              text: 'GOT IT, CONTINUE TEST',
+              isFullWidth: true,
+              variant: AppButtonVariant.primary,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
@@ -110,8 +224,8 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
 
     if (miniTest == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Mini-Test')),
-        body: const Center(child: Text('No mini-test attached to this assignment.')),
+        appBar: AppBar(title: const Text('Topic Verification')),
+        body: const Center(child: Text('No verification test attached to this assignment.')),
       );
     }
 
@@ -161,13 +275,13 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.shield_outlined, size: 14, color: Color(0xFFD97706)),
+                const Icon(Icons.shield_rounded, size: 13, color: Color(0xFFD97706)),
                 const SizedBox(width: 4),
                 Text(
                   'Pass ${miniTest.passingPercentage}%',
                   style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: Color(0xFFB45309),
                   ),
                 ),
@@ -185,9 +299,9 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
           else
             _buildQuizView(miniTest, state),
 
-          // Floating AI Tutor with test guardrails active
+          // Global Floating AI Tutor positioned safely above bottom navigation dock
           FloatingAITutorWidget(
-            bottomOffset: 24,
+            bottomOffset: 94,
             rightOffset: 16,
             contextualHomework: widget.assignment,
             isTestMode: true,
@@ -197,26 +311,36 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     );
   }
 
-  // 1. INTRO / START VIEW
+  // ================= 1. INTRO / START VIEW =================
   Widget _buildIntroView(
     HomeworkMiniTest miniTest,
     HomeworkStudentProgress progress,
     bool canAttempt,
   ) {
+    final attemptsCount = progress.testAttempts.length;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Pastel Bento Hero Banner
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,66 +355,71 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                     'ACADEMIC MASTERY CHECK',
                     style: AppTypography.caption(color: AppColors.accentMint).copyWith(
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Text(
                   miniTest.title,
-                  style: AppTypography.headline(color: Colors.white).copyWith(fontSize: 22),
+                  style: AppTypography.headline(color: Colors.white).copyWith(fontSize: 18),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  miniTest.description,
-                  style: AppTypography.body(color: const Color(0xFFCBD5E1)).copyWith(height: 1.4),
+                  miniTest.description.isNotEmpty
+                      ? miniTest.description
+                      : 'Verify your understanding of this topic through this verified assessment.',
+                  style: AppTypography.body(color: const Color(0xFFCBD5E1)).copyWith(
+                    height: 1.35,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
-          // Test Metadata Grid
+          // 4-Item Bento Grid
           Row(
             children: [
-              _buildMetaTile(
-                icon: Icons.help_outline_rounded,
+              _buildBentoTile(
+                icon: Icons.assignment_outlined,
                 title: 'Questions',
                 value: '${miniTest.questions.length} Items',
-                color: AppColors.accentCobalt,
+                accentColor: AppColors.accentCobalt,
               ),
-              const SizedBox(width: 12),
-              _buildMetaTile(
+              const SizedBox(width: 10),
+              _buildBentoTile(
                 icon: Icons.timer_outlined,
                 title: 'Est. Time',
                 value: '${miniTest.estimatedMinutes} Mins',
-                color: AppColors.accentTangerine,
+                accentColor: AppColors.accentTangerine,
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
-              _buildMetaTile(
-                icon: Icons.check_circle_outline_rounded,
+              _buildBentoTile(
+                icon: Icons.verified_outlined,
                 title: 'Passing Score',
                 value: '${miniTest.passingPercentage}% Target',
-                color: const Color(0xFF10B981),
+                accentColor: const Color(0xFF10B981),
               ),
-              const SizedBox(width: 12),
-              _buildMetaTile(
+              const SizedBox(width: 10),
+              _buildBentoTile(
                 icon: Icons.replay_rounded,
                 title: 'Attempts',
-                value: '${progress.testAttempts.length}/${miniTest.maxAttempts} Used',
-                color: const Color(0xFF8B5CF6),
+                value: '$attemptsCount of ${miniTest.maxAttempts} Used',
+                accentColor: const Color(0xFF8B5CF6),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
 
           // Integrity and Tutor Guardrails Box
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: AppColors.bgSurfaceSoft,
               borderRadius: BorderRadius.circular(16),
@@ -299,7 +428,14 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.info_outline_rounded, color: AppColors.textSecondary, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.shield_outlined, color: Color(0xFFD97706), size: 18),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -307,12 +443,12 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                     children: [
                       Text(
                         'Verification Integrity Rules',
-                        style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                        style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 13),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '• You must score at least ${miniTest.passingPercentage}% to satisfy homework completion.\n• Qrie AI Tutor is restricted to conceptual guidance and formula hints only.\n• Unanswered questions will be scored as incorrect.',
-                        style: AppTypography.caption(color: AppColors.textSecondary).copyWith(height: 1.45),
+                        '• Score at least ${miniTest.passingPercentage}% to satisfy homework verification.\n• Qrie AI Tutor is restricted to conceptual formula guidance only.\n• Direct answers and choice elimination are strictly blocked.',
+                        style: AppTypography.caption(color: AppColors.textSecondary).copyWith(height: 1.4),
                       ),
                     ],
                   ),
@@ -320,7 +456,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 18),
 
           AppButton(
             text: canAttempt ? 'START VERIFICATION TEST' : 'MAX ATTEMPTS REACHED',
@@ -338,42 +474,45 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     );
   }
 
-  Widget _buildMetaTile({
+  Widget _buildBentoTile({
     required IconData icon,
     required String title,
     required String value,
-    required Color color,
+    required Color accentColor,
   }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.bgSurfaceSoft,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.bgSurfaceMuted),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
+                color: accentColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 18),
+              child: Icon(icon, color: accentColor, size: 18),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.caption(color: AppColors.textSecondary)),
+                  Text(
+                    title,
+                    style: AppTypography.caption(color: AppColors.textSecondary).copyWith(fontSize: 11),
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     value,
                     style: AppTypography.body(color: AppColors.textPrimary).copyWith(
                       fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                      fontSize: 12.5,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -387,7 +526,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     );
   }
 
-  // 2. ACTIVE QUESTION VIEW
+  // ================= 2. ACTIVE QUESTION VIEW =================
   Widget _buildQuizView(HomeworkMiniTest miniTest, StudentState state) {
     final questions = miniTest.questions;
     final q = questions[_currentQuestionIndex];
@@ -397,95 +536,137 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
 
     return Column(
       children: [
-        // Progress Bar
+        // Top Progress Indicator
         LinearProgressIndicator(
           value: (_currentQuestionIndex + 1) / questions.length,
-          backgroundColor: AppColors.bgSurfaceMuted,
+          backgroundColor: const Color(0xFFE2E8F0),
           valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accentCobalt),
-          minHeight: 4,
+          minHeight: 3.5,
         ),
 
+        // Question Navigator Header with Question Number, Tabs & Hint Trigger
+        Container(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+          color: Colors.white,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.bgSurfaceSoft,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.bgSurfaceMuted),
+                ),
+                child: Text(
+                  'QUESTION ${_currentQuestionIndex + 1} OF ${questions.length}',
+                  style: AppTypography.caption(color: AppColors.textSecondary).copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+
+              // Interactive Question Dots/Pills
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(questions.length, (idx) {
+                    final isCurrent = idx == _currentQuestionIndex;
+                    final isAnswered = _selectedAnswers.containsKey(idx);
+
+                    Color dotColor;
+                    if (isCurrent) {
+                      dotColor = AppColors.accentCobalt;
+                    } else if (isAnswered) {
+                      dotColor = const Color(0xFF10B981);
+                    } else {
+                      dotColor = const Color(0xFFCBD5E1);
+                    }
+
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _currentQuestionIndex = idx);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: isCurrent ? 18 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: dotColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+
+              // Socratic Hint Launcher
+              TextButton.icon(
+                icon: const Icon(Icons.auto_awesome_rounded, size: 15, color: Color(0xFFD97706)),
+                label: const Text('Hint', style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w800, fontSize: 12)),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () => _openQrieHint(context, state),
+              ),
+            ],
+          ),
+        ),
+
+        // Question & Options Canvas
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Question Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.bgSurfaceSoft,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.bgSurfaceMuted),
+                // Question Card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
-                      child: Text(
-                        'QUESTION ${_currentQuestionIndex + 1} OF ${questions.length}',
-                        style: AppTypography.caption(color: AppColors.textSecondary).copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (q.topic != null && q.topic!.isNotEmpty) ...[
+                        Text(
+                          q.topic!.toUpperCase(),
+                          style: TextStyle(
+                            color: AppColors.accentCobalt,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                      ],
+                      Text(
+                        q.prompt,
+                        style: AppTypography.headline(color: AppColors.textPrimary).copyWith(
+                          fontSize: 17,
+                          height: 1.35,
                         ),
                       ),
-                    ),
-                    TextButton.icon(
-                      icon: const Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.accentCobalt),
-                      label: const Text('Hint', style: TextStyle(color: AppColors.accentCobalt, fontWeight: FontWeight.w700)),
-                      onPressed: () {
-                        // Show guardrailed hint directly or trigger floating tutor
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: AppColors.bgCanvas,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                          ),
-                          builder: (ctx) => SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.auto_awesome_rounded, color: AppColors.accentCobalt, size: 20),
-                                      const SizedBox(width: 8),
-                                      Text('Conceptual Hint', style: AppTypography.cardTitle(color: AppColors.textPrimary)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    q.hint.isNotEmpty
-                                        ? q.hint
-                                        : 'Recall the fundamental definition and identify what variables are held constant.',
-                                    style: AppTypography.body(color: AppColors.textPrimary).copyWith(height: 1.4),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  AppButton(
-                                    text: 'GOT IT',
-                                    isFullWidth: true,
-                                    variant: AppButtonVariant.primary,
-                                    onPressed: () => Navigator.pop(ctx),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-
-                // Question Text
-                Text(
-                  q.prompt,
-                  style: AppTypography.headline(color: AppColors.textPrimary).copyWith(fontSize: 18, height: 1.35),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
 
                 // Options List
                 ...List.generate(q.options.length, (optIndex) {
@@ -498,16 +679,24 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                       });
                     },
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
+                      duration: const Duration(milliseconds: 140),
                       margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
                         color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isSelected ? AppColors.accentCobalt : const Color(0xFFE2E8F0),
-                          width: isSelected ? 2 : 1,
+                          width: isSelected ? 2.0 : 1.0,
                         ),
+                        boxShadow: [
+                          if (isSelected)
+                            BoxShadow(
+                              color: AppColors.accentCobalt.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -517,6 +706,9 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isSelected ? AppColors.accentCobalt : AppColors.bgSurfaceSoft,
+                              border: Border.all(
+                                color: isSelected ? AppColors.accentCobalt : const Color(0xFFCBD5E1),
+                              ),
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -524,17 +716,20 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                               style: TextStyle(
                                 color: isSelected ? Colors.white : AppColors.textSecondary,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                fontSize: 12.5,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               q.options[optIndex],
-                              style: AppTypography.body(
+                              style: TextStyle(
                                 color: isSelected ? AppColors.accentCobalt : AppColors.textPrimary,
-                              ).copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400),
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontSize: 14,
+                                height: 1.35,
+                              ),
                             ),
                           ),
                         ],
@@ -547,9 +742,9 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
           ),
         ),
 
-        // Navigation Footer
+        // Navigation Footer Dock
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           decoration: const BoxDecoration(
             color: Colors.white,
             border: Border(top: BorderSide(color: Color(0x0F000000))),
@@ -560,17 +755,19 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
               children: [
                 if (_currentQuestionIndex > 0) ...[
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
                     onPressed: () {
                       setState(() => _currentQuestionIndex--);
                     },
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                 ],
                 Expanded(
                   child: isLastQuestion
                       ? AppButton(
-                          text: answeredAll ? 'SUBMIT TEST' : 'ANSWER ALL (${_selectedAnswers.length}/${questions.length})',
+                          text: answeredAll
+                              ? 'SUBMIT TEST'
+                              : 'ANSWER ALL (${_selectedAnswers.length}/${questions.length})',
                           isFullWidth: true,
                           variant: AppButtonVariant.primary,
                           onPressed: answeredAll ? () => _submitTest(state) : null,
@@ -594,7 +791,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     );
   }
 
-  // 3. COMPREHENSIVE RESULTS VIEW
+  // ================= 3. COMPREHENSIVE RESULTS VIEW =================
   Widget _buildResultsView(
     HomeworkMiniTest miniTest,
     HomeworkStudentProgress progress,
@@ -604,12 +801,12 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
     final passed = attempt.passed;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
       child: Column(
         children: [
           // Result Status Card
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               color: passed ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
               borderRadius: BorderRadius.circular(24),
@@ -617,11 +814,18 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                 color: passed ? const Color(0xFF32C787) : const Color(0xFFFCA5A5),
                 width: 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: (passed ? const Color(0xFF32C787) : const Color(0xFFEF4444)).withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: passed ? const Color(0xFF32C787) : const Color(0xFFEF4444),
                     shape: BoxShape.circle,
@@ -629,15 +833,15 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                   child: Icon(
                     passed ? Icons.check_rounded : Icons.close_rounded,
                     color: Colors.white,
-                    size: 36,
+                    size: 32,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 Text(
                   passed ? 'Verification Passed!' : 'Needs Review',
                   style: AppTypography.headline(
                     color: passed ? const Color(0xFF065F46) : const Color(0xFF991B1B),
-                  ).copyWith(fontSize: 22),
+                  ).copyWith(fontSize: 21),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -649,7 +853,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                     color: passed ? const Color(0xFF047857) : const Color(0xFFB91C1C),
                   ).copyWith(fontSize: 13, height: 1.4),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
                 // Score Badge
                 Container(
@@ -672,7 +876,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                           color: passed ? const Color(0xFF059669) : const Color(0xFFDC2626),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 14),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -683,7 +887,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                             ),
                           ),
                           Text(
-                            'Min Pass: ${miniTest.passingPercentage}%',
+                            'Target: ${miniTest.passingPercentage}% Minimum',
                             style: AppTypography.caption(color: AppColors.textSecondary),
                           ),
                         ],
@@ -694,7 +898,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
 
           // Question by question explanation breakdown
           Align(
@@ -707,7 +911,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           ...List.generate(miniTest.questions.length, (idx) {
             final q = miniTest.questions[idx];
             final selected = _selectedAnswers[idx];
@@ -731,19 +935,22 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                       Icon(
                         isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
                         color: isCorrect ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                        size: 20,
+                        size: 18,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Question ${idx + 1}',
-                          style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                          style: AppTypography.cardTitle(color: AppColors.textPrimary).copyWith(fontSize: 13.5),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(q.prompt, style: AppTypography.body(color: AppColors.textPrimary).copyWith(fontSize: 13)),
+                  Text(
+                    q.prompt,
+                    style: AppTypography.body(color: AppColors.textPrimary).copyWith(fontSize: 13),
+                  ),
                   const SizedBox(height: 8),
                   if (!isCorrect && selected != null)
                     Text(
@@ -756,6 +963,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                   ),
                   const SizedBox(height: 6),
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppColors.bgSurfaceSoft,
@@ -770,7 +978,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
               ),
             );
           }),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
           // If failed: Remediation Study Section
           if (!passed) ...[
@@ -786,14 +994,14 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                 children: [
                   Row(
                     children: const [
-                      Icon(Icons.menu_book_rounded, color: Color(0xFFD97706), size: 20),
+                      Icon(Icons.menu_book_rounded, color: Color(0xFFD97706), size: 18),
                       SizedBox(width: 8),
                       Text(
                         'Recommended Remediation',
                         style: TextStyle(
                           color: Color(0xFF92400E),
                           fontWeight: FontWeight.w800,
-                          fontSize: 14,
+                          fontSize: 13.5,
                         ),
                       ),
                     ],
@@ -820,7 +1028,7 @@ class _HomeworkMiniTestScreenState extends State<HomeworkMiniTestScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
           ],
 
           // Action Buttons
