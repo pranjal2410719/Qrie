@@ -3,9 +3,13 @@ import '../models/doubt_message.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../theme/design_tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 
+/// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
+/// Doubt Chat Screen with High-Contrast Onyx student bubbles,
+/// soft pastel AI bubbles, and pill-shaped interactive chips.
 class DoubtChatScreen extends StatefulWidget {
   const DoubtChatScreen({super.key});
 
@@ -13,14 +17,62 @@ class DoubtChatScreen extends StatefulWidget {
   State<DoubtChatScreen> createState() => _DoubtChatScreenState();
 }
 
-class _DoubtChatScreenState extends State<DoubtChatScreen> {
+class _DoubtChatScreenState extends State<DoubtChatScreen>
+    with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  bool _isTyping = false;
+
+  late List<AnimationController> _dotControllers;
+  late List<Animation<double>> _dotAnimations;
+
+  @override
+  void initState() {
+    super.initState();
+    _dotControllers = List.generate(3, (i) {
+      return AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 500),
+      )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            _dotControllers[i].reverse();
+          } else if (status == AnimationStatus.dismissed) {
+            _dotControllers[i].forward();
+          }
+        });
+    });
+
+    _dotAnimations = _dotControllers
+        .map((c) => Tween<double>(begin: 0.0, end: -6.0).animate(
+              CurvedAnimation(parent: c, curve: Curves.easeInOut),
+            ))
+        .toList();
+  }
+
+  void _startTypingAnimation() {
+    for (int i = 0; i < _dotControllers.length; i++) {
+      Future.delayed(Duration(milliseconds: i * 140), () {
+        if (mounted && _isTyping) {
+          _dotControllers[i].forward();
+        }
+      });
+    }
+  }
+
+  void _stopTypingAnimation() {
+    for (final ctrl in _dotControllers) {
+      ctrl.reset();
+    }
+  }
 
   @override
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
+    for (final ctrl in _dotControllers) {
+      ctrl.dispose();
+    }
     super.dispose();
   }
 
@@ -29,6 +81,17 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     state.addDoubt(text: text.trim());
     _textController.clear();
     _scrollToBottom();
+
+    // Show typing indicator
+    setState(() => _isTyping = true);
+    _startTypingAnimation();
+    Future.delayed(const Duration(milliseconds: 1400), () {
+      if (mounted) {
+        _stopTypingAnimation();
+        setState(() => _isTyping = false);
+        _scrollToBottom();
+      }
+    });
   }
 
   void _scrollToBottom() {
@@ -43,12 +106,12 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     });
   }
 
-  void _showSnapDoubtModal(StudentState state, Color primaryColor) {
+  void _showSnapDoubtModal(StudentState state) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.bgCanvas,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (ctx) {
         return SafeArea(
@@ -60,62 +123,70 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
               children: [
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: 44,
+                    height: 5,
                     decoration: BoxDecoration(
-                      color: AppColors.borderLight,
+                      color: AppColors.bgSurfaceMuted,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Row(
                   children: [
-                    Icon(Icons.camera_alt_outlined, color: primaryColor, size: 24),
-                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: AppColors.accentPeriwinkle,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.camera_alt_rounded,
+                          color: AppColors.bgSurfaceOnyx, size: 20),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        'Snap Textbook Doubt',
-                        style: AppTypography.headingSmall(),
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Snap Textbook Doubt',
+                            style: AppTypography.cardTitle(
+                                color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            'Select or simulate camera capture of a question',
+                            style: AppTypography.caption(
+                                color: AppColors.textSecondary),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Select or simulate camera capture of a textbook question:',
-                  style: AppTypography.bodySmall(color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 _buildSampleDoubtTile(
                   icon: Icons.functions_rounded,
                   title: 'Linear Equation Problem',
                   subtitle: 'Page 48, Ex 2.3: Solve 4(x - 3) = 28',
-                  primaryColor: primaryColor,
                   onTap: () {
                     Navigator.pop(ctx);
-                    state.addDoubt(
-                      text: 'Can you solve this textbook equation: 4(x - 3) = 28 ?',
-                    );
-                    _scrollToBottom();
+                    _sendMessage(state,
+                        'Can you solve this textbook equation: 4(x - 3) = 28 ?');
                   },
                 ),
                 const SizedBox(height: 10),
                 _buildSampleDoubtTile(
                   icon: Icons.science_rounded,
                   title: 'Plant Anatomy & Cell Biology',
-                  subtitle: 'Chloroplast structure, stroma, and grana functions',
-                  primaryColor: primaryColor,
+                  subtitle:
+                      'Chloroplast structure, stroma, and grana functions',
                   onTap: () {
                     Navigator.pop(ctx);
-                    state.addDoubt(
-                      text: 'What is the function of stroma and grana in chloroplasts?',
-                    );
-                    _scrollToBottom();
+                    _sendMessage(state,
+                        'What is the function of stroma and grana in chloroplasts?');
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 AppButton(
                   text: 'CLOSE',
                   isFullWidth: true,
@@ -134,21 +205,21 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     required IconData icon,
     required String title,
     required String subtitle,
-    required Color primaryColor,
     required VoidCallback onTap,
   }) {
     return AppCard(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
+      borderRadius: DesignTokens.radiusCardMd,
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.schoolMint,
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.accentCobalt.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: primaryColor, size: 20),
+            child: Icon(icon, color: AppColors.accentCobalt, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -157,14 +228,19 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
               children: [
                 Text(
                   title,
-                  style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                  style: AppTypography.subheading(
+                          color: AppColors.textPrimary)
+                      .copyWith(fontSize: 14),
                 ),
-                const SizedBox(height: 1),
-                Text(subtitle, style: AppTypography.caption(color: AppColors.textMuted)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: AppTypography.caption(
+                        color: AppColors.textSecondary)),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textDisabled),
+          const Icon(Icons.arrow_forward_ios_rounded,
+              size: 14, color: AppColors.textMuted),
         ],
       ),
     );
@@ -174,47 +250,55 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final messages = state.doubtMessages;
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bgCanvas,
       body: Column(
         children: [
-          // AI Tutor Status Bar
+          // ── Top AI Tutor Status Bar ────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(bottom: BorderSide(color: AppColors.borderLight, width: 1.2)),
+              color: AppColors.bgCanvas,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x080D0D11),
+                  offset: Offset(0, 2),
+                  blurRadius: 10,
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.schoolMint,
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF38BDF8),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.psychology_rounded, color: primaryColor, size: 20),
+                  child: const Icon(Icons.psychology_rounded,
+                      color: Colors.white, size: 22),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Qrie AI Academic Tutor',
-                        style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                        style: AppTypography.cardTitle(
+                                color: AppColors.textPrimary)
+                            .copyWith(fontSize: 15),
                       ),
+                      const SizedBox(height: 2),
                       Row(
                         children: [
                           Container(
                             width: 7,
                             height: 7,
                             decoration: const BoxDecoration(
-                              color: AppColors.success,
+                              color: AppColors.accentMint,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -222,7 +306,8 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                           Expanded(
                             child: Text(
                               'Instant step-by-step doubt resolution',
-                              style: AppTypography.caption(color: AppColors.textMuted),
+                              style: AppTypography.caption(
+                                  color: AppColors.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -233,26 +318,26 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
                   ),
                 ),
                 // Snap Doubt Quick Button
-                InkWell(
-                  onTap: () => _showSnapDoubtModal(state, primaryColor),
-                  borderRadius: BorderRadius.circular(8),
+                GestureDetector(
+                  onTap: () => _showSnapDoubtModal(state),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceSubtle,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.borderLight),
+                      color: AppColors.accentPeriwinkle.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(9999),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.camera_alt_outlined, size: 16, color: primaryColor),
-                        const SizedBox(width: 4),
+                        const Icon(Icons.camera_alt_outlined,
+                            size: 15, color: AppColors.bgSurfaceOnyx),
+                        const SizedBox(width: 5),
                         Text(
                           'SNAP',
-                          style: AppTypography.caption(color: primaryColor).copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: AppTypography.caption(
+                                  color: AppColors.bgSurfaceOnyx)
+                              .copyWith(fontWeight: FontWeight.w800),
                         ),
                       ],
                     ),
@@ -262,20 +347,24 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
             ),
           ),
 
-          // Chat Message List
+          // ── Chat message list ──────────────────────────────────────────────
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              itemCount: messages.length,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 14),
+              itemCount: messages.length + (_isTyping ? 1 : 0),
               itemBuilder: (context, index) {
+                if (_isTyping && index == messages.length) {
+                  return _buildTypingIndicator();
+                }
                 final msg = messages[index];
-                return _buildMessageItem(context, msg, state, primaryColor);
+                return _buildMessageItem(context, msg, state);
               },
             ),
           ),
 
-          // Quick Suggestion Chips
+          // ── Quick Suggestion Chips ─────────────────────────────────────────
           SizedBox(
             height: 36,
             child: ListView(
@@ -283,67 +372,78 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildSuggestionChip('Explain cell membrane', state, primaryColor),
+                _buildSuggestionChip('Explain cell membrane', state),
                 const SizedBox(width: 8),
-                _buildSuggestionChip('Solve 3x - 5 = 16', state, primaryColor),
+                _buildSuggestionChip('Solve 3x - 5 = 16', state),
                 const SizedBox(width: 8),
-                _buildSuggestionChip('Photosynthesis equation', state, primaryColor),
+                _buildSuggestionChip('Photosynthesis equation', state),
                 const SizedBox(width: 8),
-                _buildSuggestionChip('Formula of pressure', state, primaryColor),
+                _buildSuggestionChip('Formula of pressure', state),
               ],
             ),
           ),
 
           const SizedBox(height: 8),
 
-          // Input Bar
+          // ── Input bar ──────────────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(top: BorderSide(color: AppColors.borderLight, width: 1.2)),
+              color: AppColors.bgCanvas,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x0A0D0D11),
+                  offset: Offset(0, -2),
+                  blurRadius: 10,
+                ),
+              ],
             ),
             child: SafeArea(
               top: false,
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.camera_alt_outlined, color: primaryColor),
-                    onPressed: () => _showSnapDoubtModal(state, primaryColor),
+                    icon: const Icon(Icons.camera_alt_outlined,
+                        color: AppColors.textSecondary),
+                    onPressed: () => _showSnapDoubtModal(state),
                   ),
                   Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      style: AppTypography.bodyMedium(color: AppColors.textPrimary),
-                      decoration: InputDecoration(
-                        hintText: 'Ask any textbook question...',
-                        hintStyle: AppTypography.bodySmall(color: AppColors.textDisabled),
-                        filled: true,
-                        fillColor: AppColors.background,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.borderLight),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.borderLight),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: primaryColor, width: 1.5),
-                        ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.bgSurfaceSoft,
+                        borderRadius: BorderRadius.circular(9999),
                       ),
-                      onSubmitted: (text) => _sendMessage(state, text),
+                      child: TextField(
+                        controller: _textController,
+                        style: AppTypography.body(
+                            color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Ask any textbook question...',
+                          hintStyle: AppTypography.body(
+                              color: AppColors.textMuted),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                        ),
+                        onSubmitted: (text) => _sendMessage(state, text),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  AppButton(
-                    text: 'ASK',
-                    height: 42,
-                    variant: AppButtonVariant.primary,
-                    icon: Icons.send_rounded,
-                    onPressed: () => _sendMessage(state, _textController.text),
+                  GestureDetector(
+                    onTap: () => _sendMessage(state, _textController.text),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: AppColors.bgSurfaceOnyx,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.arrow_upward_rounded,
+                            color: Colors.white, size: 22),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -354,20 +454,69 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     );
   }
 
-  Widget _buildSuggestionChip(String label, StudentState state, Color primaryColor) {
-    return InkWell(
+  // ── Typing indicator ───────────────────────────────────────────────────────
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              color: Color(0xFF38BDF8),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.psychology_rounded,
+                color: Colors.white, size: 18),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.bgSurfaceSoft,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusCardMd),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(3, (i) {
+                return AnimatedBuilder(
+                  animation: _dotAnimations[i],
+                  builder: (_, _) => Transform.translate(
+                    offset: Offset(0, _dotAnimations[i].value),
+                    child: Container(
+                      margin: EdgeInsets.only(right: i < 2 ? 5.0 : 0.0),
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.textSecondary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(String label, StudentState state) {
+    return GestureDetector(
       onTap: () => _sendMessage(state, label),
-      borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.borderLight),
+          color: AppColors.bgSurfaceSoft,
+          borderRadius: BorderRadius.circular(9999),
         ),
         child: Text(
           label,
-          style: AppTypography.caption(color: AppColors.textSecondary),
+          style: AppTypography.caption(color: AppColors.textPrimary)
+              .copyWith(fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -377,115 +526,129 @@ class _DoubtChatScreenState extends State<DoubtChatScreen> {
     BuildContext context,
     DoubtMessage msg,
     StudentState state,
-    Color primaryColor,
   ) {
     final isStudent = msg.isStudent;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14.0),
       child: Row(
-        mainAxisAlignment: isStudent ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isStudent ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isStudent) ...[
             Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: AppColors.schoolMint,
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: Color(0xFF38BDF8),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.school_rounded, color: primaryColor, size: 16),
+              child: const Icon(Icons.psychology_rounded,
+                  color: Colors.white, size: 18),
             ),
             const SizedBox(width: 8),
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isStudent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isStudent
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
+                // Chat bubble: Pitch Onyx for student, soft gray for AI
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isStudent ? primaryColor : AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isStudent ? primaryColor : AppColors.borderLight,
-                      width: 1.2,
+                    color: isStudent
+                        ? AppColors.bgSurfaceOnyx
+                        : AppColors.bgSurfaceSoft,
+                    borderRadius: BorderRadius.circular(20).copyWith(
+                      bottomRight: isStudent ? const Radius.circular(4) : null,
+                      bottomLeft: !isStudent ? const Radius.circular(4) : null,
                     ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x06000000),
-                        blurRadius: 6,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow: isStudent ? DesignTokens.shadowSoft : null,
                   ),
                   child: Text(
                     msg.text,
-                    style: AppTypography.bodyMedium(
-                      color: isStudent ? Colors.white : AppColors.textPrimary,
+                    style: TextStyle(
+                      fontFamily: AppTypography.primaryFont,
+                      fontSize: 14,
+                      height: 1.4,
+                      fontWeight: isStudent ? FontWeight.w500 : FontWeight.w400,
+                      color: isStudent
+                          ? AppColors.textOnOnyx
+                          : AppColors.textPrimary,
                     ),
                   ),
                 ),
 
-                // Formula or Key Concept Box
+                // Formula / snippet block
                 if (msg.formulaOrSnippet != null) ...[
                   const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.schoolMint,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: primaryColor.withValues(alpha: 0.25), width: 1.2),
+                      color: AppColors.accentMintSoft.withValues(alpha: 0.40),
+                      borderRadius:
+                          BorderRadius.circular(DesignTokens.radiusCardMd),
+                      border: Border.all(
+                          color: AppColors.accentMint.withValues(alpha: 0.35),
+                          width: 1.2),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.lightbulb_outline_rounded, size: 16, color: primaryColor),
+                            const Icon(Icons.lightbulb_rounded,
+                                size: 16, color: AppColors.accentMint),
                             const SizedBox(width: 6),
                             Text(
                               'CORE FORMULA / RULE',
-                              style: AppTypography.caption(color: primaryColor).copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: AppTypography.caption(
+                                      color: AppColors.accentMint)
+                                  .copyWith(fontWeight: FontWeight.w800),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           msg.formulaOrSnippet!,
-                          style: AppTypography.subheading(color: AppColors.textPrimary).copyWith(fontSize: 13),
+                          style: AppTypography.subheading(
+                                  color: AppColors.textPrimary)
+                              .copyWith(fontSize: 13, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
                   ),
                 ],
 
-                // Follow up suggested chips
-                if (msg.followUpSuggestions != null && msg.followUpSuggestions!.isNotEmpty) ...[
+                // Follow-up chips
+                if (msg.followUpSuggestions != null &&
+                    msg.followUpSuggestions!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
                     children: msg.followUpSuggestions!.map((sug) {
-                      return InkWell(
+                      return GestureDetector(
                         onTap: () => _sendMessage(state, sug),
-                        borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
+                            color: AppColors.bgSurfaceSoft,
+                            borderRadius: BorderRadius.circular(9999),
+                            border: Border.all(
+                                color: AppColors.bgSurfaceMuted, width: 1.0),
                           ),
                           child: Text(
                             sug,
-                            style: AppTypography.caption(color: primaryColor).copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: AppTypography.caption(
+                                    color: AppColors.textPrimary)
+                                .copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                       );

@@ -2,31 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
+import 'design_tokens.dart';
 
+/// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
+/// Global ThemeData configuration
 class AppTheme {
   AppTheme._();
+
+  static const PageTransitionsTheme _pageTransitions = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: _SlideUpFadeTransitionBuilder(),
+      TargetPlatform.iOS: _SlideUpFadeTransitionBuilder(),
+      TargetPlatform.linux: _SlideUpFadeTransitionBuilder(),
+    },
+  );
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppColors.eagerGreen,
-      scaffoldBackgroundColor: AppColors.paperWhite,
-      canvasColor: AppColors.paperWhite,
-      cardColor: AppColors.paperWhite,
-      dividerColor: AppColors.lineGray,
+      fontFamily: AppTypography.primaryFont,
+      primaryColor: AppColors.accentCobalt,
+      scaffoldBackgroundColor: AppColors.bgCanvas,
+      canvasColor: AppColors.bgCanvas,
+      cardColor: AppColors.bgSurfaceSoft,
+      dividerColor: AppColors.bgSurfaceMuted,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.eagerGreen,
-        secondary: AppColors.sparkBlue,
-        surface: AppColors.paperWhite,
-        error: AppColors.rubyRed,
-        onPrimary: AppColors.paperWhite,
-        onSecondary: AppColors.paperWhite,
-        onSurface: AppColors.charcoal,
+        primary: AppColors.accentCobalt,
+        secondary: AppColors.accentPeriwinkle,
+        surface: AppColors.bgSurfaceSoft,
+        error: AppColors.accentCoral,
+        onPrimary: AppColors.textOnOnyx,
+        onSecondary: AppColors.textPrimary,
+        onSurface: AppColors.textPrimary,
       ),
+      pageTransitionsTheme: _pageTransitions,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.paperWhite,
-        foregroundColor: AppColors.charcoal,
+        backgroundColor: AppColors.bgCanvas,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -34,23 +47,92 @@ class AppTheme {
           statusBarIconBrightness: Brightness.dark,
         ),
       ),
-      chipTheme: ChipThemeData(
-        backgroundColor: AppColors.paperWhite,
-        selectedColor: AppColors.storybookGreen,
-        disabledColor: AppColors.cloudGray,
+      cardTheme: CardThemeData(
+        color: AppColors.bgSurfaceSoft,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.lineGray, width: 2),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusCardMd),
         ),
-        labelStyle: AppTypography.pillLabel(color: AppColors.charcoal),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.bgSurfaceSoft,
+        selectedColor: AppColors.bgSurfaceOnyx,
+        disabledColor: AppColors.bgSurfaceMuted,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        labelStyle: AppTypography.pillLabel(color: AppColors.textPrimary),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.paperWhite,
+        backgroundColor: AppColors.bgCanvas,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.lineGray, width: 2),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusCardLg),
         ),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.bgSurfaceSoft,
+        hintStyle: AppTypography.body(color: AppColors.textMuted),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide:
+              const BorderSide(color: AppColors.accentCobalt, width: 1.5),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.bgSurfaceOnyx,
+        contentTextStyle: AppTypography.bodySmall(color: Colors.white),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(DesignTokens.radiusCardMd)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.bgCanvas,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+    );
+  }
+}
+
+class _SlideUpFadeTransitionBuilder extends PageTransitionsBuilder {
+  const _SlideUpFadeTransitionBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.05),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    ));
+
+    final fadeAnimation = CurvedAnimation(
+      parent: animation,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+    );
+
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: SlideTransition(position: slideAnimation, child: child),
     );
   }
 }

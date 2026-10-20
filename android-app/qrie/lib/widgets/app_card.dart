@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+/// Qrie AppCard — Pastel Bento & Onyx surface container.
+///
+/// Default bg: [AppColors.bgSurfaceSoft], radius 22, optional soft shadow.
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -17,42 +20,51 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.backgroundColor,
     this.borderColor,
-    this.borderRadius = 16.0,
+    this.borderRadius = 22.0,
     this.hasShadow = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardWidget = Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surface,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: borderColor ?? AppColors.borderLight,
-          width: 1.2,
-        ),
-        boxShadow: hasShadow
-            ? const [
-                BoxShadow(
-                  color: Color(0x06000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ]
-            : null,
-      ),
-      child: child,
+    final bg = backgroundColor ?? AppColors.bgSurfaceSoft;
+    final border = borderColor ?? Colors.transparent;
+    final br = BorderRadius.circular(borderRadius);
+
+    final decoration = BoxDecoration(
+      color: bg,
+      borderRadius: br,
+      border: border != Colors.transparent
+          ? Border.all(color: border, width: 1.2)
+          : null,
+      boxShadow: hasShadow
+          ? const [
+              BoxShadow(
+                color: Color.fromRGBO(17, 18, 22, 0.06),
+                offset: Offset(0, 12),
+                blurRadius: 32,
+                spreadRadius: -8,
+              ),
+            ]
+          : null,
     );
 
     if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: cardWidget,
+      return Material(
+        color: Colors.transparent,
+        borderRadius: br,
+        child: Ink(
+          decoration: decoration,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: br,
+            splashColor: AppColors.bgSurfaceMuted.withValues(alpha: 0.6),
+            highlightColor: AppColors.bgSurfaceMuted.withValues(alpha: 0.4),
+            child: Padding(padding: padding, child: child),
+          ),
+        ),
       );
     }
 
-    return cardWidget;
+    return Container(decoration: decoration, padding: padding, child: child);
   }
 }

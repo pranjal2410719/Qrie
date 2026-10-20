@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../theme/app_theme.dart';
 import '../models/school_branding_config.dart';
 
 class SchoolThemeProvider extends ChangeNotifier {
@@ -16,42 +16,12 @@ class SchoolThemeProvider extends ChangeNotifier {
   }
 
   ThemeData get themeData {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.light(
+    final base = AppTheme.lightTheme;
+    return base.copyWith(
+      colorScheme: base.colorScheme.copyWith(
         primary: _branding.primaryColor,
         secondary: _branding.secondaryColor,
         tertiary: _branding.accentColor,
-        surface: Colors.white,
-        onPrimary: Colors.white,
-        onSurface: const Color(0xFF4B4B4B), // Charcoal
-      ),
-      scaffoldBackgroundColor: Colors.white,
-      textTheme: ThemeData.light().textTheme.apply(fontFamily: GoogleFonts.nunito().fontFamily),
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        iconTheme: IconThemeData(color: _branding.primaryColor),
-        titleTextStyle: GoogleFonts.nunito(
-          color: const Color(0xFF4B4B4B),
-          fontWeight: FontWeight.w800,
-          fontSize: 18,
-        ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _branding.primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-          textStyle: GoogleFonts.nunito(
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            letterSpacing: 0.6,
-          ),
-        ),
       ),
     );
   }

@@ -5,27 +5,35 @@ import '../models/lesson.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
-import '../widgets/app_button.dart';
-import '../widgets/app_card.dart';
-import '../widgets/app_chip.dart';
-import '../widgets/app_progress_bar.dart';
+import '../theme/design_tokens.dart';
+import '../widgets/bento_components.dart';
 import 'lesson_screen.dart';
 import 'quiz_solver_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+/// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
+/// Full Home Screen Implementation with Modular Bento Architecture
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedOfferIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
     final profile = state.profile;
     final selectedSubId = state.selectedSubjectId;
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
 
     // Filter chapters by selected subject
-    final relevantChapters = MockData.chapters.where((c) => c.subjectId == selectedSubId).toList();
-    final activeChapter = relevantChapters.isNotEmpty ? relevantChapters.first : MockData.chapters.first;
+    final relevantChapters =
+        MockData.chapters.where((c) => c.subjectId == selectedSubId).toList();
+    final activeChapter = relevantChapters.isNotEmpty
+        ? relevantChapters.first
+        : MockData.chapters.first;
 
     // Find next uncompleted lesson
     Lesson? nextLesson;
@@ -45,244 +53,273 @@ class HomeScreen extends StatelessWidget {
         : 0.0;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bgCanvas,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.horizontalPadding, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Daily Goal Card (Minimalist & Encouraging)
-            AppCard(
-              padding: const EdgeInsets.all(16.0),
-              hasShadow: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.schoolMint,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.flag_rounded,
-                          size: 18,
-                          color: primaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'DAILY LEARNING FOCUS',
-                              style: AppTypography.caption(color: AppColors.textMuted),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${profile.dailyGoalCurrent} of ${profile.dailyGoalTarget} lessons completed',
-                              style: AppTypography.subheading(color: AppColors.textPrimary),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: dailyFraction >= 1.0 ? AppColors.successSurface : AppColors.surfaceSubtle,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: dailyFraction >= 1.0 ? AppColors.successBorder : AppColors.borderLight,
-                          ),
-                        ),
-                        child: Text(
-                          '${(dailyFraction * 100).toInt()}%',
-                          style: AppTypography.caption(
-                            color: dailyFraction >= 1.0 ? AppColors.success : AppColors.textSecondary,
-                          ).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  AppProgressBar(
-                    value: dailyFraction,
-                    height: 8,
-                    fillColor: primaryColor,
-                  ),
-                ],
-              ),
-            ),
+            // ── 1. Horizontal Calendar Strip (Component 5.2) ─────────────────
+            const BentoCalendarStrip(),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: DesignTokens.verticalSectionGap),
 
-            // 2. Subject Filter Selector Chips
-            SizedBox(
-              height: 42,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: MockData.subjects.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final sub = MockData.subjects[index];
-                  final isSelected = (sub.id == selectedSubId);
-
-                  return AppChip(
-                    label: sub.name,
-                    icon: sub.icon,
-                    isSelected: isSelected,
-                    activeColor: primaryColor,
-                    onTap: () => state.setSubject(sub.id),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            // 3. Hero "Continue Learning" Card (Single Primary Action)
-            AppCard(
-              padding: const EdgeInsets.all(20),
-              backgroundColor: AppColors.surface,
-              borderColor: primaryColor.withValues(alpha: 0.35),
-              hasShadow: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.schoolMint,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'CONTINUE LEARNING',
-                          style: AppTypography.caption(color: primaryColor).copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.schedule_rounded, size: 14, color: AppColors.textMuted),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${nextLesson.durationMinutes} mins',
-                            style: AppTypography.caption(color: AppColors.textMuted),
-                          ),
-                          const SizedBox(width: 10),
-                          const Icon(Icons.bolt_rounded, size: 15, color: AppColors.schoolGold),
-                          const SizedBox(width: 2),
-                          Text(
-                            '+${nextLesson.xpReward} XP',
-                            style: AppTypography.caption(color: AppColors.textPrimary).copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    nextLesson.title,
-                    style: AppTypography.headingSmall(),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    nextLesson.subtitle,
-                    style: AppTypography.bodyMedium(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 18),
-                  AppButton(
-                    text: 'RESUME LESSON',
-                    isFullWidth: true,
-                    icon: Icons.play_arrow_rounded,
-                    variant: AppButtonVariant.primary,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => LessonScreen(
-                            lesson: nextLesson!,
-                            chapter: activeChapter,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 4. Chapter Section Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          activeChapter.title.toUpperCase(),
-                          style: AppTypography.caption(color: primaryColor).copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          activeChapter.subtitle,
-                          style: AppTypography.subheading(color: AppColors.textPrimary),
-                        ),
-                      ],
+            // ── 2. Featured Lesson Card ("Map the Path" Component 5.3) ───────
+            FeaturedLessonCard(
+              title: nextLesson.title,
+              subtitle: '${activeChapter.title} • ${nextLesson.durationMinutes} mins',
+              progress: dailyFraction,
+              timeLabel: '${(dailyFraction * 100).toInt()}% • +${nextLesson.xpReward} XP',
+              rating: 5.0,
+              onResume: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LessonScreen(
+                      lesson: nextLesson!,
+                      chapter: activeChapter,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceSubtle,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                    child: Text(
-                      '${activeChapter.lessons.length} Topics',
-                      style: AppTypography.caption(color: AppColors.textSecondary),
+                );
+              },
+              onCopyLink: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LessonScreen(
+                      lesson: nextLesson!,
+                      chapter: activeChapter,
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
 
-            const SizedBox(height: 18),
+            const SizedBox(height: DesignTokens.verticalSectionGap),
 
-            // 5. Minimalist Chapter Learning Path
-            _buildLearningPath(context, activeChapter, profile.completedLessonIds, primaryColor),
+            // ── 3. 2x2 To-Do Bento Grid (Component 5.6) ──────────────────────
+            Text(
+              'Tasks & Study Goals',
+              style: AppTypography.sectionHeader(color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 12),
+            BentoTodoGrid(
+              allCount: activeChapter.lessons.length * 3,
+              scheduledCount: 13,
+              activeCount: profile.streakDays,
+              overdueCount: 2,
+              onTileTap: (category) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Filtered tasks: $category',
+                      style: AppTypography.bodySmall(color: Colors.white),
+                    ),
+                    backgroundColor: AppColors.bgSurfaceOnyx,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: DesignTokens.verticalSectionGap),
+
+            // ── 4. Subject Selector Filter Chips ─────────────────────────────
+            _buildSubjectChips(state, selectedSubId),
+
+            const SizedBox(height: DesignTokens.verticalSectionGap),
+
+            // ── 5. "My Activity" Donut Chart Card (Component 5.4) ─────────────
+            MyActivityDonutCard(
+              totalTime: '${(profile.streakDays * 2.8).toStringAsFixed(1)}h',
+              completionPercent: '${(dailyFraction * 100).toInt()}%',
+              onMenuTap: () {},
+            ),
+
+            const SizedBox(height: DesignTokens.verticalSectionGap),
+
+            // ── 6. Onyx Milestone Tracker Card (Component 5.7) ───────────────
+            BentoMilestoneTrackerCard(
+              title: 'Term 1 Exam Readiness',
+              durationTag: '⏳ 8h Left',
+              priority: 'High',
+              attachmentsCount: 4,
+              assigneeName: profile.name.isNotEmpty ? profile.name : 'Student',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizSolverScreen(
+                      subjectId: selectedSubId,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: DesignTokens.verticalSectionGap),
+
+            // ── 7. 3-Column Gamified Offer Tiles ("Hot Offers" Component 5.5) ─
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Hot Offers & Power-Ups',
+                    style:
+                        AppTypography.sectionHeader(color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentRose.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(9999),
+                  ),
+                  child: Text(
+                    'PROMO',
+                    style: AppTypography.caption(color: AppColors.accentRose)
+                        .copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            BentoHotOffersGrid(
+              activeIndex: _selectedOfferIndex,
+              onTileTap: (index) {
+                setState(() => _selectedOfferIndex = index);
+              },
+            ),
 
             const SizedBox(height: 28),
+
+            // ── 8. Chapter Learning Path Header ──────────────────────────────
+            _buildChapterHeader(context, activeChapter),
+
+            const SizedBox(height: 18),
+
+            // ── 9. Learning Path Nodes ───────────────────────────────────────
+            _buildLearningPath(
+                context, activeChapter, profile.completedLessonIds),
+
+            const SizedBox(height: 36),
           ],
         ),
       ),
     );
   }
 
+  // ── Subject Chips ─────────────────────────────────────────────────────────
+  Widget _buildSubjectChips(StudentState state, String selectedSubId) {
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: MockData.subjects.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final sub = MockData.subjects[index];
+          final isSelected = sub.id == selectedSubId;
+
+          return GestureDetector(
+            onTap: () => state.setSubject(sub.id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.bgSurfaceOnyx
+                    : AppColors.bgSurfaceSoft,
+                borderRadius: BorderRadius.circular(9999),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: AppColors.bgSurfaceOnyx.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    sub.icon,
+                    size: 14,
+                    color: isSelected
+                        ? AppColors.textOnOnyx
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    sub.name,
+                    style: AppTypography.pillLabel(
+                      color: isSelected
+                          ? AppColors.textOnOnyx
+                          : AppColors.textPrimary,
+                    ).copyWith(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ── Chapter Header ─────────────────────────────────────────────────────────
+  Widget _buildChapterHeader(BuildContext context, Chapter activeChapter) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                activeChapter.title.toUpperCase(),
+                style: AppTypography.caption(color: AppColors.accentCobalt)
+                    .copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.6),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                activeChapter.subtitle,
+                style: AppTypography.sectionHeader(),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.bgSurfaceSoft,
+            borderRadius: BorderRadius.circular(9999),
+          ),
+          child: Text(
+            '${activeChapter.lessons.length} Topics',
+            style: AppTypography.caption(color: AppColors.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Learning Path ──────────────────────────────────────────────────────────
   Widget _buildLearningPath(
     BuildContext context,
     Chapter chapter,
     Set<String> completedIds,
-    Color primaryColor,
   ) {
     final lessons = chapter.lessons;
 
@@ -291,7 +328,8 @@ class HomeScreen extends StatelessWidget {
         children: List.generate(lessons.length, (index) {
           final lesson = lessons[index];
           final isCompleted = completedIds.contains(lesson.id);
-          final isCurrent = !isCompleted && (index == 0 || completedIds.contains(lessons[index - 1].id));
+          final isCurrent = !isCompleted &&
+              (index == 0 || completedIds.contains(lessons[index - 1].id));
           final isLocked = !isCompleted && !isCurrent;
           final isLast = index == lessons.length - 1;
 
@@ -305,7 +343,6 @@ class HomeScreen extends StatelessWidget {
                 isCurrent: isCurrent,
                 isLocked: isLocked,
                 isBoss: isLast,
-                primaryColor: primaryColor,
               ),
               if (!isLast)
                 Container(
@@ -313,7 +350,9 @@ class HomeScreen extends StatelessWidget {
                   height: 32,
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   decoration: BoxDecoration(
-                    color: isCompleted ? primaryColor : AppColors.borderLight,
+                    color: isCompleted
+                        ? AppColors.accentMint
+                        : AppColors.bgSurfaceMuted,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -332,27 +371,22 @@ class HomeScreen extends StatelessWidget {
     required bool isCurrent,
     required bool isLocked,
     required bool isBoss,
-    required Color primaryColor,
   }) {
     Color nodeBg;
-    Color borderColor;
     Color iconColor;
     IconData icon;
 
     if (isCompleted) {
-      nodeBg = primaryColor;
-      borderColor = primaryColor;
+      nodeBg = AppColors.accentMint;
       iconColor = Colors.white;
       icon = Icons.check_rounded;
     } else if (isCurrent) {
-      nodeBg = AppColors.schoolMint;
-      borderColor = primaryColor;
-      iconColor = primaryColor;
+      nodeBg = AppColors.bgSurfaceOnyx;
+      iconColor = Colors.white;
       icon = Icons.play_arrow_rounded;
     } else {
-      nodeBg = AppColors.surface;
-      borderColor = AppColors.borderLight;
-      iconColor = AppColors.textDisabled;
+      nodeBg = AppColors.bgSurfaceMuted;
+      iconColor = AppColors.textMuted;
       icon = Icons.lock_outline_rounded;
     }
 
@@ -360,7 +394,8 @@ class HomeScreen extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: '${lesson.title}, ${isCompleted ? "Completed" : isCurrent ? "Current topic" : "Locked"}',
+      label:
+          '${lesson.title}, ${isCompleted ? "Completed" : isCurrent ? "Current topic" : "Locked"}',
       child: InkWell(
         onTap: () {
           if (lesson.type == LessonType.quiz) {
@@ -381,7 +416,7 @@ class HomeScreen extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -391,16 +426,12 @@ class HomeScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: nodeBg,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: borderColor,
-                    width: isCurrent ? 2.5 : 1.5,
-                  ),
                   boxShadow: isCurrent
                       ? [
                           BoxShadow(
-                            color: primaryColor.withValues(alpha: 0.15),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                            color: AppColors.bgSurfaceOnyx.withValues(alpha: 0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ]
                       : null,
@@ -410,25 +441,27 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 14),
-              SizedBox(
-                width: 180,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isCurrent)
                       Container(
-                        margin: const EdgeInsets.only(bottom: 2),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        margin: const EdgeInsets.only(bottom: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.schoolMint,
-                          borderRadius: BorderRadius.circular(4),
+                          color: AppColors.accentCobalt.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Text(
                           'START HERE',
-                          style: AppTypography.caption(color: primaryColor).copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: AppTypography.caption(
+                                  color: AppColors.accentCobalt)
+                              .copyWith(
+                                  fontSize: 10, fontWeight: FontWeight.w800),
                         ),
                       ),
                     Text(
@@ -436,7 +469,9 @@ class HomeScreen extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.subheading(
-                        color: isLocked ? AppColors.textMuted : AppColors.textPrimary,
+                        color: isLocked
+                            ? AppColors.textMuted
+                            : AppColors.textPrimary,
                       ).copyWith(fontSize: 14),
                     ),
                     const SizedBox(height: 2),

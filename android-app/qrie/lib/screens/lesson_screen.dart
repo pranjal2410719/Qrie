@@ -244,17 +244,22 @@ class _LessonScreenState extends State<LessonScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'Visual Concept Guide',
-                              style: AppTypography.caption(color: Colors.white),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Concept Guide',
+                                style: AppTypography.caption(color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
@@ -322,11 +327,15 @@ class _LessonScreenState extends State<LessonScreen> {
                     children: [
                       Icon(Icons.lightbulb_outline_rounded, color: primaryColor, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        'CORE CONCEPT SUMMARY',
-                        style: AppTypography.caption(color: primaryColor).copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
+                      Flexible(
+                        child: Text(
+                          'CORE CONCEPT SUMMARY',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.caption(color: primaryColor).copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ],
@@ -418,7 +427,7 @@ class _LessonScreenState extends State<LessonScreen> {
 
             // Action Buttons
             AppButton(
-              text: 'PRACTICE THIS CONCEPT',
+              text: 'Practice This Concept',
               isFullWidth: true,
               icon: Icons.quiz_rounded,
               variant: AppButtonVariant.primary,
@@ -435,7 +444,7 @@ class _LessonScreenState extends State<LessonScreen> {
             const SizedBox(height: 10),
 
             AppButton(
-              text: isCompleted ? 'LESSON COMPLETED' : 'MARK LESSON COMPLETE (+${widget.lesson.xpReward} XP)',
+              text: isCompleted ? 'Lesson Completed' : 'Complete Lesson (+${widget.lesson.xpReward} XP)',
               isFullWidth: true,
               icon: isCompleted ? Icons.check_circle_outline : Icons.task_alt_rounded,
               variant: isCompleted ? AppButtonVariant.outline : AppButtonVariant.secondary,

@@ -159,14 +159,16 @@ class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMix
       if (widget.icon != null) {
         final iconWidget = Icon(widget.icon, size: 18, color: textColor);
         content = Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: widget.isFullWidth ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: widget.isTrailingIcon
-              ? [textWidget, const SizedBox(width: 8), iconWidget]
-              : [iconWidget, const SizedBox(width: 8), textWidget],
+              ? [Flexible(child: textWidget), const SizedBox(width: 8), iconWidget]
+              : [iconWidget, const SizedBox(width: 8), Flexible(child: textWidget)],
         );
       } else {
-        content = textWidget;
+        content = widget.isFullWidth
+            ? Center(child: textWidget)
+            : textWidget;
       }
     }
 
