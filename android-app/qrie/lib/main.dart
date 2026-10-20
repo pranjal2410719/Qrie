@@ -1,121 +1,295 @@
 import 'package:flutter/material.dart';
+import 'core/network/api_client.dart';
+import 'core/storage/secure_storage.dart';
+import 'features/auth/application/auth_controller.dart';
+import 'features/auth/presentation/student_splash_screen.dart';
+import 'features/school_branding/data/school_branding_repository.dart';
+import 'features/school_branding/presentation/school_theme_provider.dart';
+import 'features/school_branding/presentation/widgets/student_welcome_header.dart';
+import 'screens/doubt_chat_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/library_screen.dart';
+import 'screens/practice_screen.dart';
+import 'screens/profile_screen.dart';
+import 'state/student_state.dart';
+import 'theme/app_colors.dart';
+import 'theme/app_typography.dart';
+import 'widgets/bottom_nav_bar.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const QrieApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class QrieApp extends StatefulWidget {
+  final bool skipSplash;
 
-  // This widget is the root of your application.
+  const QrieApp({super.key, this.skipSplash = false});
+
+  @override
+  State<QrieApp> createState() => _QrieAppState();
+}
+
+class _QrieAppState extends State<QrieApp> {
+  final StudentState _studentState = StudentState();
+  final SecureStorageService _secureStorage = SecureStorageService();
+  late final ApiClient _apiClient;
+  late final AuthController _authController;
+  late final SchoolBrandingRepository _brandingRepo;
+  final SchoolThemeProvider _themeProvider = SchoolThemeProvider();
+
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient = ApiClient(storage: _secureStorage);
+    _authController = AuthController(
+      apiClient: _apiClient,
+      secureStorage: _secureStorage,
+    );
+    _brandingRepo = SchoolBrandingRepository(apiClient: _apiClient);
+
+    _loadInitialBranding();
+
+    if (widget.skipSplash) {
+      _initialized = true;
+    }
+  }
+
+  Future<void> _loadInitialBranding() async {
+    final cached = await _brandingRepo.getCachedBranding();
+    _themeProvider.updateBranding(cached);
+  }
+
+  @override
+  void dispose() {
+    _studentState.dispose();
+    _themeProvider.dispose();
+    _authController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return ListenableBuilder(
+      listenable: _themeProvider,
+      builder: (context, _) {
+        return StudentStateScope(
+          notifier: _studentState,
+          child: MaterialApp(
+            title: 'Qrie Student App',
+            debugShowCheckedModeBanner: false,
+            theme: _themeProvider.themeData,
+            home: !_initialized
+                ? StudentSplashScreen(
+                    authController: _authController,
+                    branding: _themeProvider.branding,
+                    onInitialized: () {
+                      setState(() => _initialized = true);
+                    },
+                  )
+                : MainScaffold(
+                    themeProvider: _themeProvider,
+                    authController: _authController,
+                  ),
+          ),
+        );
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class MainScaffold extends StatefulWidget {
+  final SchoolThemeProvider themeProvider;
+  final AuthController authController;
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const MainScaffold({
+    super.key,
+    required this.themeProvider,
+    required this.authController,
+  });
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MainScaffoldState extends State<MainScaffold> {
+  int _currentIndex = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    PracticeScreen(),
+    DoubtChatScreen(),
+    LibraryScreen(),
+    ProfileScreen(),
+  ];
+
+  void _showGradeSwitcherDialog(BuildContext context, StudentState state) {
+    final grades = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+    final boards = ['CBSE', 'ICSE', 'State Board'];
+
+    String tempGrade = state.profile.grade;
+    String tempBoard = state.profile.board;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE5E5E5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'Select Your Grade & Board',
+                        style: AppTypography.headingSmall(),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Personalize your NCERT syllabus and practice content.',
+                        style: AppTypography.bodySmall(),
+                      ),
+                      const SizedBox(height: 20),
+                      Text('GRADE / CLASS', style: AppTypography.caption(color: AppColors.charcoal)),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: grades.map((g) {
+                          final isSel = (g == tempGrade);
+                          return GestureDetector(
+                            onTap: () => setModalState(() => tempGrade = g),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSel ? const Color(0xFFE8F5EE) : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSel ? widget.themeProvider.branding.primaryColor : const Color(0xFFE5E5E5),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Text(
+                                g,
+                                style: AppTypography.pillLabel(
+                                  color: isSel ? AppColors.charcoal : AppColors.pencilGray,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                      Text('EDUCATIONAL BOARD', style: AppTypography.caption(color: AppColors.charcoal)),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 10,
+                        children: boards.map((b) {
+                          final isSel = (b == tempBoard);
+                          return GestureDetector(
+                            onTap: () => setModalState(() => tempBoard = b),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSel ? const Color(0xFFE8F5EE) : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSel ? widget.themeProvider.branding.primaryColor : const Color(0xFFE5E5E5),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Text(
+                                b,
+                                style: AppTypography.pillLabel(
+                                  color: isSel ? AppColors.charcoal : AppColors.pencilGray,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: widget.themeProvider.branding.primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: () {
+                            state.updateGradeAndBoard(tempGrade, tempBoard);
+                            Navigator.pop(ctx);
+                          },
+                          child: Text('APPLY SYLLABUS', style: AppTypography.buttonLabel()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final state = StudentStateScope.of(context);
+    final profile = state.profile;
+    final branding = widget.themeProvider.branding;
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
+        child: StudentWelcomeHeader(
+          branding: branding,
+          studentName: profile.name,
+          gradeAndBoard: '${profile.grade} ${profile.board}',
+          streakDays: profile.streakDays,
+          gems: profile.gems,
+          onGradeTap: () => _showGradeSwitcherDialog(context, state),
+          onProfileTap: () {
+            setState(() => _currentIndex = 4);
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
       ),
     );
   }

@@ -9,6 +9,7 @@ import { AppError } from './shared/errors.js';
 import { healthRoutes } from './modules/health/routes.js';
 import { teacherRoutes } from './modules/teacher/routes.js';
 import { adminRoutes } from './modules/admin/routes.js';
+import { studentRoutes } from './modules/student/routes.js';
 
 export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
   const app = Fastify({
@@ -76,6 +77,7 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
   app.register(healthRoutes);
   app.register(teacherRoutes, { prefix: '/api/v1/teacher' });
   app.register(adminRoutes, { prefix: '/api/v1/admin' });
+  app.register(studentRoutes, { prefix: '/api/v1' });
 
   // Root endpoint
   app.get('/', async () => {
