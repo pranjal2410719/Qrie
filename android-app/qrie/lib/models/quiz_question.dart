@@ -17,6 +17,11 @@ class QuizQuestion {
   final String? scaffoldSubstep; // Rung 3: Scaffolded Substep
   final int xpReward;
   final String category;
+  final String? subjectName;
+  final String? topic;
+  final String? difficulty;
+
+  String get prompt => question;
 
   const QuizQuestion({
     required this.id,
@@ -32,6 +37,9 @@ class QuizQuestion {
     this.scaffoldSubstep,
     this.xpReward = 15,
     this.category = 'Concept Check',
+    this.subjectName,
+    this.topic,
+    this.difficulty,
   });
 
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {

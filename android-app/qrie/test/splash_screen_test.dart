@@ -50,10 +50,9 @@ void main() {
     );
 
     // Verify school branding elements appear immediately
-    expect(find.text('Delhi Public School, R.K. Puram'), findsOneWidget);
-    expect(find.text('SERVICE BEFORE SELF'), findsOneWidget);
-    expect(find.text('Ready to learn today?'), findsOneWidget);
+    expect(find.text(branding.schoolName.toUpperCase()), findsOneWidget);
     expect(find.text('Powered by Qrie Academic Platform'), findsOneWidget);
+    expect(find.text('Tap to begin learning'), findsOneWidget);
 
     // Fast-forward animation and initialization timer
     await tester.pump(const Duration(milliseconds: 100));

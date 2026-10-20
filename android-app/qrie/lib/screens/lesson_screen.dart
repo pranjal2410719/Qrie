@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
+import '../widgets/floating_ai_tutor_widget.dart';
 import 'quiz_solver_screen.dart';
 
 class LessonScreen extends StatefulWidget {
@@ -93,12 +94,14 @@ class _LessonScreenState extends State<LessonScreen> {
           child: Divider(height: 1, thickness: 1, color: AppColors.borderLight),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Metadata chips (Duration, XP, Completion Status)
             Row(
               children: [
@@ -471,6 +474,12 @@ class _LessonScreenState extends State<LessonScreen> {
           ],
         ),
       ),
-    );
+      const FloatingAITutorWidget(
+        bottomOffset: 24,
+        rightOffset: 16,
+      ),
+    ],
+  ),
+);
   }
 }

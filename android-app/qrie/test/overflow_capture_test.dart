@@ -5,13 +5,16 @@ import 'package:qrie/widgets/bottom_nav_bar.dart';
 
 void main() {
   testWidgets('overflow capture', (tester) async {
+    String currentPhase = 'startup';
     FlutterError.onError = (details) {
       // ignore: avoid_print
-      print('FLUTTER_ERROR: ${details.exceptionAsString()}');
+      print('=== OVERFLOW DETECTED during [$currentPhase] ===');
+      // ignore: avoid_print
+      print('EXCEPTION: ${details.exceptionAsString()}');
       final collector = details.informationCollector?.call() ?? [];
       for (final d in collector) {
         // ignore: avoid_print
-        print('  NODE: ${d.toDescription()}');
+        print('  INFO: ${d.toDescription()}');
       }
     };
     tester.view.physicalSize = const Size(720, 1604);
@@ -21,24 +24,18 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
+    currentPhase = 'initial HomeScreen';
     await tester.pumpWidget(const QrieApp(skipSplash: true));
     await tester.pumpAndSettle();
     void drain(String context) {
       while (true) {
         final e = tester.takeException();
         if (e == null) break;
-        // ignore: avoid_print
-        print('OVERFLOW in $context:');
-        if (e is FlutterError) {
-          for (final d in e.diagnostics) {
-            // ignore: avoid_print
-            print(d.toStringDeep());
-          }
-        }
       }
     }
     drain('initial HomeScreen');
-    for (final label in ['Practice', 'Ask Qrie', 'Library', 'Profile', 'Learn']) {
+    for (final label in ['Practice', 'Homework', 'Library', 'Profile', 'Learn']) {
+      currentPhase = 'switching to $label';
       await tester.tap(find.descendant(
         of: find.byType(BottomNavBar),
         matching: find.text(label),
@@ -46,9 +43,11 @@ void main() {
       await tester.pumpAndSettle();
       drain('after tap $label');
     }
+    currentPhase = 'opening LessonScreen';
     await tester.tap(find.text('Resume'));
     await tester.pumpAndSettle();
     drain('in LessonScreen');
+    currentPhase = 'back from LessonScreen';
     await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pumpAndSettle();
     drain('after back from LessonScreen');

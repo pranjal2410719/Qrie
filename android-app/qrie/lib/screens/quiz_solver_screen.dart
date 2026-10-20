@@ -9,6 +9,7 @@ import '../theme/app_typography.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/app_progress_bar.dart';
+import '../widgets/floating_ai_tutor_widget.dart';
 
 class QuizSolverScreen extends StatefulWidget {
   final String? subjectId;
@@ -166,8 +167,10 @@ class _QuizSolverScreenState extends State<QuizSolverScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
+            Column(
+              children: [
             // ── Top bar ──────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(
@@ -325,8 +328,15 @@ class _QuizSolverScreenState extends State<QuizSolverScreen> {
             _buildBottomBanner(context, currentQ, state, primaryColor),
           ],
         ),
-      ),
-    );
+        FloatingAITutorWidget(
+          bottomOffset: 96,
+          rightOffset: 16,
+          contextualQuestion: currentQ.prompt,
+        ),
+      ],
+    ),
+  ),
+);
   }
 
   // ── Assistance card ──────────────────────────────────────────────────

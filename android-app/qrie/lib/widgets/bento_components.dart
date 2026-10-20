@@ -344,10 +344,15 @@ class FeaturedLessonCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      timeLabel,
-                      style: AppTypography.caption(color: AppColors.textMuted)
-                          .copyWith(fontSize: 10),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          timeLabel,
+                          style: AppTypography.caption(color: AppColors.textMuted)
+                              .copyWith(fontSize: 10),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -377,12 +382,14 @@ class FeaturedLessonCard extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 // Row 4: Avatar stack + Copy link pill
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Overlapping avatar stack
-                    Flexible(
-                      child: SizedBox(
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Overlapping avatar stack
+                      SizedBox(
                         height: 24,
                         width: 66,
                         child: Stack(
@@ -414,27 +421,27 @@ class FeaturedLessonCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    // #F4F5F7 pill button
-                    GestureDetector(
-                      onTap: onCopyLink,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.bgSurfaceSoft,
-                          borderRadius: BorderRadius.circular(9999),
-                        ),
-                        child: Text(
-                          'Resume',
-                          style: AppTypography.caption(
-                                  color: AppColors.textPrimary)
-                              .copyWith(fontWeight: FontWeight.w700),
+                      const SizedBox(width: 8),
+                      // #F4F5F7 pill button
+                      GestureDetector(
+                        onTap: onCopyLink,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgSurfaceSoft,
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                          child: Text(
+                            'Resume',
+                            style: AppTypography.caption(
+                                    color: AppColors.textPrimary)
+                                .copyWith(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -510,29 +517,33 @@ class MyActivityDonutCard extends StatelessWidget {
                           .copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          totalTime,
-                          style: AppTypography.metricHero(
-                              color: AppColors.textPrimary),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(9999),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: [
+                          Text(
+                            totalTime,
+                            style: AppTypography.metricHero(
+                                color: AppColors.textPrimary),
                           ),
-                          child: Text(
-                            completionPercent,
-                            style: AppTypography.caption(
-                                    color: AppColors.textPrimary)
-                                .copyWith(fontWeight: FontWeight.w700),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(9999),
+                            ),
+                            child: Text(
+                              completionPercent,
+                              style: AppTypography.caption(
+                                      color: AppColors.textPrimary)
+                                  .copyWith(fontWeight: FontWeight.w700),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -1061,41 +1072,49 @@ class BentoMilestoneTrackerCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 6),
-                // White pill duration tag
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(9999),
-                  ),
-                  child: Text(
-                    durationTag,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.bgSurfaceOnyx,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                // Coral-red priority pill
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentCoral,
-                    borderRadius: BorderRadius.circular(9999),
-                  ),
-                  child: Text(
-                    priority,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // White pill duration tag
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(9999),
+                        ),
+                        child: Text(
+                          durationTag,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.bgSurfaceOnyx,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // Coral-red priority pill
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentCoral,
+                          borderRadius: BorderRadius.circular(9999),
+                        ),
+                        child: Text(
+                          priority,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

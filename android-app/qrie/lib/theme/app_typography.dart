@@ -21,6 +21,15 @@ class AppTypography {
         color: color,
       );
 
+  /// Headline — 20px Bold
+  static TextStyle headline({Color color = AppColors.textPrimary}) =>
+      GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        height: 26 / 20,
+        color: color,
+      );
+
   /// Metric Hero — 26px Bold
   static TextStyle metricHero({Color color = AppColors.textPrimary}) =>
       GoogleFonts.poppins(

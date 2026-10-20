@@ -30,6 +30,9 @@ class AppColors {
   static const Color accentRose        = Color(0xFFE83879);
   static const Color accentMint        = Color(0xFF32C787);
   static const Color accentMintSoft    = Color(0xFFA9F0B8);
+  static const Color accentTangerine   = Color(0xFFF28D35);
+  static const Color accentPeach       = Color(0xFFFED7AA);
+  static const Color accentLilac       = Color(0xFFDF96F7);
 
   // ─────────────────────────────────────────────
   // TEXT

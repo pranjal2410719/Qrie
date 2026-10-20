@@ -41,9 +41,9 @@ class BottomNavBar extends StatelessWidget {
         label: 'Practice',
       ),
       _NavItem(
-        icon: Icons.chat_bubble_outline_rounded,
-        activeIcon: Icons.chat_bubble_rounded,
-        label: 'Ask Qrie',
+        icon: Icons.assignment_outlined,
+        activeIcon: Icons.assignment_rounded,
+        label: 'Homework',
       ),
       _NavItem(
         icon: Icons.menu_book_outlined,

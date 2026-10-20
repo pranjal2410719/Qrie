@@ -418,7 +418,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: nodeSize,
@@ -441,8 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 14),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 200),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,

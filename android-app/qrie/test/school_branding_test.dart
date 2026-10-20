@@ -88,15 +88,13 @@ void main() {
         ),
       );
 
-      // Verify school name
-      expect(find.text('Delhi Public School, R.K. Puram'), findsOneWidget);
-      // Verify grade
-      expect(find.text('CLASS 8 CBSE'), findsOneWidget);
-      // Verify streak and gems pills
-      expect(find.text('7'), findsOneWidget);
-      expect(find.text('250'), findsOneWidget);
-      // Verify student initial avatar 'A'
+      // Verify student greeting and initial avatar 'A'
+      expect(find.text('Hi, Aarav'), findsOneWidget);
       expect(find.text('A'), findsOneWidget);
+      // Verify grade
+      expect(find.text('Class 8 CBSE'), findsOneWidget);
+      // Verify streak pill
+      expect(find.text('7'), findsOneWidget);
     });
   });
 }

@@ -1,16 +1,219 @@
 import 'package:flutter/material.dart';
 import '../models/student_profile.dart';
 import '../models/doubt_message.dart';
+import '../models/homework.dart';
 import '../data/mock_data.dart';
+import '../data/mock_homework.dart';
 
 class StudentState extends ChangeNotifier {
   StudentProfile _profile = MockData.initialStudent;
   String _selectedSubjectId = 'science';
   final List<DoubtMessage> _doubtMessages = List.from(MockData.initialDoubtMessages);
 
+  // Homework State
+  final List<HomeworkAssignment> _homeworkAssignments = List.from(MockHomeworkData.assignments);
+  final Map<String, HomeworkStudentProgress> _homeworkProgress = Map.from(MockHomeworkData.initialProgress);
+  bool _isTeacherMode = false;
+
+  // AI Tutor Active Context
+  HomeworkAssignment? _activeHomeworkContext;
+  String? _activeQuestionContext;
+  bool _isTestGuardrailActive = false;
+
   StudentProfile get profile => _profile;
   String get selectedSubjectId => _selectedSubjectId;
   List<DoubtMessage> get doubtMessages => List.unmodifiable(_doubtMessages);
+  List<HomeworkAssignment> get homeworkAssignments => List.unmodifiable(_homeworkAssignments);
+  Map<String, HomeworkStudentProgress> get homeworkProgress => Map.unmodifiable(_homeworkProgress);
+  bool get isTeacherMode => _isTeacherMode;
+  HomeworkAssignment? get activeHomeworkContext => _activeHomeworkContext;
+  String? get activeQuestionContext => _activeQuestionContext;
+  bool get isTestGuardrailActive => _isTestGuardrailActive;
+
+  void toggleTeacherMode() {
+    _isTeacherMode = !_isTeacherMode;
+    notifyListeners();
+  }
+
+  void setTutorContext({
+    HomeworkAssignment? assignment,
+    String? question,
+    bool isTestMode = false,
+  }) {
+    _activeHomeworkContext = assignment;
+    _activeQuestionContext = question;
+    _isTestGuardrailActive = isTestMode;
+    notifyListeners();
+  }
+
+  void clearTutorContext() {
+    _activeHomeworkContext = null;
+    _activeQuestionContext = null;
+    _isTestGuardrailActive = false;
+    notifyListeners();
+  }
+
+  HomeworkStudentProgress getProgressForAssignment(String assignmentId) {
+    if (_homeworkProgress.containsKey(assignmentId)) {
+      return _homeworkProgress[assignmentId]!;
+    }
+    final initial = HomeworkStudentProgress(
+      assignmentId: assignmentId,
+      studentId: _profile.id,
+      status: HomeworkStatus.assigned,
+    );
+    _homeworkProgress[assignmentId] = initial;
+    return initial;
+  }
+
+  void toggleChecklistItem(String assignmentId, String stepId) {
+    final current = getProgressForAssignment(assignmentId);
+    final updatedSteps = Set<String>.from(current.completedStepIds);
+
+    if (updatedSteps.contains(stepId)) {
+      updatedSteps.remove(stepId);
+    } else {
+      updatedSteps.add(stepId);
+    }
+
+    // Determine automatic status transition if not already completed/overdue
+    HomeworkStatus newStatus = current.status;
+    if (newStatus == HomeworkStatus.assigned && updatedSteps.isNotEmpty) {
+      newStatus = HomeworkStatus.inProgress;
+    } else if (newStatus == HomeworkStatus.inProgress &&
+        updatedSteps.contains('step_1') &&
+        updatedSteps.contains('step_2') &&
+        updatedSteps.contains('step_3')) {
+      newStatus = HomeworkStatus.readyForVerification;
+    }
+
+    _homeworkProgress[assignmentId] = current.copyWith(
+      completedStepIds: updatedSteps,
+      status: newStatus,
+    );
+    notifyListeners();
+  }
+
+  void submitWrittenWork(String assignmentId, List<String> attachmentPaths, String studentNotes) {
+    final current = getProgressForAssignment(assignmentId);
+    final updatedSteps = Set<String>.from(current.completedStepIds)..add('step_3');
+
+    // Find assignment
+    final assignment = _homeworkAssignments.firstWhere(
+      (a) => a.id == assignmentId,
+      orElse: () => _homeworkAssignments.first,
+    );
+
+    HomeworkStatus newStatus = HomeworkStatus.readyForVerification;
+    if (assignment.miniTest == null) {
+      newStatus = assignment.requiresTeacherReview
+          ? HomeworkStatus.submittedAwaitingReview
+          : HomeworkStatus.completed;
+      if (newStatus == HomeworkStatus.completed) {
+        updatedSteps.add('step_5');
+      }
+    }
+
+    _homeworkProgress[assignmentId] = current.copyWith(
+      completedStepIds: updatedSteps,
+      writtenWorkSubmitted: true,
+      writtenSubmissionDate: DateTime.now(),
+      submittedAttachmentUrls: attachmentPaths,
+      studentNotes: studentNotes,
+      status: newStatus,
+    );
+
+    // Reward XP for completing written work
+    _profile = _profile.copyWith(
+      totalXp: _profile.totalXp + 25,
+      gems: _profile.gems + 5,
+    );
+
+    notifyListeners();
+  }
+
+  void recordTestAttempt({
+    required String assignmentId,
+    required HomeworkTestAttempt attempt,
+    required HomeworkMiniTest miniTest,
+  }) {
+    final current = getProgressForAssignment(assignmentId);
+    final updatedAttempts = List<HomeworkTestAttempt>.from(current.testAttempts)..add(attempt);
+
+    int highestScore = current.highestTestScore ?? 0;
+    if (attempt.scorePercentage > highestScore) {
+      highestScore = attempt.scorePercentage;
+    }
+
+    final updatedSteps = Set<String>.from(current.completedStepIds);
+    HomeworkStatus newStatus = current.status;
+
+    final assignment = _homeworkAssignments.firstWhere(
+      (a) => a.id == assignmentId,
+      orElse: () => _homeworkAssignments.first,
+    );
+
+    if (attempt.passed) {
+      updatedSteps.add('step_4');
+      if (assignment.requiresTeacherReview) {
+        newStatus = HomeworkStatus.submittedAwaitingReview;
+      } else {
+        newStatus = HomeworkStatus.completed;
+        updatedSteps.add('step_5');
+      }
+      // Reward completion XP & Gems
+      _profile = _profile.copyWith(
+        totalXp: _profile.totalXp + 50,
+        gems: _profile.gems + 10,
+        dailyGoalCurrent: _profile.dailyGoalCurrent < _profile.dailyGoalTarget
+            ? _profile.dailyGoalCurrent + 1
+            : _profile.dailyGoalCurrent,
+      );
+    } else {
+      // If student hasn't passed, status remains inProgress or readyForVerification
+      newStatus = HomeworkStatus.readyForVerification;
+    }
+
+    _homeworkProgress[assignmentId] = current.copyWith(
+      testAttempts: updatedAttempts,
+      highestTestScore: highestScore,
+      completedStepIds: updatedSteps,
+      status: newStatus,
+    );
+
+    notifyListeners();
+  }
+
+  void addHomeworkAssignment(HomeworkAssignment newAssignment) {
+    _homeworkAssignments.insert(0, newAssignment);
+    _homeworkProgress[newAssignment.id] = HomeworkStudentProgress(
+      assignmentId: newAssignment.id,
+      studentId: _profile.id,
+      status: HomeworkStatus.assigned,
+    );
+    notifyListeners();
+  }
+
+  void updateAssignmentStatusByTeacher({
+    required String assignmentId,
+    required HomeworkStatus status,
+    required String feedback,
+    int? gradePoints,
+  }) {
+    final current = getProgressForAssignment(assignmentId);
+    final updatedSteps = Set<String>.from(current.completedStepIds);
+    if (status == HomeworkStatus.completed) {
+      updatedSteps.add('step_5');
+    }
+
+    _homeworkProgress[assignmentId] = current.copyWith(
+      status: status,
+      teacherFeedback: feedback,
+      gradePoints: gradePoints,
+      completedStepIds: updatedSteps,
+    );
+    notifyListeners();
+  }
 
   void setSubject(String subjectId) {
     if (_selectedSubjectId != subjectId) {

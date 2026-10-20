@@ -6,7 +6,7 @@ import 'features/auth/presentation/student_splash_screen.dart';
 import 'features/school_branding/data/school_branding_repository.dart';
 import 'features/school_branding/presentation/school_theme_provider.dart';
 import 'features/school_branding/presentation/widgets/student_welcome_header.dart';
-import 'screens/doubt_chat_screen.dart';
+import 'screens/homework_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/library_screen.dart';
 import 'screens/practice_screen.dart';
@@ -16,6 +16,7 @@ import 'theme/app_colors.dart';
 import 'theme/app_typography.dart';
 import 'widgets/app_button.dart';
 import 'widgets/bottom_nav_bar.dart';
+import 'widgets/floating_ai_tutor_widget.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,7 +122,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   final List<Widget> _pages = const [
     HomeScreen(),
     PracticeScreen(),
-    DoubtChatScreen(),
+    HomeworkScreen(),
     LibraryScreen(),
     ProfileScreen(),
   ];
@@ -272,9 +273,17 @@ class _MainScaffoldState extends State<MainScaffold> {
           setState(() => _currentIndex = 4);
         },
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: _pages,
+          ),
+          const FloatingAITutorWidget(
+            bottomOffset: 24,
+            rightOffset: 16,
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
