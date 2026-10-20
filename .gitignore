@@ -1,0 +1,84 @@
+# ==============================================================================
+# Qrie AI Platform — Comprehensive .gitignore
+# Covers Node.js (Fastify Backend, Next.js Web App), Flutter (Android App),
+# Supabase Edge Functions, IDEs, and OS artifacts.
+# ==============================================================================
+
+# Node.js & Web (Backend & Web-App)
+**/node_modules/
+node_modules/
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js & TypeScript Build Outputs
+**/.next/
+.next/
+**/dist/
+dist/
+**/out/
+out/
+**/build/
+build/
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Test & Coverage Caches
+**/coverage/
+coverage/
+**/.vitest/
+.vitest/
+**/.turbo/
+.turbo/
+**/.cache/
+.cache/
+
+# Environment Variables & Secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.cert
+
+# Flutter & Dart (Android App)
+**/.dart_tool/
+.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/build/
+**/app/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/app/build/
+**/android/captures/
+**/ios/.symlinks/
+**/ios/Pods/
+**/ios/Podfile.lock
+
+# IDEs & Editors
+.idea/
+**/.idea/
+*.iml
+**/*.iml
+.vscode/
+**/.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS Artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

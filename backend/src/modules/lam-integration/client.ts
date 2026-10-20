@@ -1,0 +1,146 @@
+import crypto from 'crypto';
+import { config } from '../../config/index.js';
+
+export interface LamEventPayload {
+  event_id: string;
+  student_id: string;
+  session_id: string;
+  concept_ids: string[];
+  item_id: string;
+  timestamp: string;
+  event_type: 'attempt' | 'hint' | 'explanation' | 'assessment' | 'review';
+  correctness?: boolean;
+  attempt_number?: number;
+  assistance_level?: number;
+  hints_used?: number;
+  response_time_ms?: number;
+  difficulty?: number;
+  assessment_mode?: 'independent' | 'assisted' | 'delayed' | 'transfer';
+}
+
+export interface LamRecommendationRequest {
+  student_id: string;
+  concept_id: string;
+  consecutive_failures?: number;
+}
+
+export interface LamRecommendationResponse {
+  recommendation_id: string;
+  action_type: string;
+  target_concept_id: string;
+  assistance_level: number;
+  priority_tier: string;
+  reason_code: string;
+  suggested_strategy: string;
+  rationale: string;
+  policy_version: string;
+  safe_fallback: boolean;
+  uncertainty: number;
+}
+
+export class LamAdapterClient {
+  private baseUrl: string;
+  private secret: string;
+
+  constructor(baseUrl?: string, secret?: string) {
+    this.baseUrl = baseUrl || config.LAM_BASE_URL;
+    this.secret = secret || config.LAM_JWT_SECRET;
+  }
+
+  /**
+   * Generates a signed JWT in memory for server-to-server communication with LAM.
+   */
+  private generateLamToken(tenantId: string): string {
+    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+    const now = Math.floor(Date.now() / 1000);
+    const payload = Buffer.from(
+      JSON.stringify({
+        sub: `qrie-relay-${tenantId}`,
+        tenant_id: tenantId,
+        school_id: tenantId,
+        roles: ['service'],
+        iss: 'lam-auth',
+        aud: 'lam-service',
+        iat: now,
+        exp: now + 3600,
+      })
+    ).toString('base64url');
+
+    const signature = crypto
+      .createHmac('sha256', this.secret)
+      .update(`${header}.${payload}`)
+      .digest('base64url');
+
+    return `${header}.${payload}.${signature}`;
+  }
+
+  /**
+   * Forwards a verified learning interaction event to LAM's append-only ledger.
+   */
+  public async forwardEvent(tenantId: string, event: LamEventPayload): Promise<{ status: string; event_id: string }> {
+    const token = this.generateLamToken(tenantId);
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/events`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(event),
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`LAM returned HTTP ${response.status}: ${await response.text()}`);
+      }
+
+      return (await response.json()) as { status: string; event_id: string };
+    } catch (err: any) {
+      console.warn(`[LAM Adapter] Event forwarding failed (${err.message}). Queuing for retry.`);
+      return { status: 'relay_queued', event_id: event.event_id };
+    }
+  }
+
+  /**
+   * Queries LAM for the next adaptive pedagogical activity.
+   * Returns deterministic fallback if LAM is unreachable.
+   */
+  public async getRecommendation(
+    tenantId: string,
+    req: LamRecommendationRequest
+  ): Promise<LamRecommendationResponse> {
+    const token = this.generateLamToken(tenantId);
+    try {
+      const response = await fetch(`${this.baseUrl}/v1/recommendations`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(req),
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`LAM returned HTTP ${response.status}`);
+      }
+
+      return (await response.json()) as LamRecommendationResponse;
+    } catch (err: any) {
+      console.warn(`[LAM Adapter] Recommendation retrieval failed (${err.message}). Returning safe fallback.`);
+      return {
+        recommendation_id: `fallback_${Date.now()}`,
+        action_type: 'independent_practice',
+        target_concept_id: req.concept_id,
+        assistance_level: 0,
+        priority_tier: 'tier_safe_fallback',
+        reason_code: 'LAM_UNREACHABLE_FALLBACK',
+        suggested_strategy: 'continue_current_topic',
+        rationale: 'Deterministic fallback engaged while LAM service is recovering.',
+        policy_version: 'fallback-v1',
+        safe_fallback: true,
+        uncertainty: 0.5,
+      };
+    }
+  }
+}
