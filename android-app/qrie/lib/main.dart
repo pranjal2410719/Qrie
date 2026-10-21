@@ -6,7 +6,6 @@ import 'features/auth/presentation/student_splash_screen.dart';
 import 'features/school_branding/data/school_branding_repository.dart';
 import 'features/school_branding/presentation/school_theme_provider.dart';
 import 'features/school_branding/presentation/widgets/student_welcome_header.dart';
-import 'screens/homework_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/library_screen.dart';
 import 'screens/practice_screen.dart';
@@ -122,7 +121,6 @@ class _MainScaffoldState extends State<MainScaffold> {
   final List<Widget> _pages = const [
     HomeScreen(),
     PracticeScreen(),
-    HomeworkScreen(),
     LibraryScreen(),
     ProfileScreen(),
   ];
@@ -270,7 +268,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         gems: profile.gems,
         onGradeTap: () => _showGradeSwitcherDialog(context, state),
         onProfileTap: () {
-          setState(() => _currentIndex = 4);
+          setState(() => _currentIndex = 3);
         },
       ),
       body: Stack(

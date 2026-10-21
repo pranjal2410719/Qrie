@@ -41,11 +41,6 @@ class BottomNavBar extends StatelessWidget {
         label: 'Practice',
       ),
       _NavItem(
-        icon: Icons.assignment_outlined,
-        activeIcon: Icons.assignment_rounded,
-        label: 'Homework',
-      ),
-      _NavItem(
         icon: Icons.menu_book_outlined,
         activeIcon: Icons.menu_book_rounded,
         label: 'Library',
@@ -75,7 +70,7 @@ class BottomNavBar extends StatelessWidget {
             children: List.generate(items.length, (index) {
               final item = items[index];
               final isSelected = index == currentIndex;
-              final showBadge = index == 2 && unreadCount > 0;
+              final showBadge = false; // badge removed with homework tab
 
               return Expanded(
                 child: Semantics(
