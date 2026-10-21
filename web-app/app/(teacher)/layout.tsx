@@ -40,21 +40,21 @@ export default function TeacherLayout({
 
           <nav className="space-y-1">
             <Link
-              href="/teacher/dashboard"
+              href="/teacher/classes"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-medium rounded-lg bg-canvas text-google-blue"
             >
               <BookOpen className="w-4 h-4" />
               <span>Assigned Classes</span>
             </Link>
             <Link
-              href="/teacher/dashboard"
+              href="/teacher/roster"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-normal rounded-lg text-slate hover:bg-canvas hover:text-charcoal"
             >
               <Users className="w-4 h-4" />
               <span>Student Roster</span>
             </Link>
             <Link
-              href="/teacher/dashboard"
+              href="/teacher/mastery"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-normal rounded-lg text-slate hover:bg-canvas hover:text-charcoal"
             >
               <BarChart3 className="w-4 h-4" />

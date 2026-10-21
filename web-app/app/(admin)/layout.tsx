@@ -40,28 +40,28 @@ export default function AdminLayout({
 
           <nav className="space-y-1">
             <Link
-              href="/admin/dashboard"
+              href="/admin/overview"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-medium rounded-lg bg-canvas text-google-blue"
             >
               <School className="w-4 h-4" />
               <span>School Overview</span>
             </Link>
             <Link
-              href="/admin/dashboard"
+              href="/admin/staff"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-normal rounded-lg text-slate hover:bg-canvas hover:text-charcoal"
             >
               <GraduationCap className="w-4 h-4" />
               <span>Teacher Staff</span>
             </Link>
             <Link
-              href="/admin/dashboard"
+              href="/admin/enrolments"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-normal rounded-lg text-slate hover:bg-canvas hover:text-charcoal"
             >
               <Users className="w-4 h-4" />
               <span>Student Enrolments</span>
             </Link>
             <Link
-              href="/admin/dashboard"
+              href="/admin/audit"
               className="flex items-center gap-3 px-3 py-2 text-[14px] font-normal rounded-lg text-slate hover:bg-canvas hover:text-charcoal"
             >
               <Shield className="w-4 h-4" />
