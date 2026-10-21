@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { School, Users, GraduationCap, Settings, Shield, LogOut } from 'lucide-react';
+import { School, Users, GraduationCap, Settings, Shield, LogOut, Menu } from 'lucide-react';
 import { BrandMark } from '@/components/BrandMark';
 
 export default function AdminLayout({
@@ -9,9 +9,28 @@ export default function AdminLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-canvas">
+      {/* Hamburger toggle (CSS-only) */}
+      <input type="checkbox" id="admin-sidebar-toggle" className="peer hidden" />
+
+      {/* Hamburger button */}
+      <label
+        htmlFor="admin-sidebar-toggle"
+        className="md:hidden fixed top-4 left-4 z-[51] w-10 h-10 rounded-full bg-white border border-mist flex items-center justify-center text-slate cursor-pointer hover:bg-canvas transition-colors"
+        aria-label="Toggle navigation"
+      >
+        <Menu className="w-5 h-5" />
+      </label>
+
+      {/* Overlay */}
+      <label
+        htmlFor="admin-sidebar-toggle"
+        className="md:hidden fixed inset-0 bg-black/50 z-40 hidden peer-checked:block cursor-pointer"
+        aria-hidden="true"
+      />
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-mist p-6 flex flex-col justify-between">
-        <div className="space-y-6">
+      <aside className="fixed md:static top-0 left-0 z-50 w-64 h-screen bg-white border-r border-mist p-6 flex flex-col justify-between transform -translate-x-full md:translate-x-0 peer-checked:translate-x-0 transition-transform duration-200">
+        <div className="space-y-6 mt-12 md:mt-0">
           <div className="flex items-center gap-2">
             <BrandMark name="Qrie" />
             <span className="text-[10px] px-2 py-0.5 bg-canvas text-graphite font-medium rounded-full border border-mist">
@@ -64,7 +83,7 @@ export default function AdminLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
-        <header className="h-16 bg-white border-b border-mist flex items-center justify-between px-8">
+        <header className="h-16 bg-white border-b border-mist flex items-center justify-between px-8 pl-16 md:pl-8">
           <h1 className="text-[18px] font-medium text-charcoal">School Administration Portal</h1>
           <div className="flex items-center gap-2 text-[12px] text-slate">
             <span className="w-2 h-2 rounded-full bg-success"></span>
