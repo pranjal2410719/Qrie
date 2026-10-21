@@ -2,13 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Display:wght@400;500;700&family=Google+Sans+Text:wght@400;500;700&display=swap');
+
 :root {
-  --background: #F8F9FA;
-  --foreground: #1E293B;
+  --background: #f8f9fa;
+  --foreground: #202124;
+
+  --color-canvas-white: #f8f9fa;
+  --color-charcoal-ink: #202124;
+  --color-graphite: #3c4043;
+  --color-slate: #5f6368;
+  --color-mist: #dadce0;
+  --color-cloud-shadow: #c4c6c7;
+  --color-google-blue: #1a73e8;
+  --color-google-blue-deep: #1967d2;
+  --color-classroom-green: #188038;
+  --color-feature-tint: #e8f0fe;
+
+  --font-google-sans-display: 'Google Sans Display', ui-sans-serif, system-ui, sans-serif;
+  --font-google-sans-text: 'Google Sans Text', ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-charcoal-ink);
+  background: var(--color-canvas-white);
+  font-family: var(--font-google-sans-text);
+}
+
+@layer components {
+  .btn-filled {
+    @apply h-10 px-6 rounded-full bg-[var(--color-google-blue)] text-white text-[14px] font-medium hover:bg-[var(--color-google-blue-deep)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-google-blue)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply h-10 px-6 rounded-full border border-[var(--color-mist)] text-[var(--color-google-blue)] text-[14px] font-medium hover:bg-[var(--color-canvas-white)] hover:border-[var(--color-google-blue)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-google-blue)] focus:ring-offset-2;
+  }
+  .inline-link {
+    @apply text-[var(--color-google-blue)] underline underline-offset-2 hover:text-[var(--color-google-blue-deep)] transition-colors;
+  }
 }
