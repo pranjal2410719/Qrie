@@ -1,58 +1,56 @@
 import React from "react";
-import Link from "next/link";
 import { featureComparisonMatrix } from "@/lib/data/pricing";
-import { Check, X, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Check, X } from "lucide-react";
 
 export function PlanComparisonTable() {
   return (
     <div className="overflow-x-auto pb-6">
       <table className="w-full text-left border-collapse min-w-[700px]">
         <thead>
-          <tr className="border-b border-slate-200">
-            <th className="py-4 px-6 text-sm font-bold text-slate-900 w-2/5">
+          <tr className="border-b border-[#f0f1f2]">
+            <th className="py-4 px-6 text-[14px] font-medium text-[#101214] w-2/5">
               Features & Capabilities
             </th>
-            <th className="py-4 px-4 text-xs font-bold text-slate-600 text-center w-[15%]">
+            <th className="py-4 px-4 text-[13px] font-medium text-[#42526e] text-center w-[15%]">
               Starter
             </th>
-            <th className="py-4 px-4 text-xs font-bold text-sky-600 text-center w-[15%] bg-sky-50/50 rounded-t-xl">
+            <th className="py-4 px-4 text-[13px] font-medium text-[#1868db] text-center w-[15%] bg-[#e9f2fe]/60 rounded-t-[12px]">
               Student Pro
             </th>
-            <th className="py-4 px-4 text-xs font-bold text-indigo-600 text-center w-[15%]">
+            <th className="py-4 px-4 text-[13px] font-medium text-[#101214] text-center w-[15%]">
               School Essential
             </th>
-            <th className="py-4 px-4 text-xs font-bold text-slate-900 text-center w-[15%]">
+            <th className="py-4 px-4 text-[13px] font-medium text-[#101214] text-center w-[15%]">
               Enterprise
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 text-xs">
+        <tbody className="divide-y divide-[#f0f1f2] text-[13px]">
           {featureComparisonMatrix.map((cat) => (
             <React.Fragment key={cat.category}>
-              <tr className="bg-slate-50/80">
+              <tr className="bg-[#f0f1f2]/60">
                 <td
                   colSpan={5}
-                  className="py-3 px-6 font-bold text-slate-800 uppercase tracking-wider text-[11px]"
+                  className="py-2.5 px-6 font-bold text-[#101214] uppercase tracking-wider text-[11px]"
                 >
                   {cat.category}
                 </td>
               </tr>
               {cat.items.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3.5 px-6 font-medium text-slate-700">
+                <tr key={idx} className="hover:bg-[#f0f1f2]/30 transition-colors">
+                  <td className="py-3 px-6 font-normal text-[#292a2e]">
                     {item.feature}
                   </td>
-                  <td className="py-3.5 px-4 text-center">
+                  <td className="py-3 px-4 text-center">
                     {renderValue(item.starter)}
                   </td>
-                  <td className="py-3.5 px-4 text-center bg-sky-50/30 font-semibold">
+                  <td className="py-3 px-4 text-center bg-[#e9f2fe]/20 font-medium">
                     {renderValue(item.pro)}
                   </td>
-                  <td className="py-3.5 px-4 text-center">
+                  <td className="py-3 px-4 text-center">
                     {renderValue(item.school)}
                   </td>
-                  <td className="py-3.5 px-4 text-center">
+                  <td className="py-3 px-4 text-center">
                     {renderValue(item.enterprise)}
                   </td>
                 </tr>
@@ -60,43 +58,18 @@ export function PlanComparisonTable() {
             </React.Fragment>
           ))}
         </tbody>
-        <tfoot>
-          <tr className="border-t border-slate-200">
-            <td className="py-6 px-6 font-bold text-slate-900">Get Started</td>
-            <td className="py-6 px-4 text-center">
-              <Button href="/demo" variant="outline" size="sm">
-                Try Free
-              </Button>
-            </td>
-            <td className="py-6 px-4 text-center bg-sky-50/50">
-              <Button href="/checkout?product=qrie-student-app" variant="primary" size="sm">
-                Upgrade Pro
-              </Button>
-            </td>
-            <td className="py-6 px-4 text-center">
-              <Button href="/get-a-quote?product=qrie-school-platform" variant="outline" size="sm">
-                Get Quote
-              </Button>
-            </td>
-            <td className="py-6 px-4 text-center">
-              <Button href="/contact/sales" variant="secondary" size="sm">
-                Contact Sales
-              </Button>
-            </td>
-          </tr>
-        </tfoot>
       </table>
     </div>
   );
 }
 
-function renderValue(val: boolean | string) {
+function renderValue(val: string | boolean) {
   if (typeof val === "boolean") {
     return val ? (
-      <Check className="w-4 h-4 text-emerald-600 mx-auto" />
+      <Check className="w-4 h-4 text-[#1868db] mx-auto" />
     ) : (
-      <X className="w-4 h-4 text-slate-300 mx-auto" />
+      <X className="w-4 h-4 text-[#b7b9be] mx-auto" />
     );
   }
-  return <span className="text-slate-800">{val}</span>;
+  return <span className="text-[#292a2e] text-[13px]">{val}</span>;
 }

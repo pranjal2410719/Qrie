@@ -8,13 +8,8 @@ import { Badge } from "@/components/ui/Badge";
 import { generateProductSchema } from "@/lib/seo/jsonLd";
 import {
   CheckCircle2,
-  Cpu,
-  Layers,
   ShieldCheck,
-  Smartphone,
   ArrowRight,
-  School,
-  Lock,
 } from "lucide-react";
 
 export async function generateStaticParams() {
@@ -67,7 +62,7 @@ export default async function ProductDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         <Breadcrumbs
           items={[
             { label: "Products", href: "/products" },
@@ -82,47 +77,47 @@ export default async function ProductDetailPage({
               <Badge variant="primary" size="md">
                 {product.availability}
               </Badge>
-              {product.badge && <Badge variant="accent">{product.badge}</Badge>}
+              {product.badge && <Badge variant="lavender">{product.badge}</Badge>}
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
               {product.name}
             </h1>
-            <p className="text-xl font-medium text-slate-600 leading-relaxed">
+            <p className="text-xl font-medium text-[#1868db] leading-relaxed">
               {product.tagline}
             </p>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
+            <p className="text-base text-[#42526e] leading-[1.6] max-w-3xl font-normal">
               {product.longDescription}
             </p>
 
             {/* Target Audience Pill */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
-              <strong className="text-slate-900 font-semibold">Target Audience:</strong>{" "}
+            <div className="p-4 rounded-[12px] bg-[#f0f1f2] text-[13px] text-[#292a2e] font-normal">
+              <strong className="text-[#101214] font-semibold">Target Audience:</strong>{" "}
               {product.targetAudience}
             </div>
           </div>
 
-          {/* Pricing & CTA Card */}
-          <div className="lg:col-span-4 bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-6">
+          {/* Pricing & CTA Card: 20px radius card, subtle micro-shadow */}
+          <div className="lg:col-span-4 bg-white rounded-[20px] p-6 sm:p-8 border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-[12px] font-bold uppercase tracking-wider text-[#42526e]">
                 Licensing & Pricing
               </span>
               {product.startingPrice ? (
                 <div className="mt-1">
-                  <div className="text-3xl font-black text-slate-900">
+                  <div className="text-3xl font-medium tracking-[0.012em] text-[#101214]">
                     ₹{product.startingPrice.toLocaleString("en-IN")}
                   </div>
-                  <span className="text-xs text-slate-500">
-                    Billed {product.billingInterval} • Includes verified updates
+                  <span className="text-[12px] text-[#42526e] font-normal">
+                    Billed {product.billingInterval} • Verified Updates
                   </span>
                 </div>
               ) : (
                 <div className="mt-1">
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-medium text-[#101214]">
                     Institutional Quote
                   </div>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-[12px] text-[#42526e] font-normal">
                     Tailored to school student headcount and training
                   </span>
                 </div>
@@ -139,7 +134,7 @@ export default async function ProductDetailPage({
               {product.ctaText}
             </Button>
 
-            <div className="text-[11px] text-slate-400 space-y-2 border-t border-slate-200/80 pt-4">
+            <div className="text-[12px] text-[#42526e] space-y-2 border-t border-[#f0f1f2] pt-4 font-normal">
               <div className="flex items-center gap-2 text-emerald-700 font-semibold">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Qrie Architecture</span>
@@ -152,34 +147,40 @@ export default async function ProductDetailPage({
         </div>
 
         {/* Feature Breakdown */}
-        <div className="space-y-6 border-t border-slate-100 pt-12">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+        <div className="space-y-6 border-t border-[#f0f1f2] pt-12">
+          <h2 className="text-2xl sm:text-3xl font-medium tracking-[0.012em] text-[#101214]">
             Key Capabilities & Features
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {product.features.map((feat, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-2">
-                <h3 className="font-bold text-base text-slate-900">{feat.title}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{feat.description}</p>
+              <div
+                key={i}
+                className="p-6 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-2"
+              >
+                <h3 className="font-medium text-[16px] text-[#101214]">{feat.title}</h3>
+                <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">{feat.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Technical Specifications */}
-        <div className="space-y-6 border-t border-slate-100 pt-12">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+        <div className="space-y-6 border-t border-[#f0f1f2] pt-12">
+          <h2 className="text-2xl sm:text-3xl font-medium tracking-[0.012em] text-[#101214]">
             Technical Specifications & Runtime
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {product.technicalSpecs.map((spec, i) => (
-              <div key={i} className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <div
+                key={i}
+                className="p-4 rounded-[12px] border border-[#f0f1f2] bg-white shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-1"
+              >
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[#42526e]">
                   {spec.label}
                 </div>
-                <div className="text-xs font-semibold text-slate-800">{spec.value}</div>
+                <div className="text-[13px] font-medium text-[#101214]">{spec.value}</div>
               </div>
             ))}
           </div>

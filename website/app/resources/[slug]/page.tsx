@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { generateArticleSchema } from "@/lib/seo/jsonLd";
-import { Clock, User, Calendar, ArrowLeft, ArrowRight, Share2 } from "lucide-react";
+import { Clock, User, Calendar } from "lucide-react";
 
 export async function generateStaticParams() {
   return resourcesData.map((art) => ({
@@ -58,7 +58,7 @@ export default async function ResourceArticlePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <Breadcrumbs
           items={[
             { label: "Resources", href: "/resources" },
@@ -67,49 +67,49 @@ export default async function ResourceArticlePage({
         />
 
         {/* Article Header */}
-        <header className="space-y-4 border-b border-slate-100 pb-8">
+        <header className="space-y-4 border-b border-[#f0f1f2] pb-8">
           <Badge variant="primary" size="md">
             {article.category.replace("-", " ").toUpperCase()}
           </Badge>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             {article.title}
           </h1>
 
-          <p className="text-lg text-slate-600 leading-relaxed font-normal">
+          <p className="text-lg text-[#42526e] leading-[1.6] font-normal">
             {article.excerpt}
           </p>
 
-          <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-6 pt-2 text-[13px] text-[#42526e] font-normal">
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-slate-400" />
-              <span className="font-semibold text-slate-800">{article.author.name}</span>
-              <span className="text-slate-400">({article.author.role})</span>
+              <User className="w-4 h-4 text-[#1868db]" />
+              <span className="font-medium text-[#101214]">{article.author.name}</span>
+              <span className="text-[#42526e]">({article.author.role})</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-slate-400" />
+              <Calendar className="w-4 h-4 text-[#1868db]" />
               <span>{article.publishedAt}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-slate-400" />
+              <Clock className="w-4 h-4 text-[#1868db]" />
               <span>{article.readTime}</span>
             </div>
           </div>
         </header>
 
         {/* Body Paragraphs */}
-        <div className="space-y-6 text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
+        <div className="space-y-6 text-base text-[#292a2e] leading-[1.7] font-normal">
           {article.content.map((paragraph, idx) => (
             <p key={idx}>{paragraph}</p>
           ))}
         </div>
 
         {/* Tags */}
-        <div className="pt-6 border-t border-slate-100 flex flex-wrap gap-2">
+        <div className="pt-6 border-t border-[#f0f1f2] flex flex-wrap gap-2">
           {article.tags.map((tag) => (
             <span
               key={tag}
-              className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold"
+              className="px-3 py-1 rounded-full bg-[#f0f1f2] text-[#42526e] text-[12px] font-medium"
             >
               #{tag}
             </span>
@@ -117,10 +117,10 @@ export default async function ResourceArticlePage({
         </div>
 
         {/* Bottom Banner */}
-        <div className="p-8 rounded-3xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="p-8 rounded-[20px] bg-[#101214] text-white flex flex-col sm:flex-row items-center justify-between gap-6 border border-[#292a2e]">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-lg font-bold">See LAM in Action in Classrooms</h3>
-            <p className="text-xs text-slate-400">
+            <h3 className="text-lg font-medium tracking-[0.012em]">See LAM in Action in Classrooms</h3>
+            <p className="text-[14px] text-[#b7b9be] font-normal">
               Schedule a personalized school demonstration or explore our platform whitepaper.
             </p>
           </div>
@@ -128,7 +128,7 @@ export default async function ResourceArticlePage({
             <Button href="/school-demo" variant="white" size="md">
               Book School Demo
             </Button>
-            <Button href="/resources" variant="outline" size="md" className="border-slate-700 text-white bg-slate-800 hover:bg-slate-700">
+            <Button href="/resources" variant="outline" size="md" className="border-[#b7b9be] text-white hover:bg-white/10">
               Back to Resources
             </Button>
           </div>

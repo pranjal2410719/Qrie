@@ -1,11 +1,10 @@
 import React from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { School, ArrowRight, Sparkles } from "lucide-react";
 
 export function CtaBanner({
-  title = "Ready to Transform Learning in Your School?",
-  description = "Join progressive K-12 schools using Qrie's Learning Adaptation Model to deliver personalized education and automated teacher diagnostics.",
+  title = "Ready to transform learning in your school?",
+  description = "Join progressive K-12 institutions across India using Qrie's Learning Adaptation Model to deliver personalized education and automated teacher diagnostics.",
   primaryCtaText = "Request a School Demo",
   primaryCtaHref = "/school-demo",
   secondaryCtaText = "Get a Custom Quote",
@@ -19,38 +18,48 @@ export function CtaBanner({
   secondaryCtaHref?: string;
 }) {
   return (
-    <section className="py-20 bg-gradient-to-r from-sky-900 via-slate-900 to-indigo-950 text-white relative overflow-hidden">
-      {/* Glow effect */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 blur-3xl rounded-full pointer-events-none" />
+    <section className="py-20 bg-[#101214] text-white relative overflow-hidden">
+      {/* Torn geometric confetti accents in corners */}
+      <div
+        className="absolute -top-4 -left-4 w-12 h-12 bg-[#bf63f3] -rotate-12 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute top-1/2 -right-4 w-8 h-16 bg-[#fca700] rotate-45 pointer-events-none"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute -bottom-4 right-1/4 w-14 h-8 bg-[#36b37e] rotate-12 pointer-events-none"
+        aria-hidden="true"
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-900/60 border border-sky-700/80 text-xs font-semibold text-sky-300">
-          <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative text-center space-y-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1c2b42] text-[13px] font-medium text-[#fca700]">
+          <Sparkles className="w-3.5 h-3.5 text-[#fca700]" />
           <span>Transforming K-12 Classrooms</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight max-w-3xl mx-auto leading-tight">
+        <h2 className="text-3xl sm:text-4xl lg:text-[48px] font-medium tracking-[0.012em] max-w-3xl mx-auto leading-[1.14]">
           {title}
         </h2>
 
-        <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+        <p className="text-[#b7b9be] text-base max-w-2xl mx-auto leading-[1.5] font-normal">
           {description}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Button
             href={primaryCtaHref}
-            variant="white"
+            variant="yellow"
             size="lg"
-            icon={<School className="w-5 h-5 text-sky-700" />}
+            icon={<School className="w-4 h-4 text-[#101214]" />}
           >
             {primaryCtaText}
           </Button>
           <Button
             href={secondaryCtaHref}
-            variant="outline"
+            variant="white"
             size="lg"
-            className="border-slate-600 text-white bg-slate-800/80 hover:bg-slate-700"
             icon={<ArrowRight className="w-4 h-4" />}
           >
             {secondaryCtaText}

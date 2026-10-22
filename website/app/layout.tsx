@@ -7,7 +7,7 @@ import { siteConfig } from "@/lib/seo/siteConfig";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/seo/jsonLd";
 
 export const viewport: Viewport = {
-  themeColor: "#0284c7",
+  themeColor: "#1868db",
   width: "device-width",
   initialScale: 1,
 };
@@ -25,10 +25,14 @@ export const metadata: Metadata = {
     "LAM",
     "Bayesian Knowledge Tracing",
     "NCERT AI Tutor",
-    "School Education Platform",
     "CBSE Class 10 Learning App",
+    "School Education Platform",
     "Adaptive Learning India",
     "Teacher Co-Pilot Software",
+    "Offline Education App Android",
+    "DPDP Act 2023 Compliant LMS",
+    "Bengaluru EdTech",
+    "K-12 STEM Education India",
   ],
   authors: [{ name: "Qrie Learning Technologies", url: siteConfig.url }],
   creator: "Qrie Learning Technologies",
@@ -47,8 +51,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/Q_logo.png",
-        width: 1200,
-        height: 630,
+        width: 512,
+        height: 512,
         alt: "Qrie AI — Adaptive Learning Intelligence",
       },
     ],
@@ -71,6 +75,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  other: {
+    "geo.region": "IN-KA",
+    "geo.placename": "Bengaluru",
+    "geo.position": "12.9279;77.6835",
+    "ICBM": "12.9279, 77.6835",
+  },
 };
 
 export default function RootLayout({
@@ -81,6 +91,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        <meta name="geo.region" content="IN-KA" />
+        <meta name="geo.placename" content="Bengaluru" />
+        <meta name="geo.position" content="12.9279;77.6835" />
+        <meta name="ICBM" content="12.9279, 77.6835" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -94,8 +108,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-white text-slate-900 antialiased selection:bg-sky-100 selection:text-sky-900">
-        <Suspense fallback={<header className="h-20 bg-white border-b border-slate-100" />}>
+      <body className="min-h-screen flex flex-col bg-white text-[#101214] antialiased selection:bg-[#e9f2fe] selection:text-[#101214]">
+        <Suspense fallback={<header className="h-14 bg-white border-b border-[#f0f1f2]" />}>
           <Header />
         </Suspense>
         <main className="flex-1">{children}</main>

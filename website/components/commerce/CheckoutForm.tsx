@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/store/cartStore";
 import { productsData } from "@/lib/data/products";
 import { Button } from "@/components/ui/Button";
-import { ShieldCheck, Lock, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Lock, AlertCircle } from "lucide-react";
 
 export function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const directProductSlug = searchParams.get("product");
-  const { items, total, clear } = useCart();
+  const { items, clear } = useCart();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -135,16 +135,18 @@ export function CheckoutForm() {
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       {/* Left: Customer & Billing details */}
-      <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
+      <div className="lg:col-span-7 bg-white rounded-[20px] border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] p-6 sm:p-8 space-y-6">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">Customer & Billing Information</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-medium tracking-[0.012em] text-[#101214] mb-1">
+            Customer & Billing Information
+          </h2>
+          <p className="text-[13px] text-[#42526e] font-normal">
             Official educational license will be registered under this contact.
           </p>
         </div>
 
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+          <div className="p-4 rounded-[8px] bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
           </div>
@@ -153,7 +155,7 @@ export function CheckoutForm() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+              <label className="block text-[12px] font-bold text-[#292a2e] mb-1.5 uppercase tracking-wide">
                 Full Name *
               </label>
               <input
@@ -162,12 +164,12 @@ export function CheckoutForm() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Aarav Sharma"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+              <label className="block text-[12px] font-bold text-[#292a2e] mb-1.5 uppercase tracking-wide">
                 Email Address *
               </label>
               <input
@@ -176,13 +178,13 @@ export function CheckoutForm() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="aarav@example.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+            <label className="block text-[12px] font-bold text-[#292a2e] mb-1.5 uppercase tracking-wide">
               Phone Number *
             </label>
             <input
@@ -191,12 +193,12 @@ export function CheckoutForm() {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="+91 98765 43210"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
             />
           </div>
 
-          <div className="pt-2 border-t border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900 mb-3">Billing Address</h3>
+          <div className="pt-2 border-t border-[#f0f1f2]">
+            <h3 className="text-[14px] font-medium text-[#101214] mb-3">Billing Address</h3>
             <div className="space-y-3">
               <div>
                 <input
@@ -204,7 +206,7 @@ export function CheckoutForm() {
                   value={formData.street}
                   onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                   placeholder="Street address / School apartment"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                 />
               </div>
 
@@ -214,36 +216,36 @@ export function CheckoutForm() {
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   placeholder="City (e.g. Bengaluru)"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                 />
                 <input
                   type="text"
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                   placeholder="State"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                 />
                 <input
                   type="text"
                   value={formData.pinCode}
                   onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
                   placeholder="PIN Code"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                 />
               </div>
             </div>
           </div>
 
           <div className="pt-2">
-            <label className="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer">
+            <label className="flex items-start gap-2.5 text-[12px] text-[#42526e] cursor-pointer font-normal">
               <input
                 type="checkbox"
                 checked={formData.acceptTerms}
                 onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
-                className="mt-0.5 rounded text-sky-600 focus:ring-sky-500"
+                className="mt-0.5 rounded text-[#1868db] focus:ring-[#1868db]"
               />
               <span>
-                I agree to the <a href="/terms" className="text-sky-600 underline">Terms of Service</a> and confirm that my data will be handled in compliance with India&apos;s DPDP Act 2023.
+                I agree to the <a href="/terms" className="text-[#1868db] underline">Terms of Service</a> and confirm that my data will be handled in compliance with India&apos;s DPDP Act 2023.
               </span>
             </label>
           </div>
@@ -251,20 +253,20 @@ export function CheckoutForm() {
       </div>
 
       {/* Right: Order Summary & Payment Button */}
-      <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6">
-        <h3 className="text-lg font-bold text-slate-900">Order Summary</h3>
+      <div className="lg:col-span-5 bg-white rounded-[20px] border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] p-6 sm:p-8 space-y-6">
+        <h3 className="text-lg font-medium tracking-[0.012em] text-[#101214]">Order Summary</h3>
 
         {checkoutItems.length === 0 ? (
-          <p className="text-xs text-slate-500">No items selected.</p>
+          <p className="text-[13px] text-[#42526e] font-normal">No items selected.</p>
         ) : (
-          <div className="divide-y divide-slate-100 text-xs">
+          <div className="divide-y divide-[#f0f1f2] text-[13px]">
             {checkoutItems.map((item) => (
               <div key={item.productId} className="py-3 flex items-center justify-between">
                 <div>
-                  <div className="font-bold text-slate-900">{item.name}</div>
-                  <div className="text-slate-500">Qty: {item.quantity}</div>
+                  <div className="font-medium text-[#101214]">{item.name}</div>
+                  <div className="text-[#42526e] text-[12px]">Qty: {item.quantity}</div>
                 </div>
-                <div className="font-semibold text-slate-900">
+                <div className="font-medium text-[#101214]">
                   ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                 </div>
               </div>
@@ -272,22 +274,22 @@ export function CheckoutForm() {
           </div>
         )}
 
-        <div className="space-y-2.5 border-t border-slate-100 pt-4 text-xs">
-          <div className="flex items-center justify-between text-slate-600">
+        <div className="space-y-2.5 border-t border-[#f0f1f2] pt-4 text-[13px] font-normal">
+          <div className="flex items-center justify-between text-[#42526e]">
             <span>Subtotal</span>
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-[#101214]">
               ₹{subtotal.toLocaleString("en-IN")}
             </span>
           </div>
-          <div className="flex items-center justify-between text-slate-600">
+          <div className="flex items-center justify-between text-[#42526e]">
             <span>GST (18%)</span>
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-[#101214]">
               ₹{gstAmount.toLocaleString("en-IN")}
             </span>
           </div>
-          <div className="flex items-center justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between text-base font-medium text-[#101214] pt-2 border-t border-[#f0f1f2]">
             <span>Total Payable</span>
-            <span className="text-xl font-black text-sky-600">
+            <span className="text-xl font-medium tracking-[0.012em] text-[#1868db]">
               ₹{grandTotal.toLocaleString("en-IN")}
             </span>
           </div>
@@ -304,13 +306,13 @@ export function CheckoutForm() {
           {isLoading ? "Verifying Payment..." : `Pay ₹${grandTotal.toLocaleString("en-IN")}`}
         </Button>
 
-        <div className="pt-2 text-[11px] text-slate-400 space-y-1.5 text-center">
+        <div className="pt-2 text-[12px] text-[#42526e] space-y-1.5 text-center font-normal">
           <div className="flex items-center justify-center gap-1.5 text-emerald-600 font-medium">
-            <ShieldCheck className="w-4 h-4" />
+            <ShieldCheck className="w-4 h-4 text-[#1868db]" />
             <span>256-Bit SSL Encrypted Verification</span>
           </div>
           <p>
-            Supports UPI (GPay, PhonePe), Credit/Debit Cards, NetBanking, and Educational Wallets.
+            Supports UPI (GPay, PhonePe), Cards, NetBanking, and Educational Wallets.
           </p>
         </div>
       </div>

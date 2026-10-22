@@ -9,9 +9,9 @@ interface CardProps {
 export function Card({ children, className = "", hover = false }: CardProps) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/80 shadow-xs ${
+      className={`bg-white rounded-[20px] p-6 border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] ${
         hover
-          ? "transition-all duration-300 hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5"
+          ? "transition-all duration-200 hover:border-[#b7b9be]"
           : ""
       } ${className}`}
     >
@@ -27,7 +27,7 @@ export function CardHeader({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={`p-6 pb-4 ${className}`}>{children}</div>;
+  return <div className={`pb-4 ${className}`}>{children}</div>;
 }
 
 export function CardContent({
@@ -37,7 +37,7 @@ export function CardContent({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={`p-6 pt-0 ${className}`}>{children}</div>;
+  return <div className={`${className}`}>{children}</div>;
 }
 
 export function CardFooter({
@@ -48,7 +48,7 @@ export function CardFooter({
   className?: string;
 }) {
   return (
-    <div className={`p-6 pt-0 border-t border-slate-100 mt-4 flex items-center ${className}`}>
+    <div className={`pt-4 border-t border-[#f0f1f2] mt-4 flex items-center ${className}`}>
       {children}
     </div>
   );

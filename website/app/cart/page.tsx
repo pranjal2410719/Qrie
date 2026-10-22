@@ -13,18 +13,18 @@ export const metadata: Metadata = {
 export default function CartPage() {
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <Breadcrumbs items={[{ label: "Shopping Cart", href: "/cart" }]} />
 
         <div className="max-w-3xl space-y-3">
           <Badge variant="primary" size="md">
-            <ShoppingCart className="w-3.5 h-3.5 text-sky-600" />
+            <ShoppingCart className="w-3.5 h-3.5 text-[#1868db]" />
             <span>Review & Order</span>
           </Badge>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             Your Selected Software & Licenses
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-base text-[#42526e] leading-[1.5] font-normal">
             Review your selected educational licenses before proceeding to secure payment.
           </p>
         </div>

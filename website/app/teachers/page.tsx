@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { LavenderFeatureBand } from "@/components/ui/LavenderFeatureBand";
 import {
   BookOpenCheck,
   Activity,
@@ -25,19 +26,19 @@ export const metadata: Metadata = {
 export default function TeachersPage() {
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         <Breadcrumbs items={[{ label: "For Teachers", href: "/teachers" }]} />
 
         {/* Hero */}
         <div className="max-w-3xl space-y-4">
           <Badge variant="primary" size="md">
-            <BookOpenCheck className="w-3.5 h-3.5 text-sky-600" />
+            <BookOpenCheck className="w-3.5 h-3.5 text-[#1868db]" />
             <span>Teacher Co-Pilot</span>
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             Save Hours on Corrections. Target Real Classroom Gaps.
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed font-normal">
+          <p className="text-base text-[#42526e] leading-[1.5] font-normal">
             Qrie is built to empower teachers, not replace them. Automated diagnostic grading and class
             struggle heatmaps free educators from repetitive paper corrections so they can focus on
             high-impact instructional interventions.
@@ -54,46 +55,48 @@ export default function TeachersPage() {
 
         {/* Teacher Pillars Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Clock className="w-8 h-8 text-sky-600" />
-            <h3 className="text-xl font-bold text-slate-900">5+ Hours Saved Weekly</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Distribute digital NCERT assignments in two taps. Qrie evaluates symbolic math, fractions,
-              and equations automatically, eliminating midnight grading marathons.
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Clock className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              5+ Hours Saved Weekly
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Homework is automatically assessed for mathematical equivalence and conceptual reasoning,
+              relieving teachers of clerical routine.
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Activity className="w-8 h-8 text-emerald-600" />
-            <h3 className="text-xl font-bold text-slate-900">Live Class Struggle Heatmaps</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Before walking into your period, open the portal to see aggregate comprehension: &quot;71% of
-              Section 9-B is struggling with signs in quadratic factoring.&quot;
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Activity className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              Live Struggle Heatmaps
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Enter class knowing exactly which concept confused your students during yesterday&apos;s
+              assignments, turning lecture time into targeted clarification.
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Sparkles className="w-8 h-8 text-indigo-600" />
-            <h3 className="text-xl font-bold text-slate-900">Targeted Micro-Interventions</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Instead of repeating the entire lecture, spend the first 8 minutes addressing the precise
-              misconception identified by LAM, then divide students into peer-study pairs.
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Sparkles className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              Aligned to Term Exams
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Pre-populated with NCERT-aligned practice items mapped directly to CBSE syllabus
+              schedules and quarterly term milestones.
             </p>
           </div>
         </div>
 
-        {/* Closing Action */}
-        <div className="p-8 rounded-3xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-center sm:text-left">
-            <h3 className="text-xl font-bold">Introduce Qrie to Your School Principal</h3>
-            <p className="text-xs text-slate-400">
-              We provide official pilot proposals and free trial access for participating academic departments.
-            </p>
-          </div>
-          <Button href="/school-demo" variant="white" size="md">
-            Request School Pilot Pack
-          </Button>
-        </div>
+        {/* Feature Band */}
+        <LavenderFeatureBand
+          badge="Teacher Enablement"
+          headline="Technology that respects pedagogical authority."
+          body="Teachers retain complete control over syllabus pacing, homework deadlines, and classroom assignments. Qrie's co-pilot simply handles the diagnostic legwork."
+          ctaText="Learn about teacher training workshops"
+          ctaHref="/services/teacher-ai-enablement"
+        />
       </div>
     </div>
   );

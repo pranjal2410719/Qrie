@@ -1,8 +1,7 @@
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
+import { HeroConfettiEdges } from "@/components/ui/ConfettiDecoration";
 import {
   Sparkles,
   ArrowRight,
@@ -15,164 +14,149 @@ import {
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-sky-50/50 via-white to-slate-50/60">
-      {/* Background Decorative Rings */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-tr from-sky-200/30 via-indigo-100/20 to-transparent blur-3xl pointer-events-none -z-10 rounded-full" />
+    <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-32 bg-[#101214] text-white">
+      {/* Signature Atlassian Confetti Edges (Vivid Violet, Taxicab Yellow, Electric Blue, Leaf Green) */}
+      <HeroConfettiEdges />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Messaging & CTAs */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+          {/* Left Column: Messaging & Yellow CTA */}
+          <div className="lg:col-span-7 space-y-6 text-left">
             <div className="inline-flex items-center gap-2">
-              <Badge variant="primary" size="md">
-                <BrainCircuit className="w-3.5 h-3.5 text-sky-600" />
-                <span>Powered by Learning Adaptation Model (LAM)</span>
-              </Badge>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium leading-[1.29] bg-[#1c2b42] text-[#fca700]">
+                <BrainCircuit className="w-3.5 h-3.5 text-[#fca700]" />
+                <span>Learning Adaptation Model (LAM)</span>
+              </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
-              Personalized Learning for School Students,{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700">
-                Driven by Educational Intelligence.
-              </span>
+            {/* Charlie Display Editorial Headline: Scales up to 72px-80px with 0.012em tracking */}
+            <h1 className="text-4xl sm:text-6xl lg:text-[76px] font-medium text-white tracking-[0.012em] leading-[1.05]">
+              Personalized learning for school students.
             </h1>
 
-            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+            <p className="text-base text-white/90 max-w-xl leading-[1.5] font-normal">
               Qrie AI bridges learning gaps across NCERT Classes 6–12. Our proprietary{" "}
-              <strong className="font-semibold text-slate-900">Learning Adaptation Model</strong>{" "}
+              <span className="text-white font-medium">Learning Adaptation Model</span>{" "}
               combines continuous Bayesian mastery tracking, step-by-step Socratic AI tutoring, and
-              connected apps for students, teachers, and school administrators.
+              connected apps for students, teachers, and school leadership.
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+            {/* CTAs: Primary Yellow (#fca700) CTA strictly on dark hero */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <Button
                 href="/school-demo"
-                variant="primary"
+                variant="yellow"
                 size="lg"
-                icon={<School className="w-5 h-5" />}
+                icon={<School className="w-4 h-4 text-[#101214]" />}
               >
                 Request a School Demo
               </Button>
               <Button
                 href="/platform"
-                variant="outline"
+                variant="white"
                 size="lg"
                 icon={<ArrowRight className="w-4 h-4" />}
               >
-                Explore the Platform
+                Explore Platform
               </Button>
               <Button
-                href="/lam"
-                variant="ghost"
+                href="/demo"
+                variant="secondary"
                 size="lg"
-                className="text-sky-700 hover:text-sky-800"
+                className="text-white hover:text-[#fca700]"
               >
-                Explore LAM Engine
+                Try Interactive Demo
               </Button>
             </div>
 
-            {/* Value Proof Badges */}
-            <div className="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center lg:justify-start gap-y-3 gap-x-6 text-xs text-slate-500 font-medium">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            {/* Proof Badges */}
+            <div className="pt-6 border-t border-[#292a2e] flex flex-wrap items-center gap-y-3 gap-x-6 text-[13px] text-[#b7b9be] font-normal">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>NCERT Classes 6–12 Aligned</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-sky-500" />
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-[#1868db] shrink-0" />
                 <span>Offline-First Android App</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-indigo-500" />
-                <span>DPDP 2023 Tenant Isolation</span>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#bf63f3] shrink-0" />
+                <span>DPDP Act 2023 Compliant</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Genuine Product Interface Preview */}
+          {/* Right Column: Promotional Bento Card with 20px radius */}
           <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-md lg:max-w-none">
-              {/* Main Bento Mobile App Frame */}
-              <div className="relative bg-white rounded-3xl p-5 shadow-2xl border border-slate-200/90 overflow-hidden">
-                {/* Header of Mock Screen */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-slate-50 p-1 border border-slate-200">
-                      <Image
-                        src="/Q_logo.png"
-                        alt="Qrie Q"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-slate-900">Hi, Aarav Sharma</div>
-                      <div className="text-[10px] text-slate-500">Class 10 CBSE • Science</div>
-                    </div>
+            <div className="bg-white text-[#101214] rounded-[20px] p-6 shadow-2xl border border-[#292a2e] space-y-4">
+              {/* Card Header */}
+              <div className="flex items-center justify-between border-b border-[#f0f1f2] pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-8 h-8 rounded-[8px] overflow-hidden bg-[#f0f1f2] p-1 border border-[#f0f1f2]">
+                    <Image
+                      src="/Q_logo.png"
+                      alt="Qrie Mark"
+                      fill
+                      sizes="32px"
+                      className="object-contain"
+                    />
                   </div>
-                  <div className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                    6-Day Streak 🔥
+                  <div>
+                    <div className="text-[14px] font-bold text-[#101214]">Aarav Sharma</div>
+                    <div className="text-[12px] text-[#42526e]">Class 10 CBSE • Science</div>
                   </div>
                 </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-[#e3fcef] text-[#006644] text-[11px] font-bold">
+                  6-Day Streak 🔥
+                </span>
+              </div>
 
-                {/* AI Tutor Chat Card */}
-                <div className="bg-sky-50/80 rounded-2xl p-4 border border-sky-100 mb-4 space-y-2.5">
-                  <div className="flex items-center justify-between text-xs font-semibold text-sky-800">
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-sky-600" />
-                      Qrie AI Tutor
-                    </span>
-                    <span className="text-[10px] bg-white px-2 py-0.5 rounded-full border border-sky-200 text-sky-700 font-bold">
-                      Step-by-Step
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed">
-                    &quot;Let&apos;s look at Photosynthesis. Remember: what happens to water molecules when light hits chlorophyll? What gas is released?&quot;
-                  </p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-[10px] font-semibold bg-white text-slate-800 px-2 py-1 rounded-md border border-slate-200 shadow-2xs">
-                      A: Oxygen is split
-                    </span>
-                    <span className="text-[10px] font-semibold bg-white text-slate-800 px-2 py-1 rounded-md border border-slate-200 shadow-2xs">
-                      B: Carbon is fixed
-                    </span>
-                  </div>
+              {/* Socratic Dialogue Preview */}
+              <div className="bg-[#f0f1f2] rounded-[12px] p-4 space-y-2">
+                <div className="flex items-center justify-between text-[13px] font-bold text-[#101214]">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#1868db]" />
+                    Qrie Socratic Tutor
+                  </span>
+                  <span className="text-[10px] bg-white px-2 py-0.5 rounded-full text-[#1868db] font-semibold border border-[#f0f1f2]">
+                    Step-by-Step
+                  </span>
                 </div>
-
-                {/* LAM Cognitive Progress Pill */}
-                <div className="bg-slate-900 text-white rounded-2xl p-4 space-y-2 mb-4">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-300 font-medium">Topic Mastery (BKT Score)</span>
-                    <span className="font-bold text-emerald-400">84% Mastered</span>
-                  </div>
-                  <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                    <div className="bg-emerald-400 h-full w-[84%] rounded-full transition-all duration-500" />
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
-                    <span>Chemical Reactions & Equations</span>
-                    <span className="text-sky-300">Next: Practice 3 Questions</span>
-                  </div>
-                </div>
-
-                {/* Teacher / School sync indicator */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                  <div className="flex items-center gap-2">
-                    <School className="w-4 h-4 text-sky-600" />
-                    <span className="font-medium text-slate-800">Delhi Public School • Class 10-A</span>
-                  </div>
-                  <span className="text-[10px] text-slate-500 font-semibold">Synced</span>
+                <p className="text-[13px] text-[#292a2e] leading-relaxed">
+                  &quot;Let&apos;s look at Photosynthesis. Remember: what happens to water molecules when light hits chlorophyll? What gas is released?&quot;
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[11px] font-semibold bg-white text-[#101214] px-2.5 py-1 rounded-[6px] border border-[#f0f1f2]">
+                    A: Oxygen is split
+                  </span>
+                  <span className="text-[11px] font-semibold bg-[#e9f2fe] text-[#1868db] px-2.5 py-1 rounded-[6px] border border-[#1868db]">
+                    B: Carbon is fixed
+                  </span>
                 </div>
               </div>
 
-              {/* Floating Badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-3 shadow-xl border border-slate-200/90 flex items-center gap-3 animate-bounce-slow">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold">
-                  BKT
+              {/* BKT Mastery Tracker */}
+              <div className="bg-[#101214] text-white rounded-[12px] p-4 space-y-2">
+                <div className="flex items-center justify-between text-[12px]">
+                  <span className="text-[#b7b9be] font-medium">BKT Topic Mastery P(L)</span>
+                  <span className="font-bold text-emerald-400">84% Mastered</span>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Bayesian Adaptation</div>
-                  <div className="text-[10px] text-slate-500">Sub-15ms Cognitive Tracking</div>
+                <div className="w-full bg-[#292a2e] h-2 rounded-full overflow-hidden">
+                  <div className="bg-emerald-400 h-full w-[84%] rounded-full" />
                 </div>
+                <div className="flex items-center justify-between text-[11px] text-[#b7b9be] pt-0.5">
+                  <span>Chemical Reactions & Equations</span>
+                  <span className="text-[#fca700]">Next: Practice 3 Questions</span>
+                </div>
+              </div>
+
+              {/* Institutional Sync */}
+              <div className="flex items-center justify-between p-3 rounded-[12px] bg-[#f0f1f2] text-[12px]">
+                <div className="flex items-center gap-2">
+                  <School className="w-4 h-4 text-[#1868db]" />
+                  <span className="font-medium text-[#101214]">Delhi Public School • Class 10-A</span>
+                </div>
+                <span className="text-[11px] text-emerald-600 font-bold">Live Synced</span>
               </div>
             </div>
           </div>

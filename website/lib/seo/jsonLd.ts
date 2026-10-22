@@ -17,6 +17,25 @@ export function generateOrganizationSchema() {
       postalCode: siteConfig.address.postalCode,
       addressCountry: siteConfig.address.country,
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 12.9279,
+      longitude: 77.6835,
+    },
+    serviceArea: {
+      "@type": "AdministrativeArea",
+      name: "India",
+    },
+    knowsAbout: [
+      "Learning Adaptation Model (LAM)",
+      "Bayesian Knowledge Tracing (BKT)",
+      "NCERT Classes 6–12 Curriculum",
+      "CBSE Secondary & Senior Secondary Education",
+      "Socratic AI Tutoring",
+      "K-12 School Management Software",
+      "India Digital Personal Data Protection (DPDP) Act 2023",
+      "Offline-First Mobile Learning Systems",
+    ],
     contactPoint: {
       "@type": "ContactPoint",
       telephone: siteConfig.phone,

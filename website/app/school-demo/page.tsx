@@ -7,12 +7,8 @@ import { Badge } from "@/components/ui/Badge";
 import {
   School,
   CheckCircle2,
-  Calendar,
-  Users,
-  ShieldCheck,
-  AlertCircle,
   Clock,
-  Sparkles,
+  AlertCircle,
 } from "lucide-react";
 
 export default function SchoolDemoPage() {
@@ -59,66 +55,66 @@ export default function SchoolDemoPage() {
 
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <Breadcrumbs items={[{ label: "For Schools", href: "/schools" }, { label: "Request a School Demo", href: "/school-demo" }]} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Left Column: Context & What Demo Includes */}
           <div className="lg:col-span-6 space-y-6">
             <Badge variant="primary" size="md">
-              <School className="w-3.5 h-3.5 text-sky-600" />
+              <School className="w-3.5 h-3.5 text-[#1868db]" />
               <span>Institutional Consultation</span>
             </Badge>
 
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
               Request a School Demonstration & Pilot
             </h1>
 
-            <p className="text-base text-slate-600 leading-relaxed">
+            <p className="text-base text-[#42526e] leading-[1.5] font-normal">
               Experience how Qrie transforms academic operations in your classrooms. Schedule a personalized
               virtual or on-campus walk-through with our educational deployment team.
             </p>
 
-            <div className="space-y-4 pt-4 border-t border-slate-100">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+            <div className="space-y-4 pt-4 border-t border-[#f0f1f2]">
+              <h2 className="text-[12px] font-bold uppercase tracking-wider text-[#101214]">
                 What Your School Demo Includes:
               </h2>
 
-              <ul className="space-y-3 text-xs text-slate-600">
+              <ul className="space-y-3 text-[14px] text-[#42526e] font-normal">
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#1868db] shrink-0 mt-1" />
                   <span>
-                    <strong>Teacher Co-Pilot Walkthrough:</strong> Automated homework creation and class
+                    <strong className="text-[#101214] font-medium">Teacher Co-Pilot Walkthrough:</strong> Automated homework creation and class
                     mastery struggle heatmaps.
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#1868db] shrink-0 mt-1" />
                   <span>
-                    <strong>Student Mobile Experience:</strong> Live demonstration of the offline-first
+                    <strong className="text-[#101214] font-medium">Student Mobile Experience:</strong> Live demonstration of the offline-first
                     Android app and Socratic AI tutor.
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#1868db] shrink-0 mt-1" />
                   <span>
-                    <strong>Curriculum Mapping Review:</strong> Aligning NCERT/CBSE/ICSE syllabus blueprints
+                    <strong className="text-[#101214] font-medium">Curriculum Mapping Review:</strong> Aligning NCERT/CBSE/ICSE syllabus blueprints
                     with your school calendar.
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#1868db] shrink-0 mt-1" />
                   <span>
-                    <strong>30-Day Institutional Pilot:</strong> Evaluation terms and teacher enablement
+                    <strong className="text-[#101214] font-medium">30-Day Institutional Pilot:</strong> Evaluation terms and teacher enablement
                     workshop options.
                   </span>
                 </li>
               </ul>
             </div>
 
-            <div className="p-4 rounded-2xl bg-sky-50 border border-sky-100 text-xs text-sky-800 space-y-1">
-              <div className="font-bold flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-sky-600" />
+            <div className="p-4 rounded-[12px] bg-[#f0f1f2] border border-[#f0f1f2] text-[13px] text-[#42526e] space-y-1 font-normal">
+              <div className="font-medium text-[#101214] flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#1868db]" />
                 <span>Response Time Commitment</span>
               </div>
               <p>
@@ -129,30 +125,34 @@ export default function SchoolDemoPage() {
           </div>
 
           {/* Right Column: Functional Demo Form */}
-          <div className="lg:col-span-6 bg-slate-50/80 rounded-3xl p-6 sm:p-8 border border-slate-200">
+          <div className="lg:col-span-6 bg-white rounded-[20px] p-6 sm:p-8 border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px]">
             {submittedRef ? (
               <div className="py-12 text-center space-y-4 animate-in fade-in">
-                <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-[20px] bg-[#e3fcef] text-[#006644] flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900">Demonstration Requested!</h3>
-                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                <h3 className="text-2xl font-medium tracking-[0.012em] text-[#101214]">
+                  Demonstration Requested!
+                </h3>
+                <p className="text-[14px] text-[#42526e] max-w-sm mx-auto leading-relaxed font-normal">
                   Your request has been registered under reference:
                 </p>
-                <div className="inline-block px-4 py-2 rounded-xl bg-white border border-slate-200 font-mono text-sm font-bold text-sky-700">
+                <div className="inline-block px-4 py-2 rounded-[28px] bg-[#f0f1f2] font-mono text-sm font-bold text-[#1868db]">
                   {submittedRef}
                 </div>
-                <p className="text-xs text-slate-500 pt-2">
+                <p className="text-[13px] text-[#42526e] pt-2 font-normal">
                   A Qrie academic coordinator will contact you via email and phone to confirm the meeting link
                   and prepare your customized school preview.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Schedule Your School Demo</h3>
+                <h3 className="text-lg font-medium text-[#101214] mb-2 tracking-[0.012em]">
+                  Schedule Your School Demo
+                </h3>
 
                 {errorMessage && (
-                  <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                  <div className="p-3.5 rounded-[8px] bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{errorMessage}</span>
                   </div>
@@ -160,7 +160,7 @@ export default function SchoolDemoPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       Your Name *
                     </label>
                     <input
@@ -169,12 +169,12 @@ export default function SchoolDemoPage() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Dr. S. K. Verma"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       Official Work Email *
                     </label>
                     <input
@@ -183,14 +183,14 @@ export default function SchoolDemoPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="principal@dps-school.edu.in"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       Phone Number *
                     </label>
                     <input
@@ -199,12 +199,12 @@ export default function SchoolDemoPage() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+91 98765 43210"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       School / Institution Name *
                     </label>
                     <input
@@ -213,14 +213,14 @@ export default function SchoolDemoPage() {
                       value={formData.schoolName}
                       onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
                       placeholder="Delhi Public School, R.K. Puram"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       City & State *
                     </label>
                     <input
@@ -229,18 +229,18 @@ export default function SchoolDemoPage() {
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="New Delhi, Delhi"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
+                    <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
                       Target Grade Levels
                     </label>
                     <select
                       value={formData.gradeLevels}
                       onChange={(e) => setFormData({ ...formData, gradeLevels: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                     >
                       <option value="Classes 6–8">Middle School (Classes 6–8)</option>
                       <option value="Classes 9–10">Secondary (Classes 9–10)</option>
@@ -251,15 +251,15 @@ export default function SchoolDemoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wide">
-                    Additional Requirements / Preferred Timeline
+                  <label className="block text-[12px] font-bold text-[#292a2e] mb-1 uppercase tracking-wide">
+                    Additional Requirements / Notes
                   </label>
                   <textarea
                     rows={3}
                     value={formData.comments}
                     onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
-                    placeholder="Tell us about your student population, board affiliation (CBSE/ICSE), or specific diagnostic goals."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    placeholder="Tell us about student count, board affiliation (CBSE/ICSE), or specific diagnostic goals."
+                    className="w-full px-3.5 py-2.5 rounded-[8px] border border-[#b7b9be] bg-white text-[14px] focus:outline-none focus:border-[#1868db] focus:ring-1 focus:ring-[#1868db]"
                   />
                 </div>
 

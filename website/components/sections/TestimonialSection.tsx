@@ -1,6 +1,6 @@
 import React from "react";
-import { Badge } from "@/components/ui/Badge";
-import { Quote, Sparkles, Building, CheckCircle } from "lucide-react";
+import { EditorialHeadline } from "@/components/ui/EditorialHeadline";
+import { Quote, Building } from "lucide-react";
 
 export function TestimonialSection() {
   const testimonials = [
@@ -10,7 +10,7 @@ export function TestimonialSection() {
       name: "S. Mukherjee",
       role: "Senior Science Faculty",
       school: "Delhi Public School Partner Cohort",
-      type: "Educator Feedback (Pilot Cohort)",
+      type: "Educator Feedback",
     },
     {
       quote:
@@ -31,43 +31,36 @@ export function TestimonialSection() {
   ];
 
   return (
-    <section className="py-20 bg-slate-50/80 border-b border-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <Badge variant="success" size="md">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Verified Educational Feedback</span>
-          </Badge>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            Trusted by Teachers, Parents, and Academic Leaders
-          </h2>
-          <p className="text-base text-slate-600 leading-relaxed">
-            Real feedback from educators and school pilots testing the Qrie Learning Adaptation Model
-            and connected school applications.
-          </p>
-        </div>
+    <section className="py-20 bg-[#f0f1f2]/50 border-b border-[#f0f1f2]">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        <EditorialHeadline
+          badge="Verified Educational Feedback"
+          title="Trusted by Educators, Parents, and Principals"
+          highlightWord="Educators"
+          description="Real-world feedback from partner schools and pilot cohorts using the Qrie Learning Adaptation Model."
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((item, idx) => (
             <div
               key={idx}
-              className="p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between"
+              className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] flex flex-col justify-between"
             >
               <div className="space-y-4">
-                <Quote className="w-8 h-8 text-sky-500/30" />
-                <p className="text-sm text-slate-700 leading-relaxed italic">
+                <Quote className="w-7 h-7 text-[#1868db] opacity-40" />
+                <p className="text-[14px] text-[#292a2e] leading-[1.6] font-normal italic">
                   &quot;{item.quote}&quot;
                 </p>
               </div>
 
-              <div className="pt-6 border-t border-slate-100 mt-6 space-y-1">
-                <div className="font-bold text-sm text-slate-900">{item.name}</div>
-                <div className="text-xs text-slate-600">{item.role}</div>
-                <div className="text-[11px] font-medium text-sky-700 flex items-center gap-1">
-                  <Building className="w-3 h-3 text-sky-600" />
+              <div className="pt-6 border-t border-[#f0f1f2] mt-6 space-y-1">
+                <div className="font-bold text-[14px] text-[#101214]">{item.name}</div>
+                <div className="text-[12px] text-[#42526e]">{item.role}</div>
+                <div className="text-[12px] font-medium text-[#1868db] flex items-center gap-1.5 pt-0.5">
+                  <Building className="w-3.5 h-3.5 text-[#1868db]" />
                   <span>{item.school}</span>
                 </div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold pt-1">
+                <div className="text-[11px] text-[#b7b9be] uppercase tracking-wider font-semibold pt-1">
                   {item.type}
                 </div>
               </div>

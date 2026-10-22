@@ -11,15 +11,15 @@ export const metadata: Metadata = {
 
 export default function PaymentCancelledPage() {
   return (
-    <div className="py-20 bg-slate-50/50">
-      <div className="max-w-md mx-auto px-4 text-center space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200">
-        <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto">
+    <div className="py-20 bg-[#ffffff]">
+      <div className="max-w-md mx-auto px-4 text-center space-y-6 bg-white p-8 sm:p-10 rounded-[20px] border border-[#f0f1f2] shadow-[rgba(9,30,66,0.08)_0px_1px_2px_0px]">
+        <div className="w-16 h-16 rounded-[20px] bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto">
           <XCircle className="w-8 h-8" />
         </div>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-slate-900">Payment Cancelled</h1>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <h1 className="text-2xl font-normal font-serif text-[#101214]">Payment Cancelled</h1>
+          <p className="text-sm text-[#42526e] leading-relaxed">
             Your transaction was interrupted before completion. No charges have been made to your payment
             card or UPI account. Your selected items remain saved in your cart.
           </p>
@@ -34,8 +34,8 @@ export default function PaymentCancelledPage() {
           </Button>
         </div>
 
-        <div className="text-[11px] text-slate-400">
-          Encountering payment issues? Contact <a href="mailto:support@qrie.ai" className="text-sky-600 underline">support@qrie.ai</a>.
+        <div className="text-[11px] text-[#42526e]">
+          Encountering payment issues? Contact <a href="mailto:support@qrie.ai" className="text-[#1868db] underline">support@qrie.ai</a>.
         </div>
       </div>
     </div>

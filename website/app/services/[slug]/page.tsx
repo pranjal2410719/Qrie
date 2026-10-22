@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/Badge";
 import {
   CheckCircle2,
   Clock,
-  Users,
-  ShieldCheck,
   ArrowRight,
   FileText,
 } from "lucide-react";
@@ -52,7 +50,7 @@ export default async function ServiceDetailPage({
 
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         <Breadcrumbs
           items={[
             { label: "Services", href: "/services" },
@@ -70,41 +68,41 @@ export default async function ServiceDetailPage({
               {service.badge && <Badge variant="success">{service.badge}</Badge>}
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
               {service.name}
             </h1>
-            <p className="text-xl font-medium text-slate-600 leading-relaxed">
+            <p className="text-xl font-medium text-[#1868db] leading-relaxed">
               {service.tagline}
             </p>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
+            <p className="text-base text-[#42526e] leading-[1.6] max-w-3xl font-normal">
               {service.description}
             </p>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
-              <strong className="text-slate-900 font-semibold">Intended Audience:</strong>{" "}
+            <div className="p-4 rounded-[12px] bg-[#f0f1f2] text-[13px] text-[#292a2e] font-normal">
+              <strong className="text-[#101214] font-semibold">Intended Audience:</strong>{" "}
               {service.targetAudience}
             </div>
           </div>
 
-          {/* Quotation Action Card */}
-          <div className="lg:col-span-4 bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-6">
+          {/* Quotation Action Card: 20px radius card, subtle micro-shadow */}
+          <div className="lg:col-span-4 bg-white rounded-[20px] p-6 sm:p-8 border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-[12px] font-bold uppercase tracking-wider text-[#42526e]">
                 Engagement Model
               </span>
-              <div className="text-xl font-bold text-slate-900 mt-1">
+              <div className="text-xl font-medium text-[#101214] mt-1 tracking-[0.012em]">
                 {service.pricingModel}
               </div>
               {service.startingEstimate && (
-                <div className="text-xs text-slate-500 mt-1">
-                  Estimated baseline: <strong className="text-slate-800">{service.startingEstimate}</strong>
+                <div className="text-[13px] text-[#42526e] mt-1 font-normal">
+                  Estimated baseline: <strong className="text-[#292a2e]">{service.startingEstimate}</strong>
                 </div>
               )}
             </div>
 
-            <div className="space-y-2 text-xs text-slate-600 border-t border-slate-200/80 pt-4">
+            <div className="space-y-2 text-[13px] text-[#42526e] border-t border-[#f0f1f2] pt-4 font-normal">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-sky-600 shrink-0" />
+                <Clock className="w-4 h-4 text-[#1868db] shrink-0" />
                 <span>
                   <strong>Timeline:</strong> {service.timeline}
                 </span>
@@ -124,32 +122,38 @@ export default async function ServiceDetailPage({
         </div>
 
         {/* Scope & Deliverables */}
-        <div className="space-y-6 border-t border-slate-100 pt-12">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+        <div className="space-y-6 border-t border-[#f0f1f2] pt-12">
+          <h2 className="text-2xl sm:text-3xl font-medium tracking-[0.012em] text-[#101214]">
             Scope & Deliverables
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {service.scopeAndDeliverables.map((d, i) => (
-              <div key={i} className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200 flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                <span className="text-xs text-slate-700 leading-relaxed">{d}</span>
+              <div
+                key={i}
+                className="p-5 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] flex items-start gap-3"
+              >
+                <CheckCircle2 className="w-5 h-5 text-[#1868db] shrink-0 mt-0.5" />
+                <span className="text-[14px] text-[#292a2e] leading-[1.5] font-normal">{d}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Customer Responsibilities */}
-        <div className="space-y-6 border-t border-slate-100 pt-12">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+        <div className="space-y-6 border-t border-[#f0f1f2] pt-12">
+          <h2 className="text-2xl sm:text-3xl font-medium tracking-[0.012em] text-[#101214]">
             Customer Prerequisites & Responsibilities
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {service.customerResponsibilities.map((r, i) => (
-              <div key={i} className="p-5 rounded-2xl bg-white border border-slate-200 flex items-start gap-3">
-                <FileText className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
-                <span className="text-xs text-slate-700 leading-relaxed">{r}</span>
+              <div
+                key={i}
+                className="p-5 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] flex items-start gap-3"
+              >
+                <FileText className="w-5 h-5 text-[#1868db] shrink-0 mt-0.5" />
+                <span className="text-[14px] text-[#292a2e] leading-[1.5] font-normal">{r}</span>
               </div>
             ))}
           </div>

@@ -25,21 +25,21 @@ export default function OrdersPage() {
 
         <div className="max-w-3xl space-y-3">
           <Badge variant="primary" size="md">
-            <Package className="w-3.5 h-3.5 text-sky-600" />
+            <Package className="w-3.5 h-3.5 text-[#1868db]" />
             <span>Customer Portal</span>
           </Badge>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-normal font-serif text-[#101214] tracking-[-0.012em] leading-tight">
             Track Your Order & License Status
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-base text-[#42526e]">
             Enter your official Qrie order reference to view your license activation status, receipt, and tax invoice.
           </p>
         </div>
 
-        <div className="max-w-xl bg-slate-50 rounded-3xl p-6 sm:p-8 border border-slate-200 space-y-6">
+        <div className="max-w-xl bg-white rounded-[20px] p-6 sm:p-8 border border-[#f0f1f2] shadow-[rgba(9,30,66,0.08)_0px_1px_2px_0px] space-y-6">
           <form onSubmit={handleLookup} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+              <label className="block text-xs font-bold text-[#292a2e] mb-1.5 uppercase tracking-wide">
                 Order Reference (e.g. QRIE-ORD-...)
               </label>
               <div className="relative">
@@ -49,9 +49,9 @@ export default function OrdersPage() {
                   value={orderQuery}
                   onChange={(e) => setOrderQuery(e.target.value)}
                   placeholder="QRIE-ORD-XXXX-XXXX"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-500 uppercase"
+                  className="w-full pl-10 pr-4 py-3 rounded-[8px] border border-[#f0f1f2] bg-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#1868db] focus:border-[#1868db] uppercase"
                 />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Search className="w-4 h-4 text-[#42526e] absolute left-3.5 top-3.5" />
               </div>
             </div>
 
@@ -60,8 +60,8 @@ export default function OrdersPage() {
             </Button>
           </form>
 
-          <div className="text-center pt-2 text-xs text-slate-400">
-            Lost your order ID? Check your registration email or contact <a href="mailto:support@qrie.ai" className="text-sky-600 underline">support@qrie.ai</a>.
+          <div className="text-center pt-2 text-xs text-[#42526e]">
+            Lost your order ID? Check your registration email or contact <a href="mailto:support@qrie.ai" className="text-[#1868db] underline">support@qrie.ai</a>.
           </div>
         </div>
       </div>

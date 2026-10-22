@@ -15,24 +15,24 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[960px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <Breadcrumbs items={[{ label: "Terms of Service", href: "/terms" }]} />
 
-        <div className="space-y-4 border-b border-slate-100 pb-8">
+        <div className="space-y-4 border-b border-[#f0f1f2] pb-8">
           <Badge variant="primary" size="md">
             <span>Legal Agreement</span>
           </Badge>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             Terms of Service
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-[13px] text-[#42526e] font-normal">
             Last updated: October 2026 • Governing Law: Jurisdiction of Bengaluru, Karnataka, India
           </p>
         </div>
 
-        <div className="prose prose-slate max-w-none space-y-6 text-sm text-slate-700 leading-relaxed">
+        <div className="space-y-8 text-base text-[#292a2e] leading-[1.7] font-normal">
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">1. Acceptance of Terms</h2>
+            <h2 className="text-xl font-medium tracking-[0.012em] text-[#101214]">1. Acceptance of Terms</h2>
             <p>
               By accessing the Qrie AI website, downloading the Qrie Student Android App, or using any associated
               educational services provided by {siteConfig.legalName}, you agree to be bound by these Terms of Service.
@@ -40,11 +40,11 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">2. Permitted Educational Use</h2>
+            <h2 className="text-xl font-medium tracking-[0.012em] text-[#101214]">2. Permitted Educational Use</h2>
             <p>
               Qrie AI is licensed exclusively for personal educational study and school instruction. Users agree not to:
             </p>
-            <ul className="list-disc pl-5 space-y-1 text-xs">
+            <ul className="list-disc pl-5 space-y-1.5 text-[14px]">
               <li>Reverse engineer, decompile, or extract the underlying LAM Bayesian model weights or proprietary algorithms.</li>
               <li>Scrape, bulk-extract, or systematically redistribute curriculum question banks.</li>
               <li>Impersonate institutional faculty or submit forged academic attendance records.</li>
@@ -52,7 +52,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">3. Institutional School Contracts</h2>
+            <h2 className="text-xl font-medium tracking-[0.012em] text-[#101214]">3. Institutional School Contracts</h2>
             <p>
               For schools and educational trusts deploying Qrie across classrooms, the specific terms, student headcounts,
               billing schedules, and SLA commitments detailed in the executed Institutional Proposal supersede conflicting
@@ -61,19 +61,10 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">4. Cancellations & Refunds</h2>
+            <h2 className="text-xl font-medium tracking-[0.012em] text-[#101214]">4. Jurisdiction</h2>
             <p>
-              Individual Student Pro monthly and annual subscriptions may be cancelled at any time from the customer
-              orders portal. Pro-rated refunds for annual licenses are evaluated in accordance with standard Indian
-              consumer protection guidelines. Institutional school pilot fees follow the terms agreed upon during contract execution.
-            </p>
-          </section>
-
-          <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">5. Limitation of Liability</h2>
-            <p>
-              While Qrie provides curriculum-aligned diagnostic tutoring, we do not guarantee specific examination scores
-              or board ranks. Educational outcomes depend on individual student dedication and teacher instruction.
+              These terms are governed by and construed in accordance with the laws of India. Any disputes arising
+              hereunder shall be subject to the exclusive jurisdiction of the competent courts in Bengaluru, Karnataka.
             </p>
           </section>
         </div>

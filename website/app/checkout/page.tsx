@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function CheckoutPage() {
   return (
-    <div className="py-12 bg-slate-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <div className="py-12 bg-white">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <Breadcrumbs
           items={[
             { label: "Cart", href: "/cart" },
@@ -23,18 +23,18 @@ export default function CheckoutPage() {
 
         <div className="max-w-3xl space-y-3">
           <Badge variant="primary" size="md">
-            <Lock className="w-3.5 h-3.5 text-sky-600" />
+            <Lock className="w-3.5 h-3.5 text-[#1868db]" />
             <span>Secure 256-Bit SSL Checkout</span>
           </Badge>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             Complete Your Educational License Purchase
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-base text-[#42526e] leading-[1.5] font-normal">
             Provide customer registration and billing details to activate your software license immediately.
           </p>
         </div>
 
-        <Suspense fallback={<div className="py-12 text-center text-sm text-slate-500">Loading checkout...</div>}>
+        <Suspense fallback={<div className="py-12 text-center text-sm text-[#42526e]">Loading checkout...</div>}>
           <CheckoutForm />
         </Suspense>
       </div>

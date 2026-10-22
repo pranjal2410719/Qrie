@@ -22,12 +22,12 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           __html: JSON.stringify(generateBreadcrumbSchema(schemaItems)),
         }}
       />
-      <nav aria-label="Breadcrumb" className="py-3 text-xs text-slate-500">
+      <nav aria-label="Breadcrumb" className="py-2 text-[13px] text-[#42526e] font-normal">
         <ol className="flex items-center space-x-1.5 flex-wrap">
           <li>
             <Link
               href="/"
-              className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors"
+              className="inline-flex items-center gap-1 hover:text-[#1868db] transition-colors"
             >
               <Home className="w-3.5 h-3.5" />
               <span>Home</span>
@@ -37,15 +37,15 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             const isLast = index === items.length - 1;
             return (
               <li key={item.href} className="flex items-center space-x-1.5">
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#b7b9be] shrink-0" />
                 {isLast ? (
-                  <span className="font-semibold text-slate-800 truncate max-w-xs">
+                  <span className="font-medium text-[#101214] truncate max-w-xs">
                     {item.label}
                   </span>
                 ) : (
                   <Link
                     href={item.href}
-                    className="hover:text-slate-900 transition-colors"
+                    className="hover:text-[#1868db] transition-colors"
                   >
                     {item.label}
                   </Link>

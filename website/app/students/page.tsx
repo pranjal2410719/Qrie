@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { LavenderFeatureBand } from "@/components/ui/LavenderFeatureBand";
 import {
   GraduationCap,
   Sparkles,
@@ -26,19 +27,19 @@ export const metadata: Metadata = {
 export default function StudentsPage() {
   return (
     <div className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         <Breadcrumbs items={[{ label: "For Students", href: "/students" }]} />
 
         {/* Hero */}
         <div className="max-w-3xl space-y-4">
           <Badge variant="primary" size="md">
-            <GraduationCap className="w-3.5 h-3.5 text-sky-600" />
+            <GraduationCap className="w-3.5 h-3.5 text-[#1868db]" />
             <span>Built for School Students</span>
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-medium text-[#101214] tracking-[0.012em] leading-tight">
             Learn Without Fear. Master Every Concept.
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed font-normal">
+          <p className="text-base text-[#42526e] leading-[1.5] font-normal">
             Whether you are solving challenging physics numericals late at night or revising biology diagrams
             before class, Qrie is your 24/7 study companion that never judges your questions.
           </p>
@@ -54,33 +55,48 @@ export default function StudentsPage() {
 
         {/* Student Feature Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Sparkles className="w-8 h-8 text-sky-600" />
-            <h3 className="text-xl font-bold text-slate-900">24/7 Socratic AI Tutor</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Ask doubts anytime in English, Hindi, or Hinglish. Instead of giving you direct answers,
-              Qrie gives step-by-step hints so you learn how to solve the problem yourself.
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Sparkles className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              24/7 Socratic AI Tutor
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Stuck on homework? Ask anything. Qrie doesn&apos;t just spit out answers—it guides you
+              step-by-step through the logic.
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Smartphone className="w-8 h-8 text-emerald-600" />
-            <h3 className="text-xl font-bold text-slate-900">Offline-First Learning</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Internet down at home? No problem. Download chapters and practice quizzes while connected,
-              study completely offline, and your progress syncs automatically when reconnected.
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Smartphone className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              Offline-First Capability
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Download entire chapters and study offline. Your quizzes and practice sync automatically
+              when internet reconnects.
             </p>
           </div>
 
-          <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200/90 space-y-4">
-            <Flame className="w-8 h-8 text-amber-500" />
-            <h3 className="text-xl font-bold text-slate-900">Streaks, XP & Gamification</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Stay motivated with daily streaks, level progression, and mastery pills. Track your real
-              understanding rather than just cramming the night before an exam.
+          <div className="p-8 rounded-[20px] bg-white border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_1px_1px_0px] space-y-3">
+            <Flame className="w-7 h-7 text-[#1868db]" />
+            <h3 className="text-xl font-medium tracking-[0.012em] text-[#101214]">
+              Gamified Consistency
+            </h3>
+            <p className="text-[14px] text-[#42526e] leading-[1.5] font-normal">
+              Maintain study streaks, collect mastery badges, and gain confidence across every NCERT
+              chapter ahead of exams.
             </p>
           </div>
         </div>
+
+        {/* Feature Band */}
+        <LavenderFeatureBand
+          badge="Confidence Building"
+          headline="Ask questions with zero embarrassment."
+          body="Many students hesitate to raise their hands in crowded classrooms. Qrie provides a safe, patient environment where you can ask for explanations as many times as you need."
+          ctaText="Explore the 24/7 AI Tutor"
+          ctaHref="/ai-tutor"
+        />
       </div>
     </div>
   );

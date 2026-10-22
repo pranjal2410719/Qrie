@@ -2,7 +2,7 @@ import React from "react";
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: "default" | "primary" | "success" | "warning" | "outline" | "accent";
+  variant?: "default" | "primary" | "success" | "warning" | "outline" | "lavender";
   className?: string;
   size?: "sm" | "md";
 }
@@ -13,20 +13,29 @@ export function Badge({
   className = "",
   size = "md",
 }: BadgeProps) {
-  const sizeClasses = size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-xs font-semibold";
+  const sizeClasses =
+    size === "sm"
+      ? "px-2.5 py-0.5 text-[11px] leading-[1.2]"
+      : "px-3 py-1 text-[13px] leading-[1.29]";
 
   const variantClasses = {
-    default: "bg-slate-100 text-slate-800 border border-slate-200",
-    primary: "bg-sky-50 text-sky-700 border border-sky-200",
-    success: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    warning: "bg-amber-50 text-amber-700 border border-amber-200",
-    outline: "border border-slate-300 text-slate-700 bg-transparent",
-    accent: "bg-indigo-50 text-indigo-700 border border-indigo-200",
+    // Default Atlassian tag: #42526e text on #f0f1f2 background
+    default: "bg-[#f0f1f2] text-[#42526e]",
+    // Brand tinted: #1868db text on #e9f2fe background
+    primary: "bg-[#e9f2fe] text-[#1868db]",
+    // Success: green tint
+    success: "bg-[#e3fcef] text-[#006644]",
+    // Warning: orange tint
+    warning: "bg-[#fff7e6] text-[#974f0c]",
+    // Outline: 1px border
+    outline: "border border-[#292a2e] text-[#101214] bg-transparent",
+    // Lavender editorial tint
+    lavender: "bg-[#eed7fc] text-[#101214]",
   }[variant];
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full tracking-wide uppercase transition-colors ${sizeClasses} ${variantClasses} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-[10000px] font-medium tracking-normal ${sizeClasses} ${variantClasses} ${className}`}
     >
       {children}
     </span>

@@ -1,26 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Inter:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/* Atlassian Style Reference Tokens */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colors */
+  --color-atlassian-blue: #1868db;
+  --color-midnight-navy: #101214;
+  --color-carbon-edge: #292a2e;
+  --color-slate-current: #1c2b42;
+  --color-muted-indigo: #42526e;
+  --color-pure-white: #ffffff;
+  --color-fog-white: #f0f1f2;
+  --color-ash-gray: #b7b9be;
+  --color-taxicab-yellow: #fca700;
+  --color-lavender-wash: #eed7fc;
+  --color-confetti-violet: #bf63f3;
+  --color-confetti-green: #36b37e;
+  --color-confetti-gradient: #bf63f3;
+  --gradient-confetti-gradient: conic-gradient(rgb(191, 99, 243) 170deg, rgb(252, 167, 0) 171deg, rgb(252, 167, 0) 230deg, rgb(77, 140, 237) 231deg, rgb(77, 140, 237) 360deg);
+
+  /* Typography — Font Families */
+  --font-charlie-display: 'Manrope', 'Charlie Display', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-charlie-text: 'Inter', 'Charlie Text', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 13px;
+  --leading-caption: 1.29;
+  --text-body: 16px;
+  --leading-body: 1.5;
+  --text-subheading: 20px;
+  --leading-subheading: 1.4;
+  --text-heading-sm: 24px;
+  --leading-heading-sm: 1.25;
+  --text-heading: 32px;
+  --leading-heading: 1.2;
+  --text-heading-lg: 48px;
+  --leading-heading-lg: 1.14;
+  --text-display: 80px;
+  --leading-display: 1;
+  --tracking-display: 0.012em;
+
+  /* Typography — Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Spacing */
+  --spacing-unit: 4px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-36: 36px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-60: 60px;
+  --spacing-64: 64px;
+  --spacing-68: 68px;
+  --spacing-80: 80px;
+  --spacing-100: 100px;
+  --spacing-200: 200px;
+
+  /* Layout */
+  --page-max-width: 1200px;
+  --section-gap: 64-80px;
+  --card-padding: 24px;
+  --element-gap: 8-16px;
+
+  /* Named Radii */
+  --radius-nav: 2px;
+  --radius-tags: 10000px;
+  --radius-cards: 20px;
+  --radius-images: 5px;
+  --radius-inputs: 8px;
+  --radius-buttons: 28px;
+
+  /* Shadows */
+  --shadow-subtle: rgba(9, 30, 66, 0.31) 0px 0px 1px 0px, rgba(9, 30, 66, 0.25) 0px 1px 1px 0px;
+
+  /* Surfaces */
+  --surface-canvas: #ffffff;
+  --surface-soft-surface: #f0f1f2;
+  --surface-tinted-surface: #e9f2fe;
+  --surface-lavender-band: #eed7fc;
+  --surface-dark-panel: #101214;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-atlassian-blue: var(--color-atlassian-blue);
+  --color-midnight-navy: var(--color-midnight-navy);
+  --color-carbon-edge: var(--color-carbon-edge);
+  --color-slate-current: var(--color-slate-current);
+  --color-muted-indigo: var(--color-muted-indigo);
+  --color-pure-white: var(--color-pure-white);
+  --color-fog-white: var(--color-fog-white);
+  --color-ash-gray: var(--color-ash-gray);
+  --color-taxicab-yellow: var(--color-taxicab-yellow);
+  --color-lavender-wash: var(--color-lavender-wash);
+  --color-confetti-violet: var(--color-confetti-violet);
+  --color-confetti-green: var(--color-confetti-green);
+  --font-sans: var(--font-charlie-text);
+  --font-display: var(--font-charlie-display);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-nav: 2px;
+  --radius-tags: 10000px;
+  --radius-cards: 20px;
+  --radius-images: 5px;
+  --radius-inputs: 8px;
+  --radius-buttons: 28px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface-canvas);
+  color: var(--color-midnight-navy);
+  font-family: var(--font-charlie-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-charlie-display);
+  color: var(--color-midnight-navy);
+  letter-spacing: 0.012em;
+}
+
+a {
+  color: var(--color-atlassian-blue);
+}
+
+::selection {
+  background: #e9f2fe;
+  color: var(--color-midnight-navy);
+}
+
+/* Micro shadow token utility */
+.shadow-atlassian-subtle {
+  box-shadow: rgba(9, 30, 66, 0.31) 0px 0px 1px 0px, rgba(9, 30, 66, 0.25) 0px 1px 1px 0px;
 }

@@ -2,7 +2,15 @@ import React from "react";
 import Link from "next/link";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger" | "white";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "outline"
+    | "ghost"
+    | "yellow"
+    | "white"
+    | "muted"
+    | "danger";
   size?: "sm" | "md" | "lg";
   href?: string;
   external?: boolean;
@@ -22,28 +30,41 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
+  // Atlassian buttons: flat with zero shadow, pill radius 28px (or 9999px), Charlie Text font-medium
   const baseClasses =
-    "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100";
+    "inline-flex items-center justify-center font-medium rounded-[28px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1868db] focus-visible:ring-offset-2 active:opacity-90 disabled:opacity-50 disabled:pointer-events-none select-none";
 
   const sizeClasses = {
-    sm: "text-xs px-3.5 py-1.5 gap-1.5",
-    md: "text-sm px-5 py-2.5 gap-2",
-    lg: "text-base px-7 py-3.5 gap-2.5 shadow-sm",
+    sm: "text-[14px] px-3.5 py-1.5 gap-1.5 leading-[1.25]",
+    md: "text-[16px] px-5 py-2.5 gap-2 leading-[1.5]",
+    lg: "text-[16px] px-6 py-3 gap-2.5 leading-[1.5]",
   }[size];
 
   const variantClasses = {
+    // Primary: The single chromatic action color #1868db across the system
     primary:
-      "bg-sky-600 text-white hover:bg-sky-700 shadow-sm shadow-sky-600/20 active:bg-sky-800",
+      "bg-[#1868db] text-[#ffffff] hover:bg-[#1557b0] border-0",
+    // Yellow: Sporadic CTA alternative strictly for dark hero banners
+    yellow:
+      "bg-[#fca700] text-[#101214] hover:bg-[#e59700] border-0 font-medium",
+    // Secondary: Text-link counterpart with subtle underline on hover
     secondary:
-      "bg-slate-900 text-white hover:bg-slate-800 shadow-sm shadow-slate-900/10 active:bg-slate-950",
+      "bg-transparent text-[#101214] hover:underline border-0",
+    // Outline: Clean 1px border with no drop shadow
     outline:
-      "border border-slate-300 text-slate-800 bg-white hover:bg-slate-50 hover:border-slate-400",
+      "border border-[#101214] text-[#101214] bg-transparent hover:bg-[#f0f1f2]",
+    // Ghost: Flat interactive control
     ghost:
-      "text-slate-700 hover:bg-slate-100 hover:text-slate-900 bg-transparent",
-    danger:
-      "bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800",
+      "text-[#101214] hover:bg-[#f0f1f2] bg-transparent border-0",
+    // White button: For inverted dark panels
     white:
-      "bg-white text-slate-900 hover:bg-slate-100 shadow-sm shadow-black/10",
+      "bg-[#ffffff] text-[#101214] hover:bg-[#f0f1f2] border-0",
+    // Muted / Fog white button
+    muted:
+      "bg-[#f0f1f2] text-[#101214] hover:bg-[#e4e6e9] border-0",
+    // Danger
+    danger:
+      "bg-rose-600 text-white hover:bg-rose-700 border-0",
   }[variant];
 
   const combinedClasses = `${baseClasses} ${sizeClasses} ${variantClasses} ${className}`;

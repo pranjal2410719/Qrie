@@ -38,20 +38,20 @@ export default function SalesContactPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-7 space-y-6">
             <Badge variant="primary" size="md">
-              <Building2 className="w-3.5 h-3.5 text-sky-600" />
+              <Building2 className="w-3.5 h-3.5 text-[#1868db]" />
               <span>Institutional Partnerships</span>
             </Badge>
 
-            <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-normal font-serif text-[#101214] tracking-[-0.012em] leading-tight">
               Institutional Sales & Multi-School Partnerships
             </h1>
 
-            <p className="text-base text-slate-600 leading-relaxed font-normal">
+            <p className="text-base text-[#42526e] leading-relaxed font-normal">
               For school trusts, multi-branch foundations (20+ campuses), state educational boards, and
               academic publishing partners seeking tailored technology agreements.
             </p>
 
-            <div className="space-y-4 pt-4 border-t border-slate-100 text-xs text-slate-600">
+            <div className="space-y-4 pt-4 border-t border-[#f0f1f2] text-xs text-[#42526e]">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>Dedicated Enterprise Account Director and deployment team.</span>
@@ -76,14 +76,14 @@ export default function SalesContactPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-slate-900 text-white p-8 rounded-3xl border border-slate-800 space-y-6">
-            <h2 className="text-xl font-bold">Direct Institutional Desk</h2>
+          <div className="lg:col-span-5 bg-[#101214] text-white p-8 rounded-[20px] border border-[#292a2e] space-y-6">
+            <h2 className="text-xl font-normal font-serif text-white">Direct Institutional Desk</h2>
 
-            <div className="space-y-4 text-xs text-slate-300">
+            <div className="space-y-4 text-xs text-[#f0f1f2]">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-sky-400" />
+                <Mail className="w-4 h-4 text-[#1868db]" />
                 <div>
-                  <span className="block text-slate-400">Institutional Inquiries:</span>
+                  <span className="block text-[#42526e]">Institutional Inquiries:</span>
                   <a href={`mailto:${siteConfig.salesEmail}`} className="text-white font-bold hover:underline">
                     {siteConfig.salesEmail}
                   </a>
@@ -93,13 +93,13 @@ export default function SalesContactPage() {
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-emerald-400" />
                 <div>
-                  <span className="block text-slate-400">Bangalore Partnerships Office:</span>
+                  <span className="block text-[#42526e]">Bangalore Partnerships Office:</span>
                   <span className="text-white font-bold">{siteConfig.phone}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 text-xs text-slate-400 flex items-center gap-2">
+            <div className="pt-4 border-t border-[#292a2e] text-xs text-[#42526e] flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Full compliance with India DPDP Act 2023 & institutional governance.</span>
             </div>
