@@ -68,10 +68,8 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen>
     try {
       await widget.authController.initializeSession();
     } catch (_) {}
-    if (widget.splashDuration > Duration.zero) {
-      await Future.delayed(widget.splashDuration);
-    }
-    _proceed();
+    // Screen does not advance automatically on a timer.
+    // Student must explicitly tap the forward CTA button or Skip to proceed.
   }
 
   void _proceed() {
@@ -286,11 +284,15 @@ class _StudentOnboardingScreenState extends State<StudentOnboardingScreen>
                             children: [
                               _OrbitalCtaButton(onTap: _proceed),
                               const SizedBox(height: 16),
-                              Text(
-                                'Tap to begin learning',
-                                style: AppTypography.caption(
-                                        color: AppColors.bgSurfaceOnyx)
-                                    .copyWith(fontWeight: FontWeight.w700),
+                              GestureDetector(
+                                onTap: _proceed,
+                                behavior: HitTestBehavior.opaque,
+                                child: Text(
+                                  'Tap to begin learning',
+                                  style: AppTypography.caption(
+                                          color: AppColors.bgSurfaceOnyx)
+                                      .copyWith(fontWeight: FontWeight.w700),
+                                ),
                               ),
                             ],
                           ),

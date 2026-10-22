@@ -20,7 +20,7 @@ class SplashScreen extends StatefulWidget {
     super.key,
     required this.authController,
     required this.onInitialized,
-    this.minDuration = const Duration(milliseconds: 1400),
+    this.minDuration = const Duration(seconds: 3),
   });
 
   @override
@@ -56,17 +56,15 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _initializeApp() async {
-    final stopwatch = Stopwatch()..start();
+    final timerFuture = widget.minDuration > Duration.zero
+        ? Future.delayed(widget.minDuration)
+        : Future.value();
 
     try {
       await widget.authController.initializeSession();
     } catch (_) {}
 
-    stopwatch.stop();
-    final elapsed = stopwatch.elapsed;
-    if (elapsed < widget.minDuration && widget.minDuration > Duration.zero) {
-      await Future.delayed(widget.minDuration - elapsed);
-    }
+    await timerFuture;
 
     if (mounted && !_initialized) {
       _initialized = true;

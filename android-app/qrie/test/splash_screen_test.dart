@@ -31,7 +31,7 @@ void main() {
   });
 
   group('Splash Screen & Onboarding Screen Tests', () {
-    testWidgets('SplashScreen renders pure white screen with centered Qrielogo.svg and loading indicator', (WidgetTester tester) async {
+    testWidgets('SplashScreen takes at least 3 seconds by default and renders white screen with Qrielogo.svg', (WidgetTester tester) async {
       bool initialized = false;
       final authController = AuthController(
         apiClient: ApiClient(),
@@ -42,7 +42,7 @@ void main() {
         MaterialApp(
           home: SplashScreen(
             authController: authController,
-            minDuration: const Duration(milliseconds: 50),
+            // Uses default minDuration = 3 seconds
             onInitialized: () {
               initialized = true;
             },
@@ -62,14 +62,16 @@ void main() {
       // Verify loading progress indicator
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // Fast-forward animation & timer
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
+      // Fast-forward 2.5 seconds: should NOT have completed yet (< 3 seconds)
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(initialized, isFalse);
 
+      // Fast-forward remaining 600ms (total > 3 seconds): now completes
+      await tester.pump(const Duration(milliseconds: 600));
       expect(initialized, isTrue);
     });
 
-    testWidgets('StudentOnboardingScreen renders school branding without Powered by Qrie AI footer', (WidgetTester tester) async {
+    testWidgets('StudentOnboardingScreen renders school branding, does NOT advance automatically, and proceeds on tap', (WidgetTester tester) async {
       bool initialized = false;
       final branding = SchoolBrandingConfig.dpsDefault();
       final authController = AuthController(
@@ -82,7 +84,6 @@ void main() {
           home: StudentOnboardingScreen(
             authController: authController,
             branding: branding,
-            splashDuration: const Duration(milliseconds: 50),
             onInitialized: () {
               initialized = true;
             },
@@ -98,10 +99,43 @@ void main() {
       // Verify Powered by Qrie AI text is strictly removed
       expect(find.text('Powered by Qrie AI'), findsNothing);
 
-      // Fast-forward animation and initialization timer
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 100));
+      // Advance time by 10 seconds: screen MUST NOT advance automatically
+      await tester.pump(const Duration(seconds: 10));
+      expect(initialized, isFalse);
 
+      // Screen advances ONLY when user taps forward button or label
+      await tester.tap(find.text('Tap to begin learning'));
+      await tester.pump();
+      expect(initialized, isTrue);
+    });
+
+    testWidgets('StudentOnboardingScreen advances when tapping Skip button', (WidgetTester tester) async {
+      bool initialized = false;
+      final branding = SchoolBrandingConfig.dpsDefault();
+      final authController = AuthController(
+        apiClient: ApiClient(),
+        secureStorage: SecureStorageService(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StudentOnboardingScreen(
+            authController: authController,
+            branding: branding,
+            onInitialized: () {
+              initialized = true;
+            },
+          ),
+        ),
+      );
+
+      // Does not advance on its own
+      await tester.pump(const Duration(seconds: 5));
+      expect(initialized, isFalse);
+
+      // Advances on tapping Skip
+      await tester.tap(find.text('Skip'));
+      await tester.pump();
       expect(initialized, isTrue);
     });
   });
