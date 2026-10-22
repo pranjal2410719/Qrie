@@ -5,7 +5,6 @@ import '../../state/student_state.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_typography.dart';
 import '../../theme/design_tokens.dart';
-import '../../widgets/floating_ai_tutor_widget.dart';
 import 'subject_detail_screen.dart';
 
 class LearnScreen extends StatelessWidget {
@@ -19,55 +18,47 @@ class LearnScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(
-              DesignTokens.horizontalPadding,
-              16.0,
-              DesignTokens.horizontalPadding,
-              96.0, // Space for floating bottom nav
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(
+          DesignTokens.horizontalPadding,
+          16.0,
+          DesignTokens.horizontalPadding,
+          96.0, // Space for floating bottom nav
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Banner
+            _buildHeaderBanner(profile.grade, profile.board),
+
+            const SizedBox(height: 20),
+
+            // Section Title
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Header Banner
-                _buildHeaderBanner(profile.grade, profile.board),
-
-                const SizedBox(height: 20),
-
-                // Section Title
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Syllabus & Subjects',
-                        style: AppTypography.sectionHeader(color: AppColors.textPrimary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${subjects.length} Subjects',
-                      style: AppTypography.caption(color: AppColors.textSecondary),
-                    ),
-                  ],
+                Expanded(
+                  child: Text(
+                    'Syllabus & Subjects',
+                    style: AppTypography.sectionHeader(color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(height: 12),
-
-                // Subject Cards List
-                ...subjects.map((sub) => _buildSubjectCard(context, sub, state)),
+                const SizedBox(width: 8),
+                Text(
+                  '${subjects.length} Subjects',
+                  style: AppTypography.caption(color: AppColors.textSecondary),
+                ),
               ],
             ),
-          ),
-          const FloatingAITutorWidget(
-            bottomOffset: 90,
-            rightOffset: 16,
-          ),
-        ],
+            const SizedBox(height: 12),
+
+            // Subject Cards List
+            ...subjects.map((sub) => _buildSubjectCard(context, sub, state)),
+          ],
+        ),
       ),
     );
   }

@@ -1197,7 +1197,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
           // Horizontal Badges Carousel
           SizedBox(
-            height: 114,
+            height: 126,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: MockData.badges.length,
@@ -1207,8 +1207,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                 final isUnlocked = badge['unlocked'] as bool;
 
                 return Container(
-                  width: 108,
-                  padding: const EdgeInsets.all(10),
+                  width: 110,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: isUnlocked
                         ? const Color(0xFFF8FAFC)
