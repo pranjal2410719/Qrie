@@ -31,7 +31,7 @@ class MascotAvatar extends StatelessWidget {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Circular Qrie AI Blob with Dynamic Wavy Boundary
+          // Circular Qrie AI Blob with Clean Circular Border
           DynamicWavyBlob(
             size: size,
             hasActiveContext: showBadge,

@@ -326,7 +326,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                // Qrie Avatar with Dynamic Wavy Boundary
+                // Qrie Avatar with Clean Circular Border
                 DynamicWavyBlob(
                   size: 38,
                   hasActiveContext: widget.homework != null,
