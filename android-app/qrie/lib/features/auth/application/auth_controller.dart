@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import '../../../core/config/app_config.dart';
+import '../../../core/config/demo_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/rfc7807_error.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -21,6 +23,7 @@ class AuthUser {
   final String? schoolId;
   final String grade;
   final String board;
+  final bool isDemo;
 
   const AuthUser({
     required this.id,
@@ -29,6 +32,7 @@ class AuthUser {
     this.schoolId,
     required this.grade,
     required this.board,
+    this.isDemo = false,
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class AuthUser {
       schoolId: json['school_id'] as String?,
       grade: json['grade'] as String? ?? 'Class 8',
       board: json['board'] as String? ?? 'CBSE',
+      isDemo: json['is_demo'] as bool? ?? false,
     );
   }
 
@@ -49,6 +54,19 @@ class AuthUser {
       role: 'student',
       grade: 'Class 8',
       board: 'CBSE',
+      isDemo: false,
+    );
+  }
+
+  factory AuthUser.demo() {
+    return const AuthUser(
+      id: DemoConfig.demoStudentId,
+      name: DemoConfig.demoStudentName,
+      role: 'student',
+      grade: DemoConfig.demoGrade,
+      board: DemoConfig.demoBoard,
+      schoolId: DemoConfig.demoSchoolCode,
+      isDemo: true,
     );
   }
 }
@@ -60,6 +78,7 @@ class AuthController extends ChangeNotifier {
   AuthStatus _status = AuthStatus.initial;
   AuthUser? _currentUser;
   String? _errorMessage;
+  bool _isDemoSession = false;
 
   AuthController({
     required this.apiClient,
@@ -69,6 +88,7 @@ class AuthController extends ChangeNotifier {
   AuthStatus get status => _status;
   AuthUser? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
+  bool get isDemoSession => _isDemoSession;
   bool get isAuthenticated => _status == AuthStatus.authenticated || _status == AuthStatus.guestMode;
 
   /// Check stored session on startup
@@ -79,6 +99,25 @@ class AuthController extends ChangeNotifier {
       final studentId = await secureStorage.getStudentId();
 
       if (token != null && token.isNotEmpty) {
+        // Handle stored demo session
+        if (token == DemoConfig.demoToken || token.startsWith('qrie_demo_')) {
+          if (!AppConfig.current.enableDemoAuth) {
+            // Demo mode was disabled for this build/environment; clear session
+            await secureStorage.clearSession();
+            _isDemoSession = false;
+            _currentUser = null;
+            _status = AuthStatus.unauthenticated;
+            notifyListeners();
+            return;
+          }
+
+          _currentUser = AuthUser.demo();
+          _isDemoSession = true;
+          _status = AuthStatus.authenticated;
+          notifyListeners();
+          return;
+        }
+
         if (role != null && role != 'student') {
           _status = AuthStatus.unauthorizedRole;
           _errorMessage = 'Only student accounts can access the student mobile app.';
@@ -86,25 +125,73 @@ class AuthController extends ChangeNotifier {
           return;
         }
 
-        // Student has stored session
+        // Student has stored production session
         _currentUser = AuthUser(
           id: studentId ?? 'student_restored',
           name: 'Student',
           role: role ?? 'student',
           grade: 'Class 8',
           board: 'CBSE',
+          isDemo: false,
         );
+        _isDemoSession = false;
         _status = AuthStatus.authenticated;
       } else {
-        // By default on first open, let user explore as guest or sign in
-        _currentUser = AuthUser.guest();
-        _status = AuthStatus.guestMode;
+        _currentUser = null;
+        _isDemoSession = false;
+        _status = AuthStatus.unauthenticated;
       }
     } catch (e) {
-      _currentUser = AuthUser.guest();
-      _status = AuthStatus.guestMode;
+      _currentUser = null;
+      _isDemoSession = false;
+      _status = AuthStatus.unauthenticated;
     }
     notifyListeners();
+  }
+
+  /// Sign in with demo credentials (development/evaluator mode only).
+  /// Strictly rejected when AppConfig.current.enableDemoAuth is false.
+  Future<bool> signInWithDemo({
+    required String email,
+    required String password,
+  }) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    // 1. Guard check: Demo auth must be explicitly enabled
+    if (!AppConfig.current.enableDemoAuth) {
+      _status = AuthStatus.error;
+      _errorMessage = 'Demo authentication is disabled in this environment.';
+      notifyListeners();
+      return false;
+    }
+
+    // 2. Validate against configured demo credentials
+    if (!DemoConfig.validateCredentials(email, password)) {
+      _status = AuthStatus.error;
+      _errorMessage = 'Invalid demo credentials. Use ${DemoConfig.demoEmail} / ${DemoConfig.demoPassword}';
+      notifyListeners();
+      return false;
+    }
+
+    // Small delay to simulate seamless authentication without blocking
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // 3. Create isolated demo session
+    _currentUser = AuthUser.demo();
+    _isDemoSession = true;
+
+    await secureStorage.saveAuthTokens(
+      accessToken: DemoConfig.demoToken,
+      studentId: DemoConfig.demoStudentId,
+      schoolId: DemoConfig.demoSchoolCode,
+      role: 'student',
+    );
+
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+    return true;
   }
 
   /// Sign in with school code & student ID
@@ -185,6 +272,7 @@ class AuthController extends ChangeNotifier {
   Future<void> signOut() async {
     await secureStorage.clearSession();
     _currentUser = null;
+    _isDemoSession = false;
     _status = AuthStatus.unauthenticated;
     notifyListeners();
   }

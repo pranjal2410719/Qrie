@@ -406,6 +406,33 @@ class StudentState extends ChangeNotifier {
     }
   }
 
+  /// Initialize state for demo student user
+  void initializeForDemo() {
+    _profile = const StudentProfile(
+      id: 'demo_student_qrie',
+      name: 'Aarav Sharma',
+      grade: 'Class 10',
+      board: 'CBSE',
+      streakDays: 6,
+      totalXp: 1840,
+      gems: 240,
+      dailyGoalCurrent: 3,
+      dailyGoalTarget: 5,
+      completedLessonIds: {'sci_ch1_les1', 'math_ch1_les1', 'sci_ch2_les1'},
+      bookmarkedLessonIds: {'sci_ch1_les2', 'math_ch2_les1'},
+      profileImageUrl: 'assets/default_icon.png',
+    );
+    notifyListeners();
+  }
+
+  /// Reset session state on logout
+  void resetSession() {
+    _profile = MockData.initialStudent;
+    _doubtMessages.clear();
+    _doubtMessages.addAll(MockData.initialDoubtMessages);
+    notifyListeners();
+  }
+
   void completeLesson(String lessonId, int xpReward) {
     final updatedCompleted = Set<String>.from(_profile.completedLessonIds)..add(lessonId);
     final updatedGoal = (_profile.dailyGoalCurrent < _profile.dailyGoalTarget)

@@ -3,6 +3,7 @@ import 'core/network/api_client.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/student_splash_screen.dart';
+import 'features/auth/presentation/welcome_screen.dart';
 import 'features/school_branding/data/school_branding_repository.dart';
 import 'features/school_branding/presentation/school_theme_provider.dart';
 import 'features/school_branding/presentation/widgets/student_welcome_header.dart';
@@ -21,13 +22,20 @@ import 'widgets/floating_ai_tutor_widget.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const QrieApp());
+  runApp(const QrieApp(skipSplash: false, showOnboarding: true));
 }
 
 class QrieApp extends StatefulWidget {
   final bool skipSplash;
+  final bool showOnboarding;
+  final AuthController? authController;
 
-  const QrieApp({super.key, this.skipSplash = true});
+  const QrieApp({
+    super.key,
+    this.skipSplash = true,
+    this.showOnboarding = false,
+    this.authController,
+  });
 
   @override
   State<QrieApp> createState() => _QrieAppState();
@@ -47,16 +55,25 @@ class _QrieAppState extends State<QrieApp> {
   void initState() {
     super.initState();
     _apiClient = ApiClient(storage: _secureStorage);
-    _authController = AuthController(
-      apiClient: _apiClient,
-      secureStorage: _secureStorage,
-    );
+    _authController = widget.authController ??
+        AuthController(
+          apiClient: _apiClient,
+          secureStorage: _secureStorage,
+        );
     _brandingRepo = SchoolBrandingRepository(apiClient: _apiClient);
 
     _loadInitialBranding();
 
     if (widget.skipSplash) {
       _initialized = true;
+      if (!widget.showOnboarding) {
+        // Default to authenticated guest/demo session for direct test harnesses
+        if (!_authController.isAuthenticated) {
+          _authController.continueAsGuest();
+        }
+      }
+    } else {
+      _initialized = false;
     }
   }
 
@@ -69,14 +86,16 @@ class _QrieAppState extends State<QrieApp> {
   void dispose() {
     _studentState.dispose();
     _themeProvider.dispose();
-    _authController.dispose();
+    if (widget.authController == null) {
+      _authController.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _themeProvider,
+      listenable: Listenable.merge([_themeProvider, _authController]),
       builder: (context, _) {
         return StudentStateScope(
           notifier: _studentState,
@@ -92,10 +111,22 @@ class _QrieAppState extends State<QrieApp> {
                       setState(() => _initialized = true);
                     },
                   )
-                : MainScaffold(
-                    themeProvider: _themeProvider,
-                    authController: _authController,
-                  ),
+                : (_authController.isAuthenticated
+                    ? MainScaffold(
+                        themeProvider: _themeProvider,
+                        authController: _authController,
+                        onSignOut: () async {
+                          _studentState.resetSession();
+                          await _authController.signOut();
+                        },
+                      )
+                    : WelcomeScreen(
+                        authController: _authController,
+                        themeProvider: _themeProvider,
+                        onLoginSuccess: () {
+                          setState(() {});
+                        },
+                      )),
           ),
         );
       },
@@ -106,11 +137,13 @@ class _QrieAppState extends State<QrieApp> {
 class MainScaffold extends StatefulWidget {
   final SchoolThemeProvider themeProvider;
   final AuthController authController;
+  final VoidCallback? onSignOut;
 
   const MainScaffold({
     super.key,
     required this.themeProvider,
     required this.authController,
+    this.onSignOut,
   });
 
   @override
@@ -127,6 +160,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       const LibraryScreen(),
       ProfileScreen(
         onBack: () => setState(() => _currentIndex = 0),
+        onSignOut: widget.onSignOut,
       ),
     ];
   }
