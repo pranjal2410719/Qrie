@@ -1,8 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { AlertTriangle, ArrowRight, RotateCcw, Mail } from "lucide-react";
+import { AlertTriangle, RotateCcw, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Payment Failed — Qrie AI",
