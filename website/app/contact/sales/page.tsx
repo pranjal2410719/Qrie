@@ -1,6 +1,5 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -9,9 +8,7 @@ import {
   Building2,
   Mail,
   Phone,
-  FileCheck,
   CheckCircle2,
-  ArrowRight,
   ShieldCheck,
 } from "lucide-react";
 
