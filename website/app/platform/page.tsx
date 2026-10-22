@@ -1,10 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { EditorialHeadline } from "@/components/ui/EditorialHeadline";
 import { LavenderFeatureBand } from "@/components/ui/LavenderFeatureBand";
 import {
   Layers,
@@ -12,11 +10,8 @@ import {
   Smartphone,
   School,
   Database,
-  ShieldCheck,
-  ArrowRight,
   Sparkles,
   RotateCcw,
-  BookOpen,
 } from "lucide-react";
 
 export const metadata: Metadata = {

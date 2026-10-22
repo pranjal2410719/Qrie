@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { pricingTiers } from "@/lib/data/pricing";
 import { PlanComparisonTable } from "@/components/commerce/PlanComparisonTable";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { EditorialHeadline } from "@/components/ui/EditorialHeadline";
-import { Check, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
+import { Check, ShieldCheck } from "lucide-react";
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
