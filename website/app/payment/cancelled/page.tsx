@@ -1,8 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { XCircle, ArrowLeft, ShoppingCart, HelpCircle } from "lucide-react";
+import { XCircle, ArrowLeft, ShoppingCart } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Payment Cancelled — Qrie AI",
