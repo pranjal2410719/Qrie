@@ -4,6 +4,7 @@ import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_chip.dart';
 import 'teacher_create_homework_screen.dart';
 
 /// Teacher Homework Monitoring & Submission Dashboard
@@ -267,27 +268,30 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
             Container(
               height: 40,
               margin: const EdgeInsets.only(bottom: 12),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                children: ['Class 10-A', 'All Classes', 'Class 9-A', 'Class 9-B'].map((cls) {
-                  final isSel = cls == _selectedClass;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(cls),
-                      selected: isSel,
-                      selectedColor: AppColors.bgSurfaceOnyx,
-                      backgroundColor: AppColors.bgSurfaceSoft,
-                      labelStyle: TextStyle(
-                        color: isSel ? Colors.white : AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+              child: BlurredEdgeScroll(
+                fadeWidth: 16,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  children: ['Class 10-A', 'All Classes', 'Class 9-A', 'Class 9-B'].map((cls) {
+                    final isSel = cls == _selectedClass;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(cls),
+                        selected: isSel,
+                        selectedColor: AppColors.bgSurfaceOnyx,
+                        backgroundColor: AppColors.bgSurfaceSoft,
+                        labelStyle: TextStyle(
+                          color: isSel ? Colors.white : AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                        onSelected: (val) => setState(() => _selectedClass = cls),
                       ),
-                      onSelected: (val) => setState(() => _selectedClass = cls),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
 
@@ -422,17 +426,10 @@ class _TeacherHomeworkDashboardScreenState extends State<TeacherHomeworkDashboar
                                   ),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
+                                      const CircleAvatar(
                                         radius: 16,
-                                        backgroundColor: AppColors.accentCobalt.withValues(alpha: 0.15),
-                                        child: Text(
-                                          state.profile.name[0],
-                                          style: const TextStyle(
-                                            color: AppColors.accentCobalt,
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 13,
-                                          ),
-                                        ),
+                                        backgroundColor: Color(0xFFE2E8F0),
+                                        backgroundImage: AssetImage('assets/default_icon.png'),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(

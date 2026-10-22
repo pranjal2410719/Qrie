@@ -34,7 +34,7 @@ void main() {
       }
     }
     drain('initial HomeScreen');
-    for (final label in ['Practice', 'Homework', 'Library', 'Profile', 'Learn']) {
+    for (final label in ['Learn', 'Library', 'Profile', 'Home']) {
       currentPhase = 'switching to $label';
       await tester.tap(find.descendant(
         of: find.byType(BottomNavBar),
@@ -44,12 +44,34 @@ void main() {
       drain('after tap $label');
     }
     currentPhase = 'opening LessonScreen';
-    await tester.tap(find.text('Resume'));
+    final continueFinder = find.text('Continue learning');
+    await tester.scrollUntilVisible(continueFinder, 50, scrollable: find.byType(Scrollable).first);
+    await tester.tap(continueFinder);
     await tester.pumpAndSettle();
     drain('in LessonScreen');
     currentPhase = 'back from LessonScreen';
     await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pumpAndSettle();
     drain('after back from LessonScreen');
+
+    currentPhase = 'opening CalendarScreen from app bar';
+    await tester.tap(find.byTooltip('Academic Calendar'));
+    await tester.pumpAndSettle();
+    drain('in CalendarScreen');
+
+    currentPhase = 'back from CalendarScreen';
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    drain('after back from CalendarScreen');
+
+    currentPhase = 'opening NotificationsScreen from app bar';
+    await tester.tap(find.byTooltip('Notifications'));
+    await tester.pumpAndSettle();
+    drain('in NotificationsScreen');
+
+    currentPhase = 'back from NotificationsScreen';
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+    drain('after back from NotificationsScreen');
   });
 }

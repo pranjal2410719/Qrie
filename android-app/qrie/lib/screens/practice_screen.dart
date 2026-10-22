@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../data/mock_data.dart';
-import '../data/mock_homework.dart';
 import '../models/homework.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
@@ -9,6 +8,7 @@ import '../theme/app_typography.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
+import '../widgets/app_chip.dart';
 import 'homework_detail_screen.dart';
 import 'homework_mini_test_screen.dart';
 import 'quiz_solver_screen.dart';
@@ -493,45 +493,48 @@ class _PracticeScreenState extends State<PracticeScreen> {
   // ── Homework Filter Chips ────────────────────────────────────────────
   Widget _buildHomeworkFilterChips() {
     return SizedBox(
-      height: 34,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _hwFilters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final filter = _hwFilters[i];
-          final isSelected = filter == _hwFilter;
-          return GestureDetector(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              setState(() => _hwFilter = filter);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
+      height: 40,
+      child: BlurredEdgeScroll(
+        fadeWidth: 18,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _hwFilters.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          itemBuilder: (context, i) {
+            final filter = _hwFilters[i];
+            final isSelected = filter == _hwFilter;
+            return ChoiceChip(
+              label: Text(filter),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _hwFilter = filter);
+                }
+              },
+              selectedColor: AppColors.bgSurfaceOnyx,
+              backgroundColor: AppColors.bgSurfaceSoft,
+              side: BorderSide(
                 color: isSelected
                     ? AppColors.bgSurfaceOnyx
-                    : AppColors.bgSurfaceSoft,
+                    : const Color(0xFFE2E8F0),
+                width: isSelected ? 1.5 : 1.0,
+              ),
+              elevation: isSelected ? 2 : 0,
+              pressElevation: 1,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(9999),
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.bgSurfaceOnyx
-                      : AppColors.bgSurfaceMuted,
-                ),
               ),
-              child: Text(
-                filter,
-                style: AppTypography.caption(
-                  color: isSelected
-                      ? AppColors.textOnOnyx
-                      : AppColors.textSecondary,
-                ).copyWith(fontWeight: FontWeight.w700),
+              labelStyle: TextStyle(
+                fontFamily: AppTypography.primaryFont,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 12,
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -606,31 +609,42 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(
-                        isOverdue
-                            ? Icons.warning_amber_rounded
-                            : Icons.schedule_rounded,
-                        size: 13,
-                        color: isOverdue
-                            ? const Color(0xFFDC2626)
-                            : AppColors.textMuted,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isOverdue
-                            ? 'Overdue'
-                            : isCompleted
-                                ? 'Completed'
-                                : daysLeft == 0
-                                    ? 'Due Today'
-                                    : 'Due in $daysLeft day${daysLeft == 1 ? '' : 's'}',
-                        style: AppTypography.caption(
-                          color: isOverdue
-                              ? const Color(0xFFDC2626)
-                              : AppColors.textMuted,
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isOverdue
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.schedule_rounded,
+                              size: 13,
+                              color: isOverdue
+                                  ? const Color(0xFFDC2626)
+                                  : AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                isOverdue
+                                    ? 'Overdue'
+                                    : isCompleted
+                                        ? 'Completed'
+                                        : daysLeft == 0
+                                            ? 'Due Today'
+                                            : 'Due in $daysLeft day${daysLeft == 1 ? '' : 's'}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.caption(
+                                  color: isOverdue
+                                      ? const Color(0xFFDC2626)
+                                      : AppColors.textMuted,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       _buildCTAButton(context, hw, status, state),
                     ],
                   ),
@@ -800,12 +814,18 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   Color _getSubjectColor(String subject) {
     final s = subject.toLowerCase();
-    if (s.contains('math')) return AppColors.accentCobalt;
+    if (s.contains('math')) {
+      return AppColors.accentCobalt;
+    }
     if (s.contains('sci') ||
         s.contains('phys') ||
         s.contains('chem') ||
-        s.contains('bio')) return const Color(0xFF059669);
-    if (s.contains('eng')) return AppColors.accentTangerine;
+        s.contains('bio')) {
+      return const Color(0xFF059669);
+    }
+    if (s.contains('eng')) {
+      return AppColors.accentTangerine;
+    }
     return const Color(0xFF7C3AED);
   }
 }

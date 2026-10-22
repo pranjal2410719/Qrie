@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../school_branding/models/school_branding_config.dart';
 import '../../school_branding/presentation/widgets/school_logo.dart';
 import '../application/auth_controller.dart';
@@ -102,15 +103,62 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header row with logo and Skip pill
+                        // Header row with logo, school branding + Powered by Qrie AI and Skip pill
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SchoolLogo(
-                              logoUrl: branding.logoUrl,
-                              size: 44,
-                              borderColor: AppColors.bgSurfaceMuted,
+                            Expanded(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SchoolLogo(
+                                    logoUrl: branding.logoUrl,
+                                    size: 42,
+                                    borderColor: AppColors.bgSurfaceMuted,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          branding.schoolName,
+                                          style: AppTypography.subheading(
+                                                  color: AppColors.textPrimary)
+                                              .copyWith(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w700),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Powered by Qrie AI',
+                                              style: AppTypography.caption(
+                                                      color: AppColors.textSecondary)
+                                                  .copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 11),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            SvgPicture.asset(
+                                              'assets/Qrielogo.svg',
+                                              width: 14,
+                                              height: 14,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 10),
                             GestureDetector(
                               onTap: _proceed,
                               child: Container(
@@ -132,22 +180,46 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
 
                         const Spacer(),
 
-                        // School pill tag
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentCobalt.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(9999),
-                          ),
-                          child: Text(
-                            branding.schoolName.toUpperCase(),
-                            style: AppTypography.caption(
-                                    color: AppColors.accentCobalt)
-                                .copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.6),
-                          ),
+                        // School pill tag with Powered by Qrie AI badge
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentCobalt.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(9999),
+                              ),
+                              child: Text(
+                                branding.schoolName.toUpperCase(),
+                                style: AppTypography.caption(
+                                        color: AppColors.accentCobalt)
+                                    .copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.6),
+                              ),
+                            ),
+                            const Spacer(),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Powered by Qrie AI',
+                                  style: AppTypography.caption(
+                                          color: AppColors.textSecondary)
+                                      .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11),
+                                ),
+                                const SizedBox(width: 5),
+                                SvgPicture.asset(
+                                  'assets/Qrielogo.svg',
+                                  width: 18,
+                                  height: 18,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
 
                         const SizedBox(height: 12),
@@ -245,17 +317,20 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.bolt_rounded,
-                                      size: 13,
-                                      color: AppColors.bgSurfaceOnyx
-                                          .withValues(alpha: 0.6)),
-                                  const SizedBox(width: 4),
                                   Text(
-                                    'Powered by Qrie Academic Platform',
+                                    'Powered by Qrie AI',
                                     style: AppTypography.caption(
                                             color: AppColors.bgSurfaceOnyx
-                                                .withValues(alpha: 0.6))
-                                        .copyWith(fontSize: 10),
+                                                .withValues(alpha: 0.75))
+                                        .copyWith(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  SvgPicture.asset(
+                                    'assets/Qrielogo.svg',
+                                    width: 20,
+                                    height: 20,
                                   ),
                                 ],
                               ),

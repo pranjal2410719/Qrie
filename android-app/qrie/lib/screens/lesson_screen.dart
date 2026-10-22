@@ -7,6 +7,7 @@ import '../theme/app_typography.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/floating_ai_tutor_widget.dart';
+import '../data/mock_data.dart';
 import 'quiz_solver_screen.dart';
 
 class LessonScreen extends StatefulWidget {
@@ -26,6 +27,27 @@ class LessonScreen extends StatefulWidget {
 class _LessonScreenState extends State<LessonScreen> {
   bool _isPlaying = false;
   double _playbackProgress = 0.35;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final state = StudentStateScope.of(context);
+        final subject = MockData.subjects.firstWhere(
+          (s) => s.id == widget.chapter.subjectId,
+          orElse: () => MockData.subjects.first,
+        );
+        state.recordLectureActivity(
+          lesson: widget.lesson,
+          chapter: widget.chapter,
+          subject: subject,
+          progress: _playbackProgress,
+          isCompleted: state.profile.completedLessonIds.contains(widget.lesson.id),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +125,10 @@ class _LessonScreenState extends State<LessonScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
             // Metadata chips (Duration, XP, Completion Status)
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -124,7 +149,6 @@ class _LessonScreenState extends State<LessonScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -146,7 +170,6 @@ class _LessonScreenState extends State<LessonScreen> {
                     ],
                   ),
                 ),
-                const Spacer(),
                 if (isCompleted)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -247,18 +270,21 @@ class _LessonScreenState extends State<LessonScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Concept Guide',
-                                style: AppTypography.caption(color: Colors.white),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'Concept Guide',
+                                  style: AppTypography.caption(color: Colors.white),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ),
@@ -330,7 +356,7 @@ class _LessonScreenState extends State<LessonScreen> {
                     children: [
                       Icon(Icons.lightbulb_outline_rounded, color: primaryColor, size: 20),
                       const SizedBox(width: 8),
-                      Flexible(
+                      Expanded(
                         child: Text(
                           'CORE CONCEPT SUMMARY',
                           maxLines: 1,

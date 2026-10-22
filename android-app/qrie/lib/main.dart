@@ -7,9 +7,11 @@ import 'features/school_branding/data/school_branding_repository.dart';
 import 'features/school_branding/presentation/school_theme_provider.dart';
 import 'features/school_branding/presentation/widgets/student_welcome_header.dart';
 import 'screens/home_screen.dart';
+import 'screens/learn/learn_screen.dart';
 import 'screens/library_screen.dart';
-import 'screens/practice_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/calendar/calendar_screen.dart';
+import 'screens/notifications/notifications_screen.dart';
 import 'state/student_state.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_typography.dart';
@@ -25,7 +27,7 @@ void main() {
 class QrieApp extends StatefulWidget {
   final bool skipSplash;
 
-  const QrieApp({super.key, this.skipSplash = false});
+  const QrieApp({super.key, this.skipSplash = true});
 
   @override
   State<QrieApp> createState() => _QrieAppState();
@@ -39,7 +41,7 @@ class _QrieAppState extends State<QrieApp> {
   late final SchoolBrandingRepository _brandingRepo;
   final SchoolThemeProvider _themeProvider = SchoolThemeProvider();
 
-  bool _initialized = false;
+  bool _initialized = true;
 
   @override
   void initState() {
@@ -79,7 +81,7 @@ class _QrieAppState extends State<QrieApp> {
         return StudentStateScope(
           notifier: _studentState,
           child: MaterialApp(
-            title: 'Qrie Student App',
+            title: 'Qrie',
             debugShowCheckedModeBanner: false,
             theme: _themeProvider.themeData,
             home: !_initialized
@@ -118,12 +120,16 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    PracticeScreen(),
-    LibraryScreen(),
-    ProfileScreen(),
-  ];
+  List<Widget> _buildPages() {
+    return [
+      const HomeScreen(),
+      const LearnScreen(),
+      const LibraryScreen(),
+      ProfileScreen(
+        onBack: () => setState(() => _currentIndex = 0),
+      ),
+    ];
+  }
 
   void _showGradeSwitcherDialog(BuildContext context, StudentState state) {
     final grades = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
@@ -144,6 +150,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           builder: (context, setModalState) {
             return SafeArea(
               child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
@@ -206,6 +213,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                       const SizedBox(height: 10),
                       Wrap(
                         spacing: 10,
+                        runSpacing: 10,
                         children: boards.map((b) {
                           final isSel = (b == tempBoard);
                           return GestureDetector(
@@ -260,25 +268,45 @@ class _MainScaffoldState extends State<MainScaffold> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: StudentWelcomeHeader(
-        branding: branding,
-        studentName: profile.name,
-        gradeAndBoard: '${profile.grade} ${profile.board}',
-        streakDays: profile.streakDays,
-        gems: profile.gems,
-        onGradeTap: () => _showGradeSwitcherDialog(context, state),
-        onProfileTap: () {
-          setState(() => _currentIndex = 3);
-        },
-      ),
+      extendBody: true,
+      appBar: _currentIndex == 3
+          ? null
+          : StudentWelcomeHeader(
+              branding: branding,
+              studentName: profile.name,
+              gradeAndBoard: '${profile.grade} ${profile.board}',
+              streakDays: profile.streakDays,
+              gems: profile.gems,
+              unreadNotificationsCount: state.unreadNotificationCount,
+              onGradeTap: () => _showGradeSwitcherDialog(context, state),
+              onProfileTap: () {
+                setState(() => _currentIndex = 3);
+              },
+              onCalendarTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CalendarScreen(),
+                  ),
+                );
+              },
+              onNotificationTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                );
+              },
+            ),
       body: Stack(
         children: [
           IndexedStack(
             index: _currentIndex,
-            children: _pages,
+            children: _buildPages(),
           ),
           const FloatingAITutorWidget(
-            bottomOffset: 24,
+            bottomOffset: 92,
             rightOffset: 16,
           ),
         ],

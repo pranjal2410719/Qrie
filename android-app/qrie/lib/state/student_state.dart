@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/student_profile.dart';
 import '../models/doubt_message.dart';
 import '../models/homework.dart';
+import '../models/recent_lecture.dart';
+import '../models/student_notification.dart';
+import '../models/subject.dart';
+import '../models/chapter.dart';
+import '../models/lesson.dart';
 import '../data/mock_data.dart';
 import '../data/mock_homework.dart';
 
@@ -20,6 +25,68 @@ class StudentState extends ChangeNotifier {
   String? _activeQuestionContext;
   bool _isTestGuardrailActive = false;
 
+  // Recent Lecture Activity (Student's actual ongoing learning session)
+  RecentLectureRecord? _recentLecture = RecentLectureRecord(
+    subjectId: 'science',
+    subjectName: 'Science & Bio',
+    chapterId: 'sci_ch1',
+    chapterTitle: 'Chapter 1: Cell — Structure & Functions',
+    lessonId: 'sci_ch1_les2',
+    topicTitle: 'Parts of a Cell & Membrane',
+    lastAccessedAt: DateTime.now().subtract(const Duration(minutes: 42)),
+    playbackProgress: 0.65,
+    isCompleted: false,
+    durationMinutes: 10,
+    xpReward: 25,
+  );
+
+  // Student Notifications
+  final List<StudentNotification> _notifications = [
+    StudentNotification(
+      id: 'notif_1',
+      title: 'Math Homework Due Today',
+      message: 'Linear Equations in One Variable Problem Set is due at 5:00 PM today.',
+      timestamp: DateTime.now().subtract(const Duration(minutes: 18)),
+      type: NotificationType.homework,
+      isRead: false,
+      actionPayload: 'math_hw_1',
+    ),
+    StudentNotification(
+      id: 'notif_2',
+      title: 'Upcoming Live Class in 30 Mins',
+      message: 'Physics: Force & Laws of Motion live doubt resolution begins at 10:30 AM.',
+      timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
+      type: NotificationType.liveClass,
+      isRead: false,
+      actionPayload: 'science',
+    ),
+    StudentNotification(
+      id: 'notif_3',
+      title: 'Term 1 Science Diagnostic Ready',
+      message: 'Take the 10-minute diagnostic quiz to verify your mid-term readiness.',
+      timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+      type: NotificationType.exam,
+      isRead: false,
+      actionPayload: 'science',
+    ),
+    StudentNotification(
+      id: 'notif_4',
+      title: 'Streak Master! 6 Days Active',
+      message: 'Awesome consistency! You are on a 6-day learning streak. Complete 1 topic today to reach day 7.',
+      timestamp: DateTime.now().subtract(const Duration(hours: 7)),
+      type: NotificationType.streak,
+      isRead: true,
+    ),
+    StudentNotification(
+      id: 'notif_5',
+      title: 'School Notice: Mid-Term Schedule',
+      message: 'The official CBSE Class 8 mid-term examination timetable has been published.',
+      timestamp: DateTime.now().subtract(const Duration(days: 1)),
+      type: NotificationType.schoolNotice,
+      isRead: true,
+    ),
+  ];
+
   StudentProfile get profile => _profile;
   String get selectedSubjectId => _selectedSubjectId;
   List<DoubtMessage> get doubtMessages => List.unmodifiable(_doubtMessages);
@@ -29,6 +96,84 @@ class StudentState extends ChangeNotifier {
   HomeworkAssignment? get activeHomeworkContext => _activeHomeworkContext;
   String? get activeQuestionContext => _activeQuestionContext;
   bool get isTestGuardrailActive => _isTestGuardrailActive;
+  RecentLectureRecord? get recentLecture => _recentLecture;
+
+  List<StudentNotification> get notifications => List.unmodifiable(_notifications);
+  int get unreadNotificationCount => _notifications.where((n) => !n.isRead).length;
+
+  void markNotificationAsRead(String id) {
+    final idx = _notifications.indexWhere((n) => n.id == id);
+    if (idx != -1 && !_notifications[idx].isRead) {
+      _notifications[idx] = _notifications[idx].copyWith(isRead: true);
+      notifyListeners();
+    }
+  }
+
+  void markAllNotificationsAsRead() {
+    bool changed = false;
+    for (int i = 0; i < _notifications.length; i++) {
+      if (!_notifications[i].isRead) {
+        _notifications[i] = _notifications[i].copyWith(isRead: true);
+        changed = true;
+      }
+    }
+    if (changed) {
+      notifyListeners();
+    }
+  }
+
+  void deleteNotification(String id) {
+    _notifications.removeWhere((n) => n.id == id);
+    notifyListeners();
+  }
+
+  void clearAllNotifications() {
+    _notifications.clear();
+    notifyListeners();
+  }
+
+  void clearRecentLecture() {
+    _recentLecture = null;
+    notifyListeners();
+  }
+
+  void recordLectureActivity({
+    required Lesson lesson,
+    required Chapter chapter,
+    required Subject subject,
+    double progress = 0.0,
+    bool isCompleted = false,
+  }) {
+    _recentLecture = RecentLectureRecord(
+      subjectId: subject.id,
+      subjectName: subject.name,
+      chapterId: chapter.id,
+      chapterTitle: chapter.title,
+      lessonId: lesson.id,
+      topicTitle: lesson.title,
+      lastAccessedAt: DateTime.now(),
+      playbackProgress: progress,
+      isCompleted: isCompleted,
+      durationMinutes: lesson.durationMinutes,
+      xpReward: lesson.xpReward,
+    );
+    notifyListeners();
+  }
+
+  void updateLectureProgress({
+    required String lessonId,
+    required double progress,
+    bool isCompleted = false,
+  }) {
+    if (_recentLecture != null && _recentLecture!.lessonId == lessonId) {
+      _recentLecture = _recentLecture!.copyWith(
+        playbackProgress: progress,
+        isCompleted: isCompleted,
+        lastAccessedAt: DateTime.now(),
+      );
+      notifyListeners();
+    }
+  }
 
   void toggleTeacherMode() {
     _isTeacherMode = !_isTeacherMode;
@@ -242,6 +387,25 @@ class StudentState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateProfileName(String newName) {
+    if (newName.trim().isNotEmpty) {
+      _profile = _profile.copyWith(name: newName.trim());
+      notifyListeners();
+    }
+  }
+
+  void updateProfileImage(String imageUrl) {
+    _profile = _profile.copyWith(profileImageUrl: imageUrl);
+    notifyListeners();
+  }
+
+  void updateDailyGoalTarget(int newTarget) {
+    if (newTarget > 0) {
+      _profile = _profile.copyWith(dailyGoalTarget: newTarget);
+      notifyListeners();
+    }
+  }
+
   void completeLesson(String lessonId, int xpReward) {
     final updatedCompleted = Set<String>.from(_profile.completedLessonIds)..add(lessonId);
     final updatedGoal = (_profile.dailyGoalCurrent < _profile.dailyGoalTarget)
@@ -265,6 +429,12 @@ class StudentState extends ChangeNotifier {
       updatedBookmarks.add(lessonId);
     }
     _profile = _profile.copyWith(bookmarkedLessonIds: updatedBookmarks);
+    notifyListeners();
+  }
+
+  void clearDoubtHistory() {
+    _doubtMessages.clear();
+    _doubtMessages.addAll(MockData.initialDoubtMessages);
     notifyListeners();
   }
 

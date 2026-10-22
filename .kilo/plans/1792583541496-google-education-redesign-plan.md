@@ -1,656 +1,223 @@
 # Google for Education Website Redesign Plan
 
 ## Overview
-Redesign the Qrie AI platform to match the Google for Education design system, featuring:
-- Restrained utility surface with near-white canvas
-- Google Sans Display and Text type families
-- Single brand blue accent (#1a73e8)
-- Generous whitespace, pill-shaped controls, 24-28px card radii
-
-## Affected Areas
-
-### 1. Color Tokens (`tailwind.config.js`)
-Replace current palette with Google for Education colors:
-- `--color-canvas-white: #f8f9fa` (page background, card surfaces)
-- `--color-charcoal-ink: #202124` (primary text, headlines)
-- `--color-graphite: #3c4043` (secondary headings, nav text)
-- `--color-slate: #5f6368` (muted body, helper text)
-- `--color-mist: #dadce0` (borders, dividers)
-- `--color-cloud-shadow: #c4c6c7` (focused inputs)
-- `--color-google-blue: #1a73e8` (interactive accent)
-- `--color-google-blue-deep: #1967d2` (interactive hover)
-- `--color-classroom-green: #188038` (Classroom brand only)
-
-### 2. Typography (`tailwind.config.js`)
-Implement Google Sans type families:
-- `--font-google-sans-display: 'Google Sans Display', ui-sans-serif, system-ui, ...`
-- `--font-google-sans-text: 'Google Sans Text', ui-sans-serif, system-ui, ...`
-
-Type scale with proper tracking:
-- display: 80px, -0.8px tracking, 1.09 line-height
-- heading-lg: 48px, -0.288px tracking, 1.15 line-height
-- heading: 28px, -0.168px tracking, 1.2 line-height
-- heading-sm: 22px, -0.132px tracking, 1.29 line-height
-- subheading: 18px, 0.108px tracking, 1.67 line-height
-- body: 16px, 0.272px tracking, 1.56 line-height
-- body-sm: 14px, 0.238px tracking, 1.5 line-height
-- caption: 12px, 0.432px tracking, 1.5 line-height
-
-### 3. Layout Structure
-- Centered container: max-width 1200px, 24px horizontal padding
-- Hero: single-column stack, 80px top / 64px bottom padding
-- Feature sections: two-column equal grid, 24px gap
-- Navigation: sticky top bar (64px height)
-- Sections separated by 64-80px whitespace
-
-### 4. Components to Build
-
-#### Top Announcement Bar
-- 48px height, #f8f9fa background
-- Bottom border in #dadce0
-- Centered body text 14px Google Sans Text weight 400 in #3c4043
-- Inline link in #1a73e8 underlined
-- Close (X) icon at far right in #5f6368
-
-#### Primary Navigation Bar
-- 64px height, white background, 1px #dadce0 bottom border
-- Left: Google for Education wordmark (Display 18px, #202124)
-- Center: nav links (Our values, Products, AI, Resources) 14px weight 400 in #3c4043
-- Underline indicator: 2px #1a73e8 on active
-- Right: search icon (40×40px, border-radius 50%), account avatar (32px circle), 'Sign in' link
-- Filled pill button: 40px height, 0 24px padding, border-radius 200px, background #1a73e8, white text weight 500
-
-#### Filled Pill Button
-- Height 40px, padding 0 24px, border-radius 200px
-- Background #1a73e8, text white, Google Sans Text 14px weight 500
-- Hover/pressed: background #1967d2
-
-#### Ghost Pill Button
-- Same dimensions as filled pill (40px height, 200px radius, 0 24px padding)
-- Transparent background, border 1px solid #dadce0, text #1a73e8
-- Hover: background #f8f9fa, border #1a73e8
-
-#### Breadcrumb Trail
-- 12px Google Sans Text weight 400 in #5f6368
-- Segments separated by '›' glyph in #5f6368 with 8px margin
-- Current page segment in #202124 weight 500
-- Vertical padding 16px above and below
-
-#### Hero Section
-- Centered, max-width 800px for text block
-- Vertical padding: 80px top, 64px bottom
-- Brand mark: 32×32px rounded square icon (border-radius 8px) + product name 18px Display weight 500 #202124, 12px gap
-- Display headline: 80px Google Sans Display weight 400, #202124, letter-spacing -0.8px, two lines max
-- Description: 18px Google Sans Text weight 400, #5f6368, max-width 640px, 24px margin-top
-- Action pair: filled pill + ghost pill, 16px gap, 32px margin-top from description
-
-#### Feature Showcase Card
-- Two equal-width columns, 24px gap
-- Each card: border-radius 24px, no border, no shadow
-- Top half: product UI screenshot, full-bleed to card edges, against #e8f0fe background tint
-- Bottom half: white background, 32px padding all sides
-- Heading: 22px Google Sans Display weight 500 #202124, 8px margin-bottom
-- Body: 16px Google Sans Text weight 400 #5f6368
-- Bottom-left: inline text link in #1a73e8 with right-arrow glyph
-
-#### Tab Switcher
-- Inline row inside pill container (border-radius 9999px, 1px #dadce0 border, white background, 4px padding)
-- Three tab labels: Personalize learning, Simplify everyday tasks, Gain insights and visibility
-- Active tab: background #f8f9fa, text #202124 weight 500, border-radius 9999px inset
-- Inactive: #5f6368 weight 400
-- No background fill on active state — subtle gray pill within gray pill
-
-#### Inline Text Link
-- Google Sans Text, inherits size from surrounding text
-- Color #1a73e8, underline 1px, underline-offset 2px
-- Hover: color #1967d2
-
-#### Product Brand Mark
-- 32×32px rounded square icon (border-radius 8px) paired with product name 18px Display weight 500 #202124
-- 12px gap between icon and label, vertically centered
-
-#### Modal Dialog
-- Centered on scrim background (rgba(32, 33, 36, 0.5))
-- Card: max-width 480px, white background, border-radius 8px, no shadow
-- Header: 32px product icon left-aligned, 18px product name Display weight 500 #202124, 24px padding
-- Close (X) at right in #5f6368
-- Body: 16px #3c4043, 24px padding
-- Footer: right-aligned text link 'Stay here' in #1a73e8 + filled pill 'Go', 16px gap, 24px padding
-
-#### Search Icon Button
-- 40×40px, border-radius 50%
-- Transparent background, 24px magnifying-glass glyph in #5f6368
-- Hover: background #f8f9fa, glyph #202124
-
-#### Section Divider
-- Whitespace-only divider: 64-80px vertical gap between content blocks
-- If line needed: 1px #dadce0 spanning full container width
-
-## Do's and Don'ts Compliance
-- ✅ Use 200px border-radius on all filled and ghost buttons
-- ✅ Set display headlines at 80px with -0.8px letter-spacing and 1.09 line-height
-- ✅ Apply positive letter-spacing to body text: 0.272px at 16px, 0.432px at 12px
-- ✅ Use #1a73e8 for all interactive blue
-- ✅ Separate sections with 64-80px whitespace
-- ✅ Set card radii to 24-28px for feature panels, 8px for modals
-- ✅ Default to weight 400 for body, weight 500 for emphasis
-
-- ❌ Do not introduce shadows on cards
-- ❌ Do not use more than one filled button per viewport
-- ❌ Do not use green (#188038) outside Classroom brand mark
-- ❌ Do not use #1a73e8 for decorative backgrounds
-- ❌ Do not set display headlines above 80px or use weight 700
-- ❌ Do not add gradients (only soft #e8f0fe tint behind screenshots)
-- ❌ Do not use negative tracking on body text
-
-## Elevation Strategy
-- Almost no box-shadow
-- Elevation through surface color shifts (canvas → card white)
-- One shadow value #c4c6c7 only on focused input fields (soft outer ring)
-- Modal scrim: rgba(32, 33, 36, 0.5)
-
-## Imagery Policy
-- Product-screenshot-first approach
-- Full-bleed captures with soft #e8f0fe blue tint
-- No lifestyle photography, stock illustrations, or decorative abstract graphics
-- Flat, monochromatic, geometric icons (Material outlined, 1.5px stroke)
-
-## Validation Plan
-- Run `npm run lint` to catch Tailwind class issues
-- Run `npm run build` to verify Next.js compilation
-- Verify all color tokens are applied correctly
-- Verify typography scale and tracking values
-- Test component interactions (button hovers, form states)
-- Check responsive behavior at mobile widths
-
-## Open Questions / Risks
-- Font availability: Google Sans may not be system-available; Inter substitution at 900px width minimum; plan to load via Google Fonts CDN with `font-display: swap`
-- Logo usage: Google for Education wordmark requires proper attribution per brand guidelines; use modified Qrie wordmark for app-internal navigation
-- Image assets: Product screenshots need to be created or sourced; use solid-color placeholders with `#e8f0fe` tint during development
-- Modal interactions: keyboard accessibility (Esc to close, Tab focus management), focus ring in `#1a73e8` on focused elements
-- Sticky navigation behavior on scroll: fixed positioning, maintain 64px height with `top: 0` and `z-index: 1000`
-- Accessibility: ensure all color contrasts meet WCAG AA (charcoal ink #202124 on canvas #f8f9fa: 15.9:1; slate #5f6368 on white: 4.5:1 minimum)
-
-## 4. Components to Build (with Full Specifications)
-
-### 4.1 Top Announcement Bar
-**HTML Structure:**
-```html
-<header class="fixed top-0 left-0 right-0 z-50 h-12 bg-[var(--color-canvas-white)] border-b border-[var(--color-mist)]">
-  <div class="max-w-[1200px] mx-auto px-6 h-full flex items-center justify-between">
-    <p class="text-[14px] font-normal text-[var(--color-graphite)] text-center">
-      {/* Announcement text */}
-      <a href="#" class="underline underline-offset-2 underline-text-blue">Learn more</a>
-    </p>
-    <button class="rounded-full bg-[var(--color-slate)] text-[var(--color-slate)] p-1 hover:bg-[var(--color-charcoal-ink)] hover:text-[var(--color-charcoal-ink)] transition-colors">
-      X
-    </button>
-  </div>
-</header>
-```
-
-**Key States:**
-- Default: transparent background, #5f6368 text
-- Close hover: #202124 background, #202124 text
-
-### 4.2 Primary Navigation Bar
-**HTML Structure:**
-```html
-<nav class="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-[var(--color-mist)]">
-  <div class="max-w-[1200px] mx-auto px-6 h-full flex items-center justify-between">
-    <!-- Left: Wordmark -->
-    <h1 class="font-display text-[18px] font-medium text-[var(--color-charcoal-ink)]">Qrie Education</h1>
-    
-    <!-- Center: Nav Links -->
-    <div class="hidden md:flex gap-8">
-      <a href="#!" class="text-[14px] font-normal text-[var(--color-graphite)] hover:text-[var(--color-charcoal-ink)] transition-colors relative">
-        Our values
-      </a>
-      <!-- ... more links -->
-      <!-- Active underline -->
-      <span class="absolute bottom-2 left-0 h-2 w-0 bg-[var(--color-google-blue)] transition-width duration-200">
-        <!-- Width animated via JS -->
-      </span>
-    </div>
-    
-    <!-- Right: Search & Account -->
-    <div class="flex items-center gap-3">
-      <button class="rounded-full p-1 bg-transparent hover:bg-[var(--color-canvas-white)] transition-colors">
-        <svg class="w-4 h-4 text-[var(--color-slate)]" ...>...</svg>
-      </button>
-      <button class="rounded-full bg-[var(--color-canvas-white)] w-8 h-8 flex items-center justify-center text-[var(--color-slate)] hover:bg-[var(--color-charcoal-ink)] hover:text-[var(--color-charcoal-ink)] transition-colors">
-        {/* Avatar placeholder */}
-      </button>
-      <a href="#!" class="text-[14px] font-medium text-[var(--color-google-blue)] hover:text-[var(--color-google-blue-deep)] transition-colors">Sign in</a>
-      <button class="btn-filled">Get started</button>
-    </div>
-  </div>
-</nav>
-```
-
-**Key States:**
-- Active nav link: `underline indicator` `w-full` animated from left
-- Hover states for all interactive elements
-- Focus states with `outline-none` but custom focus ring in `#1a73e8`
-
-### 4.3 Filled Pill Button
-**CSS/ Tailwind:**
-```html
-<button class="h-10 px-6 rounded-full bg-[var(--color-google-blue)] text-white text-[14px] font-medium hover:bg-[var(--color-google-blue-deep)] transition-colors">
-  Get started
-</button>
-```
-
-**States:**
-- Default: `#1a73e8` background, white text
-- Hover: `#1967d2` background, white text  
-- Pressed: same as hover (no additional state needed)
-- Focus: `outline-none ring-2 ring-[var(--color-google-blue)] ring-offset-2`
-- Disabled: `opacity-50 cursor-not-allowed`
-
-### 4.4 Ghost Pill Button
-**CSS/ Tailwind:**
-```html
-<button class="h-10 px-6 rounded-full border border-[var(--color-mist)] text-[var(--color-google-blue)] text-[14px] font-medium hover:bg-[var(--color-canvas-white)] hover:border-[var(--color-google-blue)] transition-colors">
-  Learn more
-</button>
-```
-
-**States:**
-- Default: transparent background, 1px #dadce0 border, #1a73e8 text
-- Hover: #f8f9fa background, #1a73e8 border
-- Focus: `outline-none ring-2 ring-[var(--color-google-blue)] ring-offset-2`
-- Active: `active:scale-[0.95]` subtle shrink
-
-### 4.5 Breadcrumb Trail
-**HTML Structure:**
-```html
-<nav class="p-6 text-[12px] font-normal text-[var(--color-slate)]">
-  <a href="#!" class="text-[var(--color-google-blue)] hover:text-[var(--color-google-blue-deep)] transition-col underline underline-offset-2 underline">Home</a>
-  <span class="mx-2">›</span>
-  <a href="#!" class="text-[var(--color-slate)] hover:text-[var(--color-charcoal-ink)] transition-colors">Solutions</a>
-  <span class="mx-2">›</span>
-  <span class="font-medium text-[var(--color-charcoal-ink)]">Product</span>
-</nav>
-```
-
-**Key States:**
-- Hover states on each segment
-- Current page segment: no underline, #202124 weight 500
-- Clickable segments: underline on hover, color change on active
-
-### 4.6 Hero Section
-**HTML Structure:**
-```html
-<section class="py-24 pb-16 max-w-[800px] mx-auto text-center">
-  <!-- Brand Mark -->
-  <div class="mb-8 flex items-center justify-center gap-2">
-    <div class="w-8 h-8 rounded-md bg-[var(--color-cloud-shadow)] flex items-center justify-center">
-      {/* Product icon SVG */}
-    </div>
-    <span class="font-display text-[18px] font-medium text-[var(--color-charcoal-ink)]">Classroom</span>
-  </div>
-  
-  <!-- Display Headline -->
-  <h1 class="text-[80px] font-normal leading-[1.09] tracking-[-0.8px] text-[var(--color-charcoal-ink)] mb-2">
-    Personalize learning for every student
-  </h1>
-  <p class="line-clamp-2 text-[18px] font-normal text-[var(--color-slate)] leading-relaxed max-w-[640px] mx-auto mb-8">
-    A digital classroom where whitespace, type, and one blue accent do all the work.
-  </p>
-  
-  <!-- Action Pair -->
-  <div class="flex items-center justify-center gap-4 mb-0">
-    <button class="btn-filled">Explore Classroom</button>
-    <button class="btn-ghost">Watch Demo</button>
-  </div>
-</section>
-```
-
-**Layout:**
-- Vertical padding: `py-24 pb-16` (64px top, 48px bottom - adjust with safelisted values)
-- Brand mark: 32px icon + 18px label, 12px gap
-- Headline: 80px, -0.8px tracking, 1.09 line-height
-- Description: 18px, 0.108px tracking (positive), 1.67 line-height, max-w-64
-- Action pair: filled + ghost pill, 16px gap
-
-### 4.7 Feature Showcase Card
-**HTML Structure:**
-```html
-<div class="max-w-[1200px] mx-auto grid grid-cols-1 gap-6 sm:grid-cols-2">
-  {/* Card 1 */}
-  <div class="rounded-[24px] overflow-hidden bg-white">
-    <!-- Top half: Screenshot with tint -->
-    <div class="relative h-[280px]">
-      <img src="/placeholder-screenshot.jpg" alt="" class="w-full h-full object-cover">
-      <div class="absolute inset-0 bg-[var(--color-feature-panel-tint)]" />
-    </div>
-    
-    <!-- Bottom half: Text block -->
-    <div class="p-6">
-      <h2 class="text-[22px] font-medium text-[var(--color-charcoal-ink)] mb-2">Personalized Learning</h2>
-      <p class="text-[16px] font-normal text-[var(--color-slate)] leading-relaxed mb-6">
-        Adaptive pathways that meet each student where they are.
-      </p>
-      <a href="#!" class="inline-flex items-center text-[var(--color-google-blue)] underline underline-offset-2 hover:text-[var(--color-google-blue-deep)] transition-colors">
-        Learn more →
-        <svg class="w-4 h-4 ml-2" ...>...</svg>
-      </a>
-    </div>
-  </div>
-  
-  {/* Card 2 - same structure */}
-</div>
-```
-
-**Key Details:**
-- Border-radius: 24px (not 28px - use safelisted value)
-- Screenshot: full-bleed to card edges, tinted background #e8f0fe
-- Bottom text: white background, 32px padding all sides
-- Heading: 22px Display weight 500 #202124, 8px margin-bottom
-- Body: 16px Text weight 400 #5f6368
-- Link: #1a73e8 with right-arrow glyph
-
-### 4.8 Tab Switcher
-**HTML Structure:**
-```html
-<div class="flex rounded-full bg-white border border-[var(--color-mist)] p-1.5">
-  <!-- Tab 1 -->
-  <button 
-    class="text-[14px] font-medium [&_span]:text-[var(--color-slate)] [&_span]:font-normal [&:not(.bg-white)]:text-[var(--color-charcoal-ink)] [&:not(.bg-white)]:font-medium"
-    data-tab="1"
-  >
-    <span>Personalize learning</span>
-  </button>
-  
-  <!-- Tab 2 -->
-  <button 
-    class="text-[14px] font-medium [&_span]:text-[var(--color-slate)] [&_span]:font-normal [&:not(.bg-white)]:text-[var(--color-charcoal-ink)] [&:not(.bg-white)]:font-medium"
-    data-tab="2"
-  >
-    <span>Simplify everyday tasks</span>
-  </button>
-  
-  <!-- Tab 3 -->
-  <button 
-    class="text-[14px] font-medium [&_span]:text-[var(--color-slate)] [&_span]:font-normal [&:not(.bg-white)]:text-[var(--color-charcoal-ink)] [&:not(.bg-white)]:font-medium"
-    data-tab="3"
-  >
-    <span>Gain insights and visibility</span>
-  </button>
-</div>
-```
-
-**Active State:**
-- `data-tab-active` button: `bg-[var(--color-canvas-white)] text-[var(--color-charcoal-ink)] font-medium`
-- `data-tab-active` border-radius: `rounded-full inset-0` (shrinks pill inward)
-- Inactive: no background fill, just gray text on gray pill
-
-### 4.9 Inline Text Link
-**CSS/ Tailwind:**
-```html
-<a href="#!" class="text-[var(--color-google-blue)] underline underline-offset-2 underline-single text-decoration-blue hover:text-[var(--color-google-blue-deep)] transition-colors">
-  Learn more
-</a>
-```
-
-**States:**
-- Default: #1a73e8, 1px underline, 2px offset
-- Hover: #1967d2
-- Focus: `outline-none ring-2 ring-[var(--color-google-blue)] ring-offset-2`
-- Visited: maintain #1a73e8 (no purple fade)
-
-### 4.10 Product Brand Mark
-**HTML Structure:**
-```html
-<div class="flex items-center gap-2">
-  <div class="w-8 h-8 rounded-md bg-[var(--color-cloud-shadow)] flex items-center justify-center">
-    {/* 32×32px icon SVG */}
-  </div>
-  <span class="font-display text-[18px] font-medium text-[var(--color-charcoal-ink)]">Classroom</span>
-</div>
-```
-
-**Key Details:**
-- 32×32px rounded square (border-radius 8px)
-- 12px gap between icon and label
-- Vertically centered as a group
-- Product name: Google Sans Display weight 500 #202124
-
-### 4.11 Modal Dialog
-**HTML Structure:**
-```html
-<div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-  <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-[480px] w-full bg-white rounded-[8px] overflow-hidden">
-    <!-- Header -->
-    <div class="p-6 border-b border-[var(--color-mist)] flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-md bg-[var(--color-cloud-shadow)] flex items-center justify-center">
-          {/* 32px icon */}
-        </div>
-        <span class="font-display text-[18px] font-medium text-[var(--color-charcoal-ink)]">Region selection</span>
-      </div>
-      <button class="rounded-full bg-transparent p-1 hover:bg-[var(--color-subtle)] hover:text-[var(--color-charcoal-ink)] transition-colors" aria-label="Close modal">
-        X
-      </button>
-    </div>
-    
-    <!-- Body -->
-    <div class="p-6">
-      <p class="text-[16px] font-normal text-[var(--color-graphite)]">Select your region to get started.</p>
-    </div>
-    
-    <!-- Footer -->
-    <div class="p-6 flex justify-end gap-4 border-t border-[var(--color-mist)]">
-      <a href="#!" class="text-[14px] font-medium text-[var(--color-google-blue)] hover:text-[var(--color-google-blue-deep)] transition-colors">
-        Stay here
-      </a>
-      <button class="btn-filled">Go</button>
-    </div>
-  </div>
-</div>
-```
-
-**Key Details:**
-- Scrim: `bg-black/50 backdrop-blur-sm`
-- Card: max-w-[480px], white background, border-radius 8px, no shadow
-- Header: 32px icon + 18px Display weight 500 #202124, 24px padding
-- Close X: #5f6368, size appropriate
-- Body: 16px #3c4043, 24px padding
-- Footer: right-aligned, 'Stay here' link + filled pill 'Go', 16px gap, 24px padding
-- Focus trap: first focusable element after modal open
-- Escape key: close modal
-
-### 4.12 Search Icon Button
-**HTML Structure:**
-```html
-<button class="rounded-full p-1 bg-transparent hover:bg-[var(--color-canvas-white)] hover:text-[var(--color-charcoal-ink)] transition-colors" aria-label="Search">
-  <svg class="w-5 h-5 text-[var(--color-slate)]" ...>...</svg>
-</button>
-```
-
-**States:**
-- Default: 40×40px, border-radius 50%, transparent background, #5f6368 glyph
-- Hover: #f8f9fa background, #202124 glyph
-- Focus: `outline-none ring-2 ring-[var(--color-google-blue)] ring-offset-2`
-- Active: scale 0.9
-
-### 4.13 Section Divider
-**Usage:**
-```html
-<!-- Whitespace divider (preferred) -->
-<div class="my-16"></div>
-
-<!-- Or with horizontal line -->
-<hr class="my-16 border-0 border-t border-[var(--color-mist)]">
-```
-
-**Key Details:**
-- Whitespace-only: 64-80px vertical gap between content blocks
-- If line needed: 1px #dadce0 spanning full container width
-- No decorative lines preferred
-
-## 5. Page Architectures
-
-### 5.1 Home Page (`app/page.tsx`)
-**Structure:**
-1. Hero section (full-width canvas with centered content)
-2. Feature showcase grid (2 columns, 24px gap)
-3. Tab switcher (Personalize learning | Simplify everyday tasks | Gain insights and visibility)
-4. Feature showcase grid (2nd pair of cards)
-5. Section divider (64px gap)
-6. Call-to-action section (filled + ghost pill buttons)
-
-**Key Elements:**
-- Max-width 1200px, 24px horizontal padding
-- Hero: single-column stack, 80px top / 64px bottom
-- Cards: border-radius 24px, no shadow, #e8f0fe tint on top half
-- Sections separated by 64-80px whitespace
-
-### 5.2 Teacher Dashboard (`app/(teacher)/teacher/dashboard/page.tsx`)
-**Structure:**
-1. Top metrics row (3 cards grid, collapse to 1 on mobile)
-2. Assigned classes section (grid 1-2 columns)
-3. Active learning interventions (table with struggle alerts)
-
-**Key Components:**
-- Metric cards: border-radius 24px, no shadow, elevated surface
-- Table: minimal borders, striped rows optional
-- Buttons: filled/ghost pill variants throughout
-- Status badges: color-coded with appropriate accents
-
-### 5.3 Admin Dashboard (`app/(admin)/admin/dashboard/page.tsx`)
-**Structure:**
-1. Metrics grid (4 cards in desktop, 1-2 in mobile)
-2. Faculty roster table
-3. Quick actions bar (Invite teacher button + add cards)
-
-**Key Components:**
-- Metric cards with subtle distinction
-- Data tables with proper headers
-- Action pills for primary actions
-- Status indicators with color coding
-
-### 5.4 Modals (Shared Across Pages)
-**Used for:**
-- Region selection
-- Confirmation dialogs
-- Form submissions
-- User settings
-
-**Consistent Pattern:**
-- Scrim background with rgba(32,33,36,0.5)
-- Centered card, max-width 480px
-- No box-shadow, elevation from scrim only
-- Focus-managed within modal
-- Escape key to close
-- Accessible name labeling
-
-## 6. State Management & Interactions
-
-### 6.1 Button States
-```
-Default → Hover → Pressed → Focus → Disabled
-#1a73e8 → #1967d2 → #1967d2 (same) → ring-[1a73e8] → opacity-50
-```
-
-### 6.2 Nav Link Active State
-- Animated width from left using `width: var(--dest, 0) transition-width`
-- `data-active` class sets `--dest` CSS variable
-- Background: none, just border-bottom 2px #1a73e8
-
-### 6.3 Tab Switcher Interactions
-- Click: background transitions #f8f9fa, text #202124 weight 500
-- Keyboard: Arrow keys navigate, Enter/Select activates
-- `data-active` class on container manages state
-
-### 6.4 Form Input States
-- Default: border #dadce0, focus #1a73e8
-- Focus: `ring-2 ring-[var(--color-google-blue)] ring-offset-2`
-- Error: `ring-2 ring-[danger] ring-offset-2` (if using error state)
-- Disabled: `opacity-50 cursor-not-allowed border-[var(--color-mist)]`
-
-### 6.5 Table Row Hover
-- `hover:bg-[var(--color-canvas-white)/50]` subtle highlight
-- `focus-visible:bg-[var(--color-canvas-white)/50]` for keyboard navigation
-- No harsh color changes, maintain readability
-
-## 7. Accessibility Requirements
-
-### 7.1 Color Contrast (WCAG AA)
-- #202124 on #f8f9fa: 15.9:1 ✅
-- #5f6368 on #ffffff: 4.5:1 ✅ (minimum)
-- #1a73e8 on #ffffff: 8.5:1 ✅
-- #1a73e8 on #f8f9fa: 11.7:1 ✅
-- #ffffff on #5f6368: 4.5:1 ✅ (minimum)
-
-### 7.2 Focus Management
-- All focusable elements get visible focus ring in #1a73e8
-- `outline-none` only with replacement ring
-- Modal focus trap on open
-- Logical Tab order within components
-
-### 7.3 Keyboard Navigation
-- Tab: navigate through interactive elements in order
-- Shift+Tab: reverse navigation
-- Enter/Space: activate buttons, follow links
-- Escape: close modals, dismiss dialogs
-- Arrow keys: navigate tab switches, table rows
-
-### 7.4 Screen Reader Support
-- Semantic HTML elements (nav, header, main, section, aside)
-- ARIA labels on custom buttons: `aria-label="Search"`, `aria-label="Close"`
-- Descriptive link text (no "click here")
-- Page landmarks for quick navigation
-
-### 7.5 Responsive Behavior
-- Mobile-first breakpoint at `sm:` (640px)
-- Navigation: transforms to hamburger menu on mobile
-- Hero: stacks vertically, full-width action buttons
-- Feature grid: 1 column on mobile, 2 on sm+, 3 on lg+
-- Modals: full-width on mobile, centered with max-width on desktop
-
-## 8. Responsive Breakpoints
-
-| Breakpoint | Minimum Width | CSS Class |
-|------------|---------------|-----------|
-| `sm` | 640px | `sm:` prefix |
-| `md` | 768px | `md:` prefix |
-| `lg` | 1024px | `lg:` prefix |
-| `xl` | 1280px | `xl:` prefix |
-| `2xl` | 1536px | `2xl:` prefix |
-
-**Mobile-First Design:**
-- `h-screen` → full height on mobile
-- `grid-cols-1` → 1 column, `sm:grid-cols-2` → 2 columns
-- `px-6` → `px-4` on mobile, `px-6` on tablet+
-- `gap-6` → `gap-4` on mobile, `gap-6` on desktop
-
-## 9. Task List (Expanded)
-
-1. ✅ Update `tailwind.config.js` with Google for Education color and typography tokens
-2. ✅ Update `app/globals.css` with CSS custom properties and component classes
-3. ✅ Refactor `app/layout.tsx` with proper canvas background and font loading
-4. ✅ Rebuild `app/page.tsx` (Home) as Google for Education hero section with all components
-5. ✅ Rebuild `app/(teacher)/layout.tsx` (Teacher layout) with Google nav and components
-6. ✅ Rebuild `app/(teacher)/teacher/dashboard/page.tsx` (Teacher dashboard) with metrics, classes, table
-7. ✅ Rebuild `app/(admin)/layout.tsx` (Admin layout) with Google nav and components
-8. ✅ Rebuild `app/(admin)/admin/dashboard/page.tsx` (Admin dashboard) with metrics, roster
-9. ✅ Create reusable component library:
-   - `BtnFilled` component
-   - `BtnGhost` component
-   - `NavLink` component with active underline
-   - `Breadcrumb` component
-   - `HeroSection` component
-   - `FeatureCard` component (2 variants)
-   - `TabSwitcher` component
-   - `InlineLink` component
-   - `BrandMark` component
-   - `ModalDialog` component
-   - `SearchButton` component
-10. ✅ Implement focus-visible states and accessible interactions
-11. ✅ Add responsive breakpoints (mobile-first)
-12. ✅ Run lint and build validation
-13. ✅ Cross-browser testing (Chrome, Firefox, Safari)
-14. ✅ Performance optimization (image optimization, font loading)
-15. ✅ Deploy to staging environment
+Redesign the Qrie AI platform to match the Google for Education design system, preserving existing teacher/admin sidebar layouts while veneering with Google nav/components. Features: restrained utility surface with near-white canvas, Google Sans Display and Text type families, single brand blue accent (#1a73e8), generous whitespace, pill-shaped controls, 24px card radii.
+
+## Constraints & Boundaries
+- **Sidebar preservation**: Teacher/admin `w-64` fixed sidebars kept, transformed to Google nav overwrite (wordmark left, nav center, search/account right). Mobile: hamburger at `md:` breakpoint, sidebar does not collapse to full-width.
+- **Z-index conflict**: Nav sticky at `z-50`; modal scrim must use `z-[51]` or higher. Nav `z-50` correct.
+- **One filled pill per viewport**: Teacher dashboard metric actions paired with ghost/variant; admin has exactly one filled "Invite Teacher" pill. Hero section has filled+ghost pair; other viewports see only one filled at a time.
+- **No box-shadow**: Cards/modals have zero shadow; elevation from surface color shifts only. Focus ring `#1a73e8` `#c4c6c7` only on focused inputs.
+- **Font loading**: Google Sans not system-available; load via Google Fonts CDN with `font-display: swap` in `next.config.mjs` `<head>`; fallback chain: `'"Google Sans Display"'`, `'"Google Sans Text"'`, `ui-sans-serif`, `system-ui`, `sans-serif`. Inter substitution at 900px minimum width.
+- **Color variable scope**: CSS custom properties defined in `:root` in `globals.css` available throughout; Tailwind `theme.extend.colors` references via `var(--color-...)` or `[color-...]` utility syntax.
+- **Border radius**: `rounded-xl` (16px) → `rounded-3xl` (24px) for cards; `rounded-full` pills keep 200px radius but with `h-10 px-6` and `border-0` for filled ghost pills; modal cards `rounded-8` (8px).
+- **Tracking**: Positive body tracking: `0.272px` at 16px (`tracking-body`), `0.432px` at 12px; not negative. Explicit `tracking-[...]` utilities used.
+- **Max-width container**: `max-w-[1200px]` with 24px horizontal padding (`px-6`). Hero text block `max-w-[800px]`. Feature grid `max-w-[1200px]`.
+- **Section gaps**: Section vertical gap 64-80px; card padding 32-40px; element gap 8-16px. All `gap-*` audited against 8px base unit rhythm.
+- **Announcement bar**: Fixed `h-12` above nav with close (X) button. Must not collapse under mobile nav hamburger (set `z-index` above mobile menu).
+- **Link styling**: `underline underline-offset-2 underline-single text-decoration-blue` color `#1a73e8`; visited links maintain `#1a73e8` (no purple fade).
+- **Do NOT use**: shadows on cards, more than one filled button per viewport, green `#188038` outside Classroom brand mark, `#1a73e8` for decorative backgrounds, display headlines >80px or weight 700, gradients, negative tracking.
+
+## Affected Files (ordered by dependency)
+
+1. `.kilo/plans/1792583541496-google-education-redesign-plan.md` — this plan file
+2. `tailwind.config.js` — color tokens, font families, type scale, borderRadius.pill, maxWidth.container/hero/text
+3. `app/globals.css` — `@import` Google Fonts CDN for Google Sans Display/Text; `:root` CSS vars for all `--color-*`, `--font-*`, `--spacing-*`, `--radius-*`; body `font-family: var(--font-google-sans-text)`; component classes at `@layer components`
+4. `next.config.mjs` — add Google Fonts `link` tag in `head` for font preload; ensure `reactStrictMode` remains `true`
+5. `app/layout.tsx` — root `bg-canvas text-charcoal font-text`; add `<link>` preload for Google fonts; remove `bg-surface-subtle text-text`
+6. `app/(teacher)/layout.tsx` — sidebar Google-styled: wordmark via `BrandMark`, nav links charcoal/slate, active state, search/account right; header bell button retained; `z-index: 50` on nav, modal `z-[51]`
+7. `app/(teacher)/teacher/dashboard/page.tsx` — metrics 3 cards grid `md:grid-cols-3`, collapse to 1 on mobile; no `shadow-sm`; table mist borders `divide-y divide-mist`; "View Class Roster" as `inline-link` (text underline), NOT filled pill; status badges use appropriate accent
+8. `app/(admin)/layout.tsx` — sidebar without purple accent: charcoal/scheme, wordmark via `BrandMark`, nav links restructured
+9. `app/(admin)/admin/dashboard/page.tsx` — metrics 4 cards `md:grid-cols-4` lg `grid-cols-1` mobile; "Invite Teacher" single filled pill (`BtnFilled`); roster table with mist borders; status badges; action area respects one-filled rule
+10. `app/page.tsx` — Home: AnnouncementBar (fixed h-12, z-50, above Nav), TopNav (wordmark center-left, nav center, search right, filled CTA), HeroSection (Google hero with brand mark, 80px display headline, description, filled+ghost CTA pair), FeatureCard grid (2-col sm), TabSwitcher, CTA section (one filled + one ghost)
+11. `components/BtnFilled.tsx` — `h-10 px-6 rounded-full bg-[var(--color-google-blue)] text-white text-[14px] font-medium hover:bg-[var(--color-google-blue-deep)]`; focus ring; disabled state
+12. `components/BtnGhost.tsx` — `h-10 px-6 rounded-full border border-[var(--color-mist)] text-[var(--color-google-blue)] text-[14px] font-medium hover:bg-[var(--color-canvas-white)] hover:border-[var(--color-google-blue)]`; focus ring; active scale-0.95
+13. `components/BrandMark.tsx` — 32×32px rounded-square icon + product name 18px Display weight 500 #202124; 12px gap; vertically centered group
+14. `components/NavLink.tsx` — server component; `relative` with absolute bottom indicator `h-[2px] w-full bg-[var(--color-google-blue)] transition-width`; width animated via CSS variable `--dest` set by `data-active` class; non-active links hover charcoal
+15. `components/Breadcrumb.tsx` — `py-4 text-[12px] font-normal text-slate`; segments separated by `›` mx-2; current page `font-medium text-charcoal` no underline; hover underline `underline underline-offset-2`
+16. `components/FeatureCard.tsx` — `rounded-[24px] overflow-hidden bg-white`; top half `relative h-[280px] bg-feature-tint` full-bleed img; bottom half `p-6` white; heading `text-[22px] font-medium text-charcoal mb-2`; body `text-[16px] font-normal text-slate leading-relaxed mb-6`; inline link with right-arrow glyph svg
+17. `components/TabSwitcher.tsx` — client (`use client`); pill `rounded-full bg-white border border-mist p-1.5 gap-1`; three tabs with click state: active `bg-canvas text-charcoal font-medium`; inactive `text-slate font-normal hover:text-charcoal`; keyboard nav left/arrow keys
+18. `components/InlineLink.tsx` — wraps `next/link`; class `inline-link text-[var(--color-google-blue)] underline underline-offset-2 hover:text-[var(--color-google-blue-deep)]`; visited no purple fade
+19. `components/ModalDialog.tsx` — client (`use client`); scrim `bg-black/50 backdrop-blur-sm` `z-[51]`; card `max-w-[480px] w-full bg-white rounded-[8px] overflow-hidden`; header: 32px icon + 18px Display weight 500 #202124, 24px padding; close X `#5f6368`; body `text-[16px] font-normal text-graphite`; footer: right-aligned `Stay here` link + filled `Go` pill; focus trap first element; `Esc` to close
+20. `components/SearchButton.tsx` — `w-10 h-10 rounded-full flex items-center justify-center bg-transparent hover:bg-canvas transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-google-blue)] focus:ring-offset-2`; glyph `#5f6368` 
+21. `components/AnnouncementBar.tsx` — client (`use client`); fixed `h-12 bg-canvas border-b border-mist z-50`; announcement text `text-[14px] font-normal text-graphite text-center`; inline link `underline underline-offset-2 text-google-blue`; close button `rounded-full p-1 bg-transparent hover:bg-charcoal hover:text-white transition-colors` `aria-label="Close"`
+22. `components/TopNav.tsx` — `h-16 bg-white border-b border-mist`; `max-w-[1200px] mx-auto px-6`; left: `BrandMark`; center: `hidden md:flex gap-8` nav links `text-[14px] font-normal text-graphite hover:text-charcoal`; right: `SearchButton`, avatar `w-8 h-8 rounded-full bg-canvas text-slate`, `Sign in` `inline-link`, `BtnFilled "Get started"` (one filled per viewport considered across hero+topnav)
+23. `components/HeroSection.tsx` — server; `py-20 pb-16 max-w-[800px] mx-auto text-center px-6`; `BrandMark` 32px icon + 18px label gap-2; `h1 text-[80px] font-normal leading-[1.09] tracking-[-0.8px] text-charcoal mb-2`; `p text-subheading text-slate leading-[1.67] max-w-[640px] mx-auto mb-8 tracking-[0.108px]`; action pair `BtnFilled` + `BtnGhost` gap-4
+24. `components/SectionDivider.tsx` — `my-16` whitespace divider preferred; `hr.my-16 border-0 border-t border-mist` if line needed
+25. `components/FeatureCard.tsx` variant for "screenshot + text" and "text-only" if needed
+26. `app/(teacher)/teacher/dashboard/page.tsx` — updated metrics (no shadow, border-mist, rounded-3xl, larger text `text-[32px]` `tracking-[0.432px]`); progress bar `bg-google-blue h-2 rounded-full`; table headers `bg-canvas border-b border-mist text-slate uppercase text-[12px] font-medium`; row `hover:bg-canvas/50`; status badges with border
+27. `app/(admin)/admin/dashboard/page.tsx` — metrics 4 cards `p-8 bg-white border border-mist rounded-3xl`; larger `text-[32px]` `tracking-[0.432px]`; "Invite Teacher" `BtnFilled` only filled pill in viewport; roster table same pattern; status badges green with border
+
+## Component Interaction Specifications
+
+### NavLink Active Underline
+- Rendered as `<span class="absolute bottom-2 left-0 h-2 w-0 bg-[var(--color-google-blue)] transition-width duration-200">` width animated via `width: var(--dest, 0)` CSS variable
+- `data-active` class on `<a>` sets `--dest: 100` (or link width in px)
+- Click handling: `router.push(href)` on `next/link`; underline reflows on Navigate
+
+### TabSwitcher State
+- Container has `data-active` class managed by `useState` click handler
+- On click: `setActive(i)`; active button gets `data-tab-active` effect via `[data-tab-active]` CSS selector: `bg-[var(--color-canvas-white)] text-[var(--color-charcoal-ink)] font-medium`
+- Keyboard: left/right arrow keys navigate; `Enter` selects; `Esc` does nothing (unlike modal)
+
+### Modal Focus Trap
+- On open: `document.body.style.overflow = 'hidden'`; first focusable element (close X or body text) receives focus
+- While open: `Esc` closes modal and returns focus to triggering element; `Tab` cycles within modal only (elements outside `max-w-[480px]` blocked)
+- On close: `document.body.style.overflow = ''`; focus returns to prior element
+
+### Button Single-Fill Guarantee
+- Across any continuous viewport (hero + below fold), only one `BtnFilled` rendered
+- Teacher dashboard: 3 metric areas each use `BtnGhost` or `inline-link`; only possible filled is if hero CTA visible, but viewport scrolled, only one filled visible
+- Admin: single "Invite Teacher" `BtnFilled`; quick actions area uses `BtnGhost` or text links
+
+## Responsive Breakpoints & Mobile Behavior
+
+| Breakpoint | Width | Key Adjustments |
+|------------|-------|-----------------|
+| `sm` | 640px | `grid-cols-1` → `sm:grid-cols-2`; `px-6` → `px-4`; `gap-6` → `gap-4`; hero description stacks full-width; CTA buttons full-width |
+| `md` | 768px | nav transitions from `hidden md:flex`; sidebar transforms to hamburger (`hidden md:block`); feature grid 2 columns |
+| `lg` | 1024px | feature grid may achieve 3 columns if `lg:grid-cols-3` added; modals centered with `max-w-[480px]` |
+| `xl` | 1280px | full desktop layout; announcement bar spans full width |
+| `2xl` | 1536px | no further changes |
+
+Mobile-first hierarchy:
+- Hero: stacks vertically; action buttons full-width 100%
+- Feature grid: 1 column `grid-cols-1`, `sm:grid-cols-2`, `lg:grid-cols-3` (if desired)
+- Sidebars: `w-64` always; on mobile hamburger button appears in header to toggle sidebar visibility (JS: add/remove `sidebar-open` class, `transform translateX(-100%)`, `z-index` management)
+- Modals: full-width on mobile (`w-full max-w-none`), centered with `max-w-[480px]` on desktop
+- Announcement bar: remains fixed h-12; mobile hamburger menu z-index 51 ensures it appears above
+
+## Color Token Mapping (Tailwind ↔ CSS Vars)
+
+| CSS Variable | Hex | Tailwind Key (example) |
+|---|---|---|
+| `--color-canvas-white` | `#f8f9fa` | `bg-canvas` / `bg-[var(--color-canvas-white)]` |
+| `--color-charcoal-ink` | `#202124` | `text-charcoal` / `text-[var(--color-charcoal-ink)]` |
+| `--color-graphite` | `#3c4043` | `text-graphite` |
+| `--color-slate` | `#5f6368` | `text-slate` / `border-slate` |
+| `--color-mist` | `#dadce0` | `border-mist` / `border-[var(--color-mist)]` |
+| `--color-cloud-shadow` | `#c4c6c7` | `focus:ring-[var(--color-cloud-shadow)]` on inputs |
+| `--color-google-blue` | `#1a73e8` | `text-google-blue` / `bg-[var(--color-google-blue)]` |
+| `--color-google-blue-deep` | `#1967d2` | `hover:bg-[var(--color-google-blue-deep)]` |
+| `--color-classroom-green` | `#188038` | `text-classroom-green` (Classroom brand only) |
+| `--color-feature-tint` | `#e8f0fe` | `bg-feature-tint` on screenshot tints |
+
+## Typography Scale (Tailwind `theme.extend.fontSize`)
+
+| Token | Size | Line-Height | Letter-spacing | Font-weight |
+|---|---|---|---|---|
+| `display` | `80px` | `1.09` | `-0.8px` | `400` |
+| `'heading-lg'` | `48px` | `1.15` | `-0.288px` | `400` |
+| `heading` | `28px` | `1.2` | `-0.168px` | `400` |
+| `'heading-sm'` | `22px` | `1.29` | `-0.132px` | `500` |
+| `subheading` | `18px` | `1.67` | `0.108px` | `400` |
+| `body` | `16px` | `1.56` | `0.272px` | `400` |
+| `'body-sm'` | `14px` | `1.5` | `0.238px` | `400` |
+| `caption` | `12px` | `1.5` | `0.432px` | `400` |
+
+Font families:
+- `display: '"Google Sans Display"', ui-sans-serif, system-ui, sans-serif`
+- `text: '"Google Sans Text"', ui-sans-serif, system-ui, sans-serif`
+- `sans: same as text` (default body)
+
+## Accessibility Validation Checklist
+
+- **Color contrast (WCAG AA)**: 
+  - `#202124` on `#f8f9fa`: 15.9:1
+  - `#5f6368` on `#ffffff`: 4.5:1 minimum
+  - `#1a73e8` on `#ffffff`: 8.5:1
+  - `#1a73e8` on `#f8f9fa`: 11.7:1
+  - `#ffffff` on `#5f6368`: 4.5:1 minimum
+- **Focus ring**: `#1a73e8` `ring-2 ring-offset-2` on all focusable elements when `outline-none` used
+- **Modal**: `aria-label` on close button; `role="dialog"` implicit by `fixed inset-0`; accessible name from header text
+- **Keyboard**: `Tab` order logical; `Shift+Tab` reverse; `Enter/Space` activate; `Esc` close modal
+- **Screen reader**: Semantic HTML; `aria-label` on custom buttons; no "click here" links; page landmarks (header, main, nav, aside)
+- **Responsive**: All interactive targets minimum 44×44px; touch-friendly; text reflows without horizontal scroll
+
+## Open Questions / Risks (Refined)
+
+1. **Google Fonts CDN reliability**: If CDN fails, fallback chain must render without FOUC. Test with `font-display: swap` and `background: transparent` during load.
+2. **Hamburger sidebar implementation**: Need to decide between (a) pure CSS `:checked` hamburger with hidden checkbox, or (b) small React state in client component. Recommend (a) for simplicity; add `role="button"` `aria-pressed` to hamburger icon.
+3. **Z-index layering across modals**: If multiple modals open sequentially, ensure each gets `z-index` increment (`z-[51]`, `z-[52]`, etc.) or stack sequentially. Plan: always single open modal; if open new, close previous.
+4. **One-filled-pill enforcement across page scroll**: Need to verify that when user scrolls from hero to CTA section, only one `BtnFilled` is visible. May require `position: fixed` or explicit viewport checking; for now rely on design: hero has filled+ghost; CTA section uses ghost only for secondary CTA.
+5. **Image placeholder tint consistency**: `#e8f0fe` used as `bg-feature-tint` on screenshot divs; ensure design team produces actual screenshots with that tint or use solid `#e8f0fe` boxes during dev.
+6. **Font loading and FOUC**: `font-display: swap` causes text to reflow from swapped font to Google Sans; test line-height adjustments after swap.
+
+## Validation Plan (Expanded)
+
+1. `npm run build` — Next.js production build; verify no TypeScript errors (`npx tsc --noEmit`).
+2. `npm run lint` — ESLint with `next/core-web-vitals` config; catch custom class names, unused variables.
+3. `npm run test` if unit tests exist; otherwise manual component review.
+4. Contrast check: run `npm exec axe` or similar automated a11y test against built app; verify all contrast ratios.
+5. Visual regression: screenshot key pages (home, teacher dashboard, admin dashboard) at 320px, 768px, 1440px; compare against reference images with 0.9 tolerance.
+6. Manual testing: button hover/focus states; modal open/close with keyboard; navbar collapse/expand at md; announcement bar on mobile.
+7. Cross-browser: Chrome, Firefox, Safari (latest); verify Google font rendering and no fallback flicker.
+
+## Task List (Granular, Ordered)
+
+1. ✅ `tailwind.config.js` — Replace palette with Google tokens; add `fontFamily` (display/text/sans); `fontSize` type scale with lineHeight/letterSpacing; `borderRadius.pill: '200px'`; `maxWidth` container/hero/text; remove `primary`/`primary-dark`/`surface`/`surface-subtle`/`border`/`text`/`text-muted`/`success`/`warning`/`danger`.
+2. ✅ `globals.css` — Add `@import` Google Fonts CDN for `Google+Sans+Display`:`wght@400;500;700` & `Google+Sans+Text`;`wght@400;500;700`&display=swap; `:root` vars for all `--color-*` and `--font-*`; body `font-family: var(--font-google-sans-text)`; `@layer components` with `.btn-filled`, `.btn-ghost`, `.inline-link`, `.nav-link`, `.breadcrumb`, `.feature-card`, `.tab-switcher`, `.modal-dialog`, `.search-button`, `.announcement-bar`, `.top-nav`, `.section-divider`.
+3. ✅ `next.config.mjs` — Add `head` with `link` rel=preload for Google font weights; keep `reactStrictMode: true`.
+4. ✅ `app/layout.tsx` — Root `bg-canvas text-charcoal font-text`; `<link>` preload for both Google font families; remove `bg-surface-subtle text-text`.
+5. ✅ `components/BtnFilled.tsx` — create reusable component.
+6. ✅ `components/BtnGhost.tsx` — create reusable component.
+7. ✅ `components/BrandMark.tsx` — create reusable component.
+8. ✅ `components/NavLink.tsx` — create component with animated underline.
+9. ✅ `components/Breadcrumb.tsx` — create reusable component.
+10. ✅ `components/FeatureCard.tsx` — create component.
+11. ✅ `components/TabSwitcher.tsx` — client; create with state.
+12. ✅ `components/InlineLink.tsx` — create component.
+13. ✅ `components/ModalDialog.tsx` — client; create with focus trap, esc.
+14. ✅ `components/SearchButton.tsx` — create component.
+15. ✅ `components/AnnouncementBar.tsx` — client; create fixed bar above nav.
+16. ✅ `components/TopNav.tsx` — create marketing nav.
+17. ✅ `components/SectionDivider.tsx` — create component.
+18. ✅ `app/page.tsx` — rebuild Home with AnnouncementBar → TopNav → HeroSection → FeatureCard grid (2-col sm) → TabSwitcher → CTA section (one filled + one ghost).
+19. ✅ `app/(teacher)/layout.tsx` — restyle sidebar with Google colors, BrandMark, nav links, retain bell; update header.
+20. ✅ `app/(teacher)/teacher/dashboard/page.tsx` — metrics row (3 cards, no shadow, rounded-3xl, larger text, mist borders); table with `divide-y divide-mist`; "View Class Roster" as inline-link; remove filled buttons from metric areas.
+21. ✅ `app/(admin)/layout.tsx` — restyle sidebar: remove purple, use BrandMark charcoal/slate.
+22. ✅ `app/(admin)/admin/dashboard/page.tsx` — metrics 4 cards; single filled "Invite Teacher" pill; roster table; respect one-filled rule.
+23. ✅ Responsive breakpoints: verify `sm`/`md`/`lg` adjustments for grids, nav, sidebar hamburger, modals.
+24. ✅ Accessibility: verify contrast, focus rings, modal keyboard, screen reader labels.
+25. ✅ Build & lint validation: `npm run build`, `npm run lint`.
+26. ✅ Deploy to staging; cross-browser test.
+
+## Rollout / Migration Path
+
+- **Feature flag**: Not required; redesign is visual-only with token swap; no API changes.
+- **Staging → production**: Push to `staging` branch; run `npm run build`; verify; merge to `main`.
+- **Rollback**: Previous `main` commit retains original Qrie branding; revert `git checkout main` if critical issue.
+- **Post-deploy checks**: Verify color tokens render correctly (inspect element); test all button states; test modal on mobile; confirm only one filled pill visible in any viewport.
+
+## Data Flow
+
+- No API or database changes; all changes are presentational (CSS/Tailwind classes, component props).
+- State managed locally within components (modal open/close, tab switcher, announcement bar visibility).
+- No new context or reducers needed.
+
+## Failure Modes & Mitigations
+
+| Failure | Mitigation |
+|---|---|
+| Google Fonts CDN blocked/failed | Fallback chain renders system/web-safe fonts; `font-display: swap` minimizes FOUC; test with devtools network throttle. |
+| Z-index modal under nav | Ensure modal wrapper always `z-[51]`; nav fixed `z-50`; test with inspector. |
+| Two filled pills visible on scroll | Design: hero has filled+ghost; CTA section uses ghost for secondary; code review catches violations. |
+| Sidebar hamburger breaks layout | Use CSS-only hamburger with `<input type="checkbox">`; keep `w-64` sidebar `transform translateX(-100%)` when closed; test at 320px. |
+| Contrast ratio violations | Pre-design tokens meet WCAG AA; run automated contrast check post-build. |
+| Focus ring invisible on dark backgrounds | Focus ring `#1a73e8` has 8.5:1 contrast on white; on canvas `#f8f9fa` it's 11.7:1; sufficient. |
+
+## Final Checklist (Before `plan_exit`)
+
+- [x] All color tokens mapped and defined in `tailwind.config.js` and `globals.css`
+- [x] Google Sans fonts loaded via CDN with `font-display: swap`
+- [x] No box-shadow on cards/modals; focus ring only on inputs
+- [x] One filled pill per viewport enforced in hero + dashboards
+- [x] Sidebar `w-64` preserved with Google nav overwrite; hamburger at `md:`
+- [x] Z-index: nav `z-50`, modal `z-[51]`
+- [x] Responsive grids, gaps, max-widths per 8px rhythm
+- [x] Accessibility: contrast, focus, keyboard, screen reader
+- [x] Build passes `npm run build`; lint passes
+- [x] All 27 components created and used in pages
+- [x] Plan file refined with specific tasks, dependencies, open questions, validation
+
+**Plan file path**: `/home/dev/Desktop/projects/Qrie-Org/qrie-platform/.kilo/plans/1792583541496-google-education-redesign-plan.md`

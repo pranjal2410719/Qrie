@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../../theme/app_typography.dart';
+import '../../../../screens/calendar/calendar_screen.dart';
+import '../../../../screens/notifications/notifications_screen.dart';
 import '../../models/school_branding_config.dart';
 
 /// Ultra-Minimalist & Smooth Top App Bar
@@ -11,16 +13,20 @@ import '../../models/school_branding_config.dart';
 /// - Crisp, borderless aesthetic with subtle hairline bottom divider.
 /// - 40×40 circular avatar with student initial and soft glow.
 /// - Auto-fitting student greeting + Grade/Board dropdown selector.
-/// - Sleek compact streak indicator pill (flame + count).
-/// - 38×38 rounded notification icon button with smooth feedback.
+/// - 38×38 rounded calendar icon button routing to dedicated CalendarScreen.
+/// - 38×38 rounded notification icon button with unread badge routing to NotificationsScreen.
 class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidget {
   final SchoolBrandingConfig branding;
   final String studentName;
   final String gradeAndBoard;
   final int streakDays;
   final int gems;
+  final String? profileImageUrl;
   final VoidCallback? onGradeTap;
   final VoidCallback? onProfileTap;
+  final VoidCallback? onCalendarTap;
+  final VoidCallback? onNotificationTap;
+  final int unreadNotificationsCount;
 
   const StudentWelcomeHeader({
     super.key,
@@ -29,8 +35,12 @@ class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidge
     required this.gradeAndBoard,
     this.streakDays = 5,
     this.gems = 180,
+    this.profileImageUrl = 'assets/default_icon.png',
     this.onGradeTap,
     this.onProfileTap,
+    this.onCalendarTap,
+    this.onNotificationTap,
+    this.unreadNotificationsCount = 0,
   });
 
   @override
@@ -57,7 +67,7 @@ class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidge
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── 40x40 circular avatar with soft gradient ───────────────
+              // ── 40x40 circular profile avatar with image ───────────────
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -67,31 +77,56 @@ class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidge
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF0EA5E9), Color(0xFF38BDF8)],
-                    ),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: branding.primaryColor.withValues(alpha: 0.25),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0EA5E9).withValues(alpha: 0.22),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: Text(
-                      studentName.isNotEmpty
-                          ? studentName[0].toUpperCase()
-                          : 'R',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                      ),
+                  child: ClipOval(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF0EA5E9), Color(0xFF38BDF8)],
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              studentName.isNotEmpty
+                                  ? studentName[0].toUpperCase()
+                                  : 'S',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                        ),
+                        Image.asset(
+                          profileImageUrl ?? 'assets/default_icon.png',
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -160,38 +195,7 @@ class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidge
 
               const SizedBox(width: 8),
 
-              // ── Minimalist Streak Pill ───────────────────────────────────
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.accentAmber.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(9999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department_rounded,
-                      size: 14,
-                      color: AppColors.accentAmber,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      '$streakDays',
-                      style: TextStyle(
-                        fontFamily: AppTypography.primaryFont,
-                        color: AppColors.accentAmber,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 8),
-
-              // ── 38x38 Clean Notification Button ──────────────────────────
+              // ── 38x38 Clean Academic Calendar Button (In place of streak pill) ──
               Container(
                 width: 38,
                 height: 38,
@@ -202,29 +206,80 @@ class StudentWelcomeHeader extends StatelessWidget implements PreferredSizeWidge
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   splashRadius: 20,
+                  tooltip: 'Academic Calendar',
                   icon: const Icon(
-                    Icons.notifications_none_rounded,
-                    size: 19,
-                    color: AppColors.textPrimary,
+                    Icons.calendar_month_rounded,
+                    size: 20,
+                    color: AppColors.accentCobalt,
                   ),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'You are all caught up!',
-                          style: AppTypography.bodySmall(color: Colors.white),
+                    if (onCalendarTap != null) {
+                      onCalendarTap!.call();
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CalendarScreen(),
                         ),
-                        backgroundColor: AppColors.bgSurfaceOnyx,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    );
+                      );
+                    }
                   },
                 ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // ── 38x38 Clean Notification Button with Dynamic Unread Badge ────
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: const BoxDecoration(
+                      color: AppColors.bgSurfaceSoft,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      splashRadius: 20,
+                      tooltip: 'Notifications',
+                      icon: const Icon(
+                        Icons.notifications_none_rounded,
+                        size: 20,
+                        color: AppColors.textPrimary,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        if (onNotificationTap != null) {
+                          onNotificationTap!.call();
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  if (unreadNotificationsCount > 0)
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: Container(
+                        padding: const EdgeInsets.all(3.5),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentRose,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

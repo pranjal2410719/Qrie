@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qrie/main.dart';
 import 'package:qrie/screens/homework_detail_screen.dart';
 import 'package:qrie/screens/homework_mini_test_screen.dart';
 import 'package:qrie/screens/homework_screen.dart';
 import 'package:qrie/state/student_state.dart';
-import 'package:qrie/widgets/bottom_nav_bar.dart';
 import 'package:qrie/widgets/floating_ai_tutor_widget.dart';
 import 'package:qrie/widgets/homework_study_materials_sheet.dart';
 
 void main() {
   testWidgets('Homework Tab displays vertically browsable cards and status pills', (tester) async {
-    await tester.pumpWidget(const QrieApp(skipSplash: true));
+    final state = StudentState();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(splashFactory: InkRipple.splashFactory),
+        home: StudentStateScope(
+          notifier: state,
+          child: const HomeworkScreen(),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
-    // 1. Navigate to Homework Tab
-    await tester.tap(find.descendant(
-      of: find.byType(BottomNavBar),
-      matching: find.text('Homework'),
-    ));
-    await tester.pumpAndSettle();
-
-    // 2. Verify Homework screen loaded
+    // Verify Homework screen loaded
     expect(find.byType(HomeworkScreen), findsOneWidget);
     expect(find.text('Homework & Tasks'), findsOneWidget);
 
@@ -49,6 +49,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(splashFactory: InkRipple.splashFactory),
         home: StudentStateScope(
           notifier: state,
           child: HomeworkDetailScreen(assignment: assignment),
@@ -95,6 +96,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(splashFactory: InkRipple.splashFactory),
         home: StudentStateScope(
           notifier: state,
           child: HomeworkMiniTestScreen(assignment: assignment),
@@ -177,6 +179,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(splashFactory: InkRipple.splashFactory),
         home: StudentStateScope(
           notifier: state,
           child: const HomeworkScreen(),

@@ -5,6 +5,7 @@ import '../models/chapter.dart';
 import '../models/lesson.dart';
 import '../models/quiz_question.dart';
 import '../models/doubt_message.dart';
+import '../models/study_material.dart';
 import '../theme/app_colors.dart';
 
 class MockData {
@@ -32,6 +33,7 @@ class MockData {
       'sci_ch1_les3',
       'math_ch1_les2',
     },
+    profileImageUrl: 'assets/default_icon.png',
   );
 
   static const List<Subject> subjects = [
@@ -118,6 +120,38 @@ class MockData {
           summaryText:
               'All living organisms are made up of basic building blocks called cells. Some organisms consist of a single cell (unicellular like Amoeba), while others consist of trillions of cells (multicellular like humans).',
           funFact: 'An ostrich egg is the largest single cell known to science!',
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          studyMaterials: [
+            TopicStudyMaterial(
+              id: 'sm_sci_1',
+              topicId: 'sci_ch1_les1',
+              title: 'NCERT Chapter 1 Notes — Cell Discovery',
+              description: 'Comprehensive handwritten class revision notes covering Hooke and Leeuwenhoek experiments.',
+              type: StudyMaterialType.pdf,
+              fileUrl: 'https://ncert.nic.in/textbook/pdf/hesc108.pdf',
+              fileSize: '1.8 MB',
+              pageCount: 6,
+            ),
+            TopicStudyMaterial(
+              id: 'sm_sci_2',
+              topicId: 'sci_ch1_les1',
+              title: 'Cork Cells Microscopic Diagram',
+              description: 'High-resolution annotated sketch showing cell wall boundaries and honeycomb structure.',
+              type: StudyMaterialType.image,
+              fileUrl: 'https://images.unsplash.com/photo-1530497610245-94d3c16cda28?auto=format&fit=crop&w=800&q=80',
+              fileSize: '650 KB',
+            ),
+            TopicStudyMaterial(
+              id: 'sm_sci_3',
+              topicId: 'sci_ch1_les1',
+              title: 'Summary Sheet & Flash Facts',
+              description: 'Quick reference sheet for exam morning revision with definitions.',
+              type: StudyMaterialType.document,
+              fileUrl: 'https://ncert.nic.in/textbook/pdf/hesc108_summary.pdf',
+              fileSize: '420 KB',
+              pageCount: 2,
+            ),
+          ],
         ),
         Lesson(
           id: 'sci_ch1_les2',
@@ -135,6 +169,28 @@ class MockData {
           summaryText:
               'The three essential parts of every typical cell are the cell membrane (boundary), cytoplasm (fluid workspace), and the nucleus (genetic master controller).',
           funFact: 'Your body produces about 2 million new red blood cells every second!',
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          studyMaterials: [
+            TopicStudyMaterial(
+              id: 'sm_sci_4',
+              topicId: 'sci_ch1_les2',
+              title: 'Cell Organelles Structure & Functions PDF',
+              description: 'Detailed analysis of nucleus, ribosomes, ER, and mitochondria.',
+              type: StudyMaterialType.pdf,
+              fileUrl: 'https://ncert.nic.in/textbook/pdf/hesc108_organelles.pdf',
+              fileSize: '2.4 MB',
+              pageCount: 8,
+            ),
+            TopicStudyMaterial(
+              id: 'sm_sci_5',
+              topicId: 'sci_ch1_les2',
+              title: 'Interactive Cell Cross-Section Diagram',
+              description: 'Full color anatomical cell cross section detailing inner and outer membranes.',
+              type: StudyMaterialType.image,
+              fileUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
+              fileSize: '840 KB',
+            ),
+          ],
         ),
         Lesson(
           id: 'sci_ch1_les3',
@@ -309,6 +365,97 @@ class MockData {
           summaryText:
               'We don’t feel crushed by atmospheric pressure because the pressure of blood and fluids inside our body balances it equally from within!',
           funFact: 'Suction cups stick because air pressure outside pushes them firmly against smooth glass!',
+        ),
+      ],
+    ),
+    Chapter(
+      id: 'chem_ch1',
+      subjectId: 'chemistry',
+      title: 'Chapter 4: Synthetic Fibres & Plastics',
+      subtitle: 'Polymers, natural vs synthetic textiles, and recycling',
+      icon: Icons.science_rounded,
+      order: 4,
+      isUnlocked: true,
+      lessons: [
+        Lesson(
+          id: 'chem_ch1_les1',
+          chapterId: 'chem_ch1',
+          title: 'What are Synthetic Fibres?',
+          subtitle: 'Monomers, polymer chains, and nylon vs rayon',
+          type: LessonType.video,
+          durationMinutes: 8,
+          xpReward: 20,
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          keyPoints: [
+            'A polymer is made of many repeating units called monomers.',
+            'Rayon is regenerated from wood pulp and known as artificial silk.',
+            'Nylon is the first fully synthetic fibre made from coal, water, and air.',
+          ],
+          summaryText:
+              'Synthetic fibres are artificial materials synthesized through chemical petrochemical processes. They dry faster and are generally more durable than cotton or wool.',
+          funFact: 'A nylon thread is actually stronger than a steel wire of the same thickness!',
+          studyMaterials: [
+            TopicStudyMaterial(
+              id: 'sm_chem_1',
+              topicId: 'chem_ch1_les1',
+              title: 'NCERT Chapter 4 Notes — Synthetic Polymers',
+              description: 'Revision notes on thermoplastic vs thermosetting resins.',
+              type: StudyMaterialType.pdf,
+              fileUrl: 'https://ncert.nic.in/textbook/pdf/hesc104.pdf',
+              fileSize: '1.5 MB',
+              pageCount: 5,
+            ),
+            TopicStudyMaterial(
+              id: 'sm_chem_2',
+              topicId: 'chem_ch1_les1',
+              title: 'Polymer Chain Microscopic Architecture',
+              description: 'Diagram showing linear vs cross-linked molecular linkages.',
+              type: StudyMaterialType.image,
+              fileUrl: 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?auto=format&fit=crop&w=800&q=80',
+              fileSize: '510 KB',
+            ),
+          ],
+        ),
+      ],
+    ),
+    Chapter(
+      id: 'soc_ch1',
+      subjectId: 'social',
+      title: 'Chapter 5: Resources & Sustainable Living',
+      subtitle: 'Natural, human-made, and renewable assets of the planet',
+      icon: Icons.public_rounded,
+      order: 5,
+      isUnlocked: true,
+      lessons: [
+        Lesson(
+          id: 'soc_ch1_les1',
+          chapterId: 'soc_ch1',
+          title: 'Types of Resources',
+          subtitle: 'Biotic, abiotic, renewable, and non-renewable',
+          type: LessonType.video,
+          durationMinutes: 9,
+          xpReward: 20,
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          keyPoints: [
+            'Anything that can be used to satisfy a human need is a resource.',
+            'Renewable resources replenish quickly (solar, wind).',
+            'Sustainable development meets present needs without compromising future generations.',
+          ],
+          summaryText:
+              'Carefully utilizing resources so that besides meeting the requirements of the present, also takes care of future generations is called sustainable development.',
+          funFact: 'Over 70% of Earth is water, but only 1% is accessible freshwater!',
+          studyMaterials: [
+            TopicStudyMaterial(
+              id: 'sm_soc_1',
+              topicId: 'soc_ch1_les1',
+              title: 'Geography Resource Classification Chart',
+              description: 'NCERT official syllabus summary map of global resources.',
+              type: StudyMaterialType.pdf,
+              fileUrl: 'https://ncert.nic.in/textbook/pdf/hess101.pdf',
+              fileSize: '2.1 MB',
+              pageCount: 7,
+            ),
+          ],
         ),
       ],
     ),

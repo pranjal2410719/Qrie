@@ -951,7 +951,7 @@ class _BentoTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 96,
+        constraints: const BoxConstraints(minHeight: 96),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(DesignTokens.radiusCardMd),
@@ -1172,18 +1172,28 @@ class BentoMilestoneTrackerCard extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF38BDF8),
                         shape: BoxShape.circle,
                       ),
-                      child: Center(
-                        child: Text(
-                          assigneeName.isNotEmpty
-                              ? assigneeName[0].toUpperCase()
-                              : 'J',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/default_icon.png',
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: const Color(0xFF38BDF8),
+                            child: Center(
+                              child: Text(
+                                assigneeName.isNotEmpty
+                                    ? assigneeName[0].toUpperCase()
+                                    : 'J',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),

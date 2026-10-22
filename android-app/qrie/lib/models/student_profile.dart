@@ -10,6 +10,7 @@ class StudentProfile {
   final int dailyGoalTarget;
   final Set<String> completedLessonIds;
   final Set<String> bookmarkedLessonIds;
+  final String profileImageUrl;
 
   const StudentProfile({
     required this.id,
@@ -23,6 +24,7 @@ class StudentProfile {
     required this.dailyGoalTarget,
     required this.completedLessonIds,
     required this.bookmarkedLessonIds,
+    this.profileImageUrl = 'assets/default_icon.png',
   });
 
   StudentProfile copyWith({
@@ -37,6 +39,7 @@ class StudentProfile {
     int? dailyGoalTarget,
     Set<String>? completedLessonIds,
     Set<String>? bookmarkedLessonIds,
+    String? profileImageUrl,
   }) {
     return StudentProfile(
       id: id ?? this.id,
@@ -50,6 +53,7 @@ class StudentProfile {
       dailyGoalTarget: dailyGoalTarget ?? this.dailyGoalTarget,
       completedLessonIds: completedLessonIds ?? this.completedLessonIds,
       bookmarkedLessonIds: bookmarkedLessonIds ?? this.bookmarkedLessonIds,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
     );
   }
 }

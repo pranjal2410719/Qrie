@@ -93,8 +93,9 @@ void main() {
       expect(find.text('A'), findsOneWidget);
       // Verify grade
       expect(find.text('Class 8 CBSE'), findsOneWidget);
-      // Verify streak pill
-      expect(find.text('7'), findsOneWidget);
+      // Verify academic calendar and notifications action buttons
+      expect(find.byTooltip('Academic Calendar'), findsOneWidget);
+      expect(find.byTooltip('Notifications'), findsOneWidget);
     });
   });
 }

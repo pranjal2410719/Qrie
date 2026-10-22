@@ -4,6 +4,7 @@ import '../models/homework.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import '../widgets/app_chip.dart';
 import '../widgets/homework_study_materials_sheet.dart';
 import 'homework_detail_screen.dart';
 import 'homework_mini_test_screen.dart';
@@ -142,43 +143,53 @@ class _HomeworkScreenState extends State<HomeworkScreen> {
               ),
             ),
 
-            // Horizontal Filter Chips
+            // Horizontal Filter Chips with Blurred Ends
             Container(
-              height: 40,
+              height: 42,
               margin: const EdgeInsets.only(bottom: 8),
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: _filters.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final filter = _filters[index];
-                  final isSelected = filter == _selectedFilter;
+              child: BlurredEdgeScroll(
+                fadeWidth: 20,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _filters.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final filter = _filters[index];
+                    final isSelected = filter == _selectedFilter;
 
-                  return ChoiceChip(
-                    label: Text(filter),
-                    selected: isSelected,
-                    selectedColor: AppColors.bgSurfaceOnyx,
-                    backgroundColor: AppColors.bgSurfaceSoft,
-                    side: BorderSide(
-                      color: isSelected ? AppColors.bgSurfaceOnyx : AppColors.bgSurfaceMuted,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedFilter = filter);
-                      }
-                    },
-                  );
-                },
+                    return ChoiceChip(
+                      label: Text(filter),
+                      selected: isSelected,
+                      selectedColor: AppColors.bgSurfaceOnyx,
+                      backgroundColor: AppColors.bgSurfaceSoft,
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.bgSurfaceOnyx
+                            : const Color(0xFFE2E8F0),
+                        width: isSelected ? 1.5 : 1.0,
+                      ),
+                      elevation: isSelected ? 2 : 0,
+                      pressElevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9999),
+                      ),
+                      labelStyle: TextStyle(
+                        color:
+                            isSelected ? Colors.white : AppColors.textPrimary,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w600,
+                        fontSize: 12.5,
+                      ),
+                      onSelected: (selected) {
+                        if (selected) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedFilter = filter);
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             ),
 

@@ -1,3 +1,5 @@
+import 'study_material.dart';
+
 enum LessonType { video, interactive, quiz, flashcard }
 
 class Lesson {
@@ -9,9 +11,11 @@ class Lesson {
   final int durationMinutes;
   final int xpReward;
   final String videoThumbnailUrl;
+  final String? videoUrl;
   final List<String> keyPoints;
   final String summaryText;
   final String funFact;
+  final List<TopicStudyMaterial> studyMaterials;
 
   const Lesson({
     required this.id,
@@ -22,8 +26,11 @@ class Lesson {
     required this.durationMinutes,
     required this.xpReward,
     this.videoThumbnailUrl = '',
+    this.videoUrl,
     required this.keyPoints,
     required this.summaryText,
     this.funFact = '',
+    this.studyMaterials = const [],
   });
 }
+

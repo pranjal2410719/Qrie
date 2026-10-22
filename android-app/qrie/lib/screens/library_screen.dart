@@ -8,7 +8,7 @@ import '../theme/app_typography.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/app_card.dart';
 import '../widgets/empty_state_view.dart';
-import 'lesson_screen.dart';
+import 'classroom/classroom_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -449,11 +449,18 @@ class _LibraryScreenState extends State<LibraryScreen>
                 // Cobalt REVISE pill
                 GestureDetector(
                   onTap: () {
+                    final subject = MockData.subjects.firstWhere(
+                      (s) => s.id == ch.subjectId,
+                      orElse: () => MockData.subjects.first,
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            LessonScreen(lesson: les, chapter: ch),
+                        builder: (_) => ClassroomScreen(
+                          subject: subject,
+                          chapter: ch,
+                          lesson: les,
+                        ),
                       ),
                     );
                   },

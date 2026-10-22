@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../data/mock_data.dart';
 import '../models/homework.dart';
 import '../models/lesson.dart';
-import '../screens/lesson_screen.dart';
+import '../screens/classroom/classroom_screen.dart';
 import '../screens/quiz_solver_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -13,7 +13,7 @@ import '../theme/app_typography.dart';
 /// Features:
 /// - Categorizes linked study resources (Masterclass, Recorded Lectures, Notes, Practice, Tests).
 /// - Handles all enum types so no resource disappears.
-/// - Central resource launcher routing to LessonScreen, QuizSolverScreen, or Document Reader.
+/// - Central resource launcher routing to ClassroomScreen, QuizSolverScreen, or Document Reader.
 /// - Adaptive card sizing for narrow mobile screens.
 /// - Helpful empty state when no matching resources are found.
 class HomeworkStudyMaterialsSheet extends StatelessWidget {
@@ -50,10 +50,18 @@ class HomeworkStudyMaterialsSheet extends StatelessWidget {
           (l) => l.type == LessonType.video || l.type == LessonType.interactive,
           orElse: () => chapter.lessons.first,
         );
+        final subject = MockData.subjects.firstWhere(
+          (s) => s.id == chapter.subjectId,
+          orElse: () => MockData.subjects.first,
+        );
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => LessonScreen(lesson: lesson, chapter: chapter),
+            builder: (_) => ClassroomScreen(
+              subject: subject,
+              chapter: chapter,
+              lesson: lesson,
+            ),
           ),
         );
         break;

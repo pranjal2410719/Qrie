@@ -5,15 +5,18 @@ import '../models/homework.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
+import 'app_chip.dart';
+import 'dynamic_wavy_blob.dart';
 
-/// Global Floating Qrie AI Academic Tutor
+/// Global Qrie AI Academic Tutor
 ///
 /// Features:
-/// - Magnetic edge-snapping on drag release (left/right dock).
-/// - RepaintBoundary isolation to eliminate frame drops and buffer queue delays.
+/// - Screen-bounded positioning via LayoutBuilder (can NEVER leave the viewport).
+/// - Magnetic edge-snapping on drag release with boundary protection.
+/// - Tactile pill capsule design with glowing status indicator.
+/// - Clean, smooth, student-friendly conversational sheet.
 /// - Socratic & Mini-Test Guardrails mode (conceptual clues, no direct answers).
-/// - Rich conversational sheet with syntax-highlighted formulas and topic pills.
-/// - Contextual awareness for active homework assignments and quiz questions.
+/// - Formula rendering, follow-up suggestion chips, and typing indicator.
 class FloatingAITutorWidget extends StatefulWidget {
   final double bottomOffset;
   final double rightOffset;
@@ -23,7 +26,7 @@ class FloatingAITutorWidget extends StatefulWidget {
 
   const FloatingAITutorWidget({
     super.key,
-    this.bottomOffset = 84.0,
+    this.bottomOffset = 24.0,
     this.rightOffset = 16.0,
     this.contextualHomework,
     this.contextualQuestion,
@@ -36,36 +39,21 @@ class FloatingAITutorWidget extends StatefulWidget {
 
 class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
     with SingleTickerProviderStateMixin {
-  late Offset _position;
-  bool _initialized = false;
+  Offset? _position;
   late AnimationController _snapController;
   late Animation<Offset> _snapAnimation;
 
-  static const double _buttonSize = 54.0;
-  static const double _margin = 14.0;
+  static const double _buttonSize = 52.0;
+  static const double _horizontalPadding = 14.0;
+  static const double _verticalPadding = 12.0;
 
   @override
   void initState() {
     super.initState();
     _snapController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 240),
+      duration: const Duration(milliseconds: 260),
     );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final size = MediaQuery.of(context).size;
-      final defaultX = size.width - _buttonSize - widget.rightOffset;
-      final defaultY = (size.height - _buttonSize - widget.bottomOffset).clamp(
-        60.0,
-        size.height - _buttonSize - 20.0,
-      );
-      _position = Offset(defaultX, defaultY);
-      _initialized = true;
-    }
   }
 
   @override
@@ -74,21 +62,21 @@ class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
     super.dispose();
   }
 
-  void _snapToNearestEdge(Size size) {
-    final targetX = (_position.dx + _buttonSize / 2 < size.width / 2)
-        ? _margin
-        : size.width - _buttonSize - _margin;
+  void _snapToNearestEdge(double maxW, double maxH) {
+    if (_position == null) return;
+    final minX = _horizontalPadding;
+    final maxX = (maxW - _buttonSize - _horizontalPadding).clamp(minX, double.infinity);
+    final targetX = (_position!.dx + _buttonSize / 2 < maxW / 2) ? minX : maxX;
 
-    final targetY = _position.dy.clamp(
-      70.0,
-      size.height - _buttonSize - widget.bottomOffset.clamp(20.0, 140.0),
-    );
+    final minY = _verticalPadding;
+    final maxY = (maxH - _buttonSize - _verticalPadding).clamp(minY, double.infinity);
+    final targetY = _position!.dy.clamp(minY, maxY);
 
-    final start = _position;
+    final start = _position!;
     final end = Offset(targetX, targetY);
 
     _snapAnimation = Tween<Offset>(begin: start, end: end).animate(
-      CurvedAnimation(parent: _snapController, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _snapController, curve: Curves.easeOutCubic),
     );
 
     _snapController.reset();
@@ -121,85 +109,78 @@ class _FloatingAITutorWidgetState extends State<FloatingAITutorWidget>
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTest = widget.isTestMode || state.isTestGuardrailActive;
-    final hasContext = widget.contextualHomework != null || state.activeHomeworkContext != null;
+    final hasContext = widget.contextualHomework != null || state.activeHomeworkContext != null || widget.isTestMode || state.isTestGuardrailActive;
 
-    final clampedX = _position.dx.clamp(_margin, size.width - _buttonSize - _margin);
-    final clampedY = _position.dy.clamp(60.0, size.height - _buttonSize - 20.0);
+    return Positioned.fill(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxW = constraints.maxWidth;
+          final maxH = constraints.maxHeight;
 
-    return Positioned(
-      left: clampedX,
-      top: clampedY,
-      child: RepaintBoundary(
-        child: GestureDetector(
-          onPanUpdate: (details) {
-            setState(() {
-              _position += details.delta;
-            });
-          },
-          onPanEnd: (_) => _snapToNearestEdge(size),
-          child: Material(
-            color: Colors.transparent,
-            elevation: 8,
-            shadowColor: isTest
-                ? const Color(0xFFD97706).withValues(alpha: 0.35)
-                : AppColors.bgSurfaceOnyx.withValues(alpha: 0.35),
-            shape: const CircleBorder(),
-            child: InkWell(
-              onTap: () => _openTutorSheet(context, state),
-              customBorder: const CircleBorder(),
-              child: Container(
-                width: _buttonSize,
-                height: _buttonSize,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isTest
-                        ? const [Color(0xFFD97706), Color(0xFFF59E0B)]
-                        : const [Color(0xFF0F172A), Color(0xFF1E293B)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isTest
-                        ? const Color(0xFFFDE68A)
-                        : Colors.white.withValues(alpha: 0.22),
-                    width: 1.8,
-                  ),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(
-                      isTest ? Icons.shield_rounded : Icons.auto_awesome_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    // Active indicator dot
-                    if (hasContext || isTest)
-                      Positioned(
-                        top: 7,
-                        right: 7,
-                        child: Container(
-                          width: 9,
-                          height: 9,
-                          decoration: BoxDecoration(
-                            color: isTest ? Colors.white : const Color(0xFF32C787),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isTest ? const Color(0xFFD97706) : const Color(0xFF0F172A),
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
+          if (maxW <= 0 || maxH <= 0) return const SizedBox.shrink();
+
+          final defaultX = (maxW - _buttonSize - widget.rightOffset).clamp(
+            _horizontalPadding,
+            (maxW - _buttonSize - _horizontalPadding).clamp(_horizontalPadding, double.infinity),
+          );
+          final defaultY = (maxH - _buttonSize - widget.bottomOffset).clamp(
+            _verticalPadding,
+            (maxH - _buttonSize - _verticalPadding).clamp(_verticalPadding, double.infinity),
+          );
+
+          if (_position == null) {
+            _position = Offset(defaultX, defaultY);
+          } else {
+            // Re-clamp strictly within bounds whenever layout changes
+            final safeX = _position!.dx.clamp(
+              _horizontalPadding,
+              (maxW - _buttonSize - _horizontalPadding).clamp(_horizontalPadding, double.infinity),
+            );
+            final safeY = _position!.dy.clamp(
+              _verticalPadding,
+              (maxH - _buttonSize - _verticalPadding).clamp(_verticalPadding, double.infinity),
+            );
+            if (safeX != _position!.dx || safeY != _position!.dy) {
+              _position = Offset(safeX, safeY);
+            }
+          }
+
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: _position!.dx,
+                top: _position!.dy,
+                child: RepaintBoundary(
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        final newX = (_position!.dx + details.delta.dx).clamp(
+                          _horizontalPadding,
+                          (maxW - _buttonSize - _horizontalPadding).clamp(_horizontalPadding, double.infinity),
+                        );
+                        final newY = (_position!.dy + details.delta.dy).clamp(
+                          _verticalPadding,
+                          (maxH - _buttonSize - _verticalPadding).clamp(_verticalPadding, double.infinity),
+                        );
+                        _position = Offset(newX, newY);
+                      });
+                    },
+                    onPanEnd: (_) => _snapToNearestEdge(maxW, maxH),
+                    child: GestureDetector(
+                      onTap: () => _openTutorSheet(context, state),
+                      child: DynamicWavyBlob(
+                        size: _buttonSize,
+                        hasActiveContext: hasContext,
+                        isTestMode: widget.isTestMode || state.isTestGuardrailActive,
                       ),
-                  ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -224,6 +205,18 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isAITyping = false;
+  bool _hasInputText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _inputController.addListener(() {
+      final hasText = _inputController.text.trim().isNotEmpty;
+      if (hasText != _hasInputText) {
+        setState(() => _hasInputText = hasText);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -233,11 +226,11 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
   }
 
   void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 160), () {
+    Future.delayed(const Duration(milliseconds: 140), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 260),
+          duration: const Duration(milliseconds: 240),
           curve: Curves.easeOutCubic,
         );
       }
@@ -305,11 +298,11 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
     } else if (widget.homework != null) {
       subtitle = '${widget.homework!.subject}: ${widget.homework!.chapter}';
     } else {
-      subtitle = 'Personalized Socratic Academic Pair';
+      subtitle = 'Personalized Socratic Academic Partner';
     }
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
+      height: MediaQuery.of(context).size.height * 0.84,
       decoration: const BoxDecoration(
         color: AppColors.bgCanvas,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -317,36 +310,27 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
       child: Column(
         children: [
           // 1. Drag Handle
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Container(
-            width: 44,
+            width: 38,
             height: 4.5,
             decoration: BoxDecoration(
               color: AppColors.bgSurfaceMuted,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
-          // 2. Header Bar with Flexible text to prevent RenderFlex overflow
+          // 2. Clean Header Bar
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: widget.isTestMode
-                        ? const Color(0xFFFEF3C7)
-                        : AppColors.accentCobalt.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.isTestMode ? Icons.shield_rounded : Icons.auto_awesome_rounded,
-                    color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
-                    size: 20,
-                  ),
+                // Qrie Avatar with Dynamic Wavy Boundary
+                DynamicWavyBlob(
+                  size: 38,
+                  hasActiveContext: widget.homework != null,
+                  isTestMode: widget.isTestMode,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -370,23 +354,17 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: widget.isTestMode
-                                  ? const Color(0xFFFEF3C7)
-                                  : const Color(0xFFEFF6FF),
+                              color: const Color(0xFFEFF6FF),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                color: widget.isTestMode
-                                    ? const Color(0xFFFDE68A)
-                                    : const Color(0xFFBFDBFE),
+                                color: const Color(0xFFBFDBFE),
                               ),
                             ),
-                            child: Text(
-                              widget.isTestMode ? 'GUARDRAILS' : 'SOCRATIC',
+                            child: const Text(
+                              'SOCRATIC',
                               style: TextStyle(
-                                color: widget.isTestMode
-                                    ? const Color(0xFFB45309)
-                                    : const Color(0xFF1D4ED8),
-                                fontSize: 9.5,
+                                color: Color(0xFF1D4ED8),
+                                fontSize: 9.0,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.4,
                               ),
@@ -404,10 +382,34 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                     ],
                   ),
                 ),
+                // Reset / Clear Chat button
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
-                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.restart_alt_rounded, size: 20, color: AppColors.textSecondary),
+                  tooltip: 'Reset Conversation',
                   visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    state.clearDoubtHistory();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Conversation reset to fresh state',
+                          style: AppTypography.bodySmall(color: Colors.white),
+                        ),
+                        backgroundColor: AppColors.bgSurfaceOnyx,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    );
+                  },
+                ),
+                // Close button
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                  tooltip: 'Close',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
@@ -415,34 +417,34 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
 
           // 3. Mini-Test Guardrails / Active Context Banner
           Container(
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 2),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            margin: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: widget.isTestMode ? const Color(0xFFFFFBEB) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: widget.isTestMode ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0),
+                color: const Color(0xFFE2E8F0),
               ),
             ),
             child: Row(
               children: [
-                Icon(
-                  widget.isTestMode ? Icons.shield_outlined : Icons.menu_book_rounded,
-                  size: 15,
-                  color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                const Icon(
+                  Icons.menu_book_rounded,
+                  size: 14,
+                  color: AppColors.accentCobalt,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     widget.isTestMode
-                        ? 'Test Integrity: Qrie provides conceptual formula hints only. Direct answers are locked.'
-                        : 'Current Study Context: ${widget.homework?.title ?? "General Academic Doubt"}',
-                    style: TextStyle(
-                      fontSize: 11,
+                        ? 'Verification Guidance: Conceptual clues & formulas active'
+                        : 'Study Context: ${widget.homework?.title ?? "General Academic Doubt Resolution"}',
+                    style: const TextStyle(
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w600,
-                      color: widget.isTestMode ? const Color(0xFF92400E) : AppColors.textSecondary,
+                      color: AppColors.textSecondary,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -450,61 +452,69 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             ),
           ),
 
-          // 4. Contextual Starter Chips
-          Container(
-            height: 42,
-            margin: const EdgeInsets.only(top: 6, bottom: 4),
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: starterPrompts.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final prompt = starterPrompts[index];
-                return ActionChip(
-                  label: Text(
-                    prompt,
-                    style: TextStyle(
-                      color: widget.isTestMode ? const Color(0xFF92400E) : AppColors.textPrimary,
+          // 4. Contextual Starter Chips with Edge Blur
+          SizedBox(
+            height: 40,
+            child: BlurredEdgeScroll(
+              fadeWidth: 18,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: starterPrompts.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final prompt = starterPrompts[index];
+                  return ChoiceChip(
+                    avatar: const Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 13,
+                      color: AppColors.accentCobalt,
+                    ),
+                    label: Text(prompt),
+                    selected: false,
+                    onSelected: (_) => _handleSend(state, prompt),
+                    backgroundColor: AppColors.bgSurfaceSoft,
+                    side: const BorderSide(
+                      color: AppColors.bgSurfaceMuted,
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    labelStyle: const TextStyle(
+                      fontFamily: AppTypography.primaryFont,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 11.5,
                     ),
-                  ),
-                  backgroundColor: widget.isTestMode
-                      ? const Color(0xFFFEF3C7).withValues(alpha: 0.6)
-                      : AppColors.bgSurfaceSoft,
-                  side: BorderSide(
-                    color: widget.isTestMode ? const Color(0xFFFDE68A) : AppColors.bgSurfaceMuted,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                  onPressed: () => _handleSend(state, prompt),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
 
+          const SizedBox(height: 4),
           const Divider(height: 1, color: Color(0x0F000000)),
 
           // 5. Chat History
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               itemCount: messages.length + (_isAITyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == messages.length) {
                   return _buildTypingBubble();
                 }
                 final msg = messages[index];
-                return _buildMessageBubble(msg);
+                return _buildMessageBubble(msg, state);
               },
             ),
           ),
 
-          // 6. Input Bar
+          // 6. Smooth Input Bar
           Container(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 8 + bottomInset),
+            padding: EdgeInsets.fromLTRB(14, 8, 14, 8 + bottomInset),
             decoration: const BoxDecoration(
               color: AppColors.bgCanvas,
               border: Border(top: BorderSide(color: Color(0x0F000000))),
@@ -523,12 +533,14 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                       ),
                       child: TextField(
                         controller: _inputController,
-                        style: AppTypography.body(color: AppColors.textPrimary),
+                        style: AppTypography.body(color: AppColors.textPrimary)
+                            .copyWith(fontSize: 13.5),
                         decoration: InputDecoration(
                           hintText: widget.isTestMode
-                              ? 'Ask for a conceptual formula hint...'
-                              : 'Ask a question or explain a step...',
-                          hintStyle: AppTypography.body(color: AppColors.textMuted).copyWith(fontSize: 13),
+                              ? 'Ask for a conceptual clue or formula...'
+                              : 'Ask a doubt or explain a step...',
+                          hintStyle: AppTypography.body(color: AppColors.textMuted)
+                              .copyWith(fontSize: 13),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         ),
@@ -537,11 +549,12 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     width: 40,
                     height: 40,
-                    decoration: const BoxDecoration(
-                      color: AppColors.bgSurfaceOnyx,
+                    decoration: BoxDecoration(
+                      color: _hasInputText ? AppColors.accentCobalt : AppColors.bgSurfaceOnyx,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -559,16 +572,16 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
     );
   }
 
-  Widget _buildMessageBubble(DoubtMessage msg) {
+  Widget _buildMessageBubble(DoubtMessage msg, StudentState state) {
     if (msg.isStudent) {
       return Align(
         alignment: Alignment.centerRight,
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 6),
+          margin: const EdgeInsets.only(top: 4, bottom: 8, left: 48),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           constraints: const BoxConstraints(maxWidth: 290),
           decoration: const BoxDecoration(
-            color: AppColors.bgSurfaceOnyx,
+            color: Color(0xFF0F172A),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -578,7 +591,12 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
           ),
           child: Text(
             msg.text,
-            style: AppTypography.body(color: Colors.white).copyWith(fontSize: 13),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13.5,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       );
@@ -587,13 +605,11 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        margin: const EdgeInsets.only(top: 4, bottom: 8, right: 36),
         padding: const EdgeInsets.all(14),
         constraints: const BoxConstraints(maxWidth: 320),
         decoration: BoxDecoration(
-          color: widget.isTestMode
-              ? const Color(0xFFFEF3C7).withValues(alpha: 0.3)
-              : AppColors.accentLilac.withValues(alpha: 0.15),
+          color: const Color(0xFFF8FAFC),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(16),
@@ -601,9 +617,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             bottomRight: Radius.circular(16),
           ),
           border: Border.all(
-            color: widget.isTestMode
-                ? const Color(0xFFFDE68A)
-                : AppColors.accentLilac.withValues(alpha: 0.3),
+            color: const Color(0xFFE2E8F0),
           ),
         ),
         child: Column(
@@ -612,16 +626,26 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  widget.isTestMode ? Icons.shield_rounded : Icons.auto_awesome_rounded,
-                  size: 14,
-                  color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                Container(
+                  width: 16,
+                  height: 16,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/Q_logo.png',
+                      width: 16,
+                      height: 16,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  widget.isTestMode ? 'Qrie Guardrail Hint' : 'Qrie Tutor',
+                const Text(
+                  'Qrie AI Tutor',
                   style: TextStyle(
-                    color: widget.isTestMode ? const Color(0xFFD97706) : AppColors.accentCobalt,
+                    color: AppColors.accentCobalt,
                     fontWeight: FontWeight.w700,
                     fontSize: 11.5,
                   ),
@@ -632,7 +656,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             Text(
               msg.text,
               style: AppTypography.body(color: AppColors.textPrimary).copyWith(
-                height: 1.4,
+                height: 1.42,
                 fontSize: 13,
               ),
             ),
@@ -662,14 +686,50 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.accentMint.withValues(alpha: 0.2),
+                  color: AppColors.accentMint.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '💡 Concept: ${msg.keyConcept}',
+                  '💡 ${msg.keyConcept}',
                   style: AppTypography.caption(color: const Color(0xFF065F46))
                       .copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                 ),
+              ),
+            ],
+            if (msg.followUpSuggestions != null && msg.followUpSuggestions!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: msg.followUpSuggestions!.map((suggestion) {
+                  return InkWell(
+                    onTap: () => _handleSend(state, suggestion),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_forward_rounded, size: 10, color: AppColors.accentCobalt),
+                          const SizedBox(width: 4),
+                          Text(
+                            suggestion,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.accentCobalt,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ],
@@ -682,11 +742,12 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        margin: const EdgeInsets.only(top: 4, bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color: AppColors.bgSurfaceSoft,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.bgSurfaceMuted),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -702,7 +763,7 @@ class _TutorSheetContentState extends State<_TutorSheetContent> {
             SizedBox(width: 8),
             Text(
               'Qrie is thinking...',
-              style: TextStyle(fontSize: 11.5, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             ),
           ],
         ),

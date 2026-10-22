@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../data/mock_data.dart';
 import '../models/chapter.dart';
 import '../models/lesson.dart';
+import '../models/homework.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/design_tokens.dart';
+import '../widgets/app_chip.dart';
 import '../widgets/bento_components.dart';
-import 'lesson_screen.dart';
+import '../widgets/recent_lecture_card.dart';
 import 'quiz_solver_screen.dart';
+import 'learn/learn_screen.dart';
+import 'classroom/classroom_screen.dart';
+import 'tasks/tasks_screen.dart';
 
 /// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
 /// Full Home Screen Implementation with Modular Bento Architecture
@@ -20,8 +26,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedOfferIndex = 1;
-
   @override
   Widget build(BuildContext context) {
     final state = StudentStateScope.of(context);
@@ -52,75 +56,88 @@ class _HomeScreenState extends State<HomeScreen> {
         ? (profile.dailyGoalCurrent / profile.dailyGoalTarget).clamp(0.0, 1.0)
         : 0.0;
 
+    // Real dynamic counts for BentoTodoGrid
+    final now = DateTime.now();
+    int scheduledCount = 0;
+    int activeCount = 0;
+    int overdueCount = 0;
+
+    for (final hw in state.homeworkAssignments) {
+      final status = state.getEffectiveStatus(hw);
+      final isOverdue = status == HomeworkStatus.overdue ||
+          (hw.dueDate.isBefore(now) && status != HomeworkStatus.completed);
+      if (isOverdue) {
+        overdueCount++;
+      } else if (status != HomeworkStatus.completed) {
+        activeCount++;
+        if (hw.dueDate.isAfter(now)) {
+          scheduledCount++;
+        }
+      }
+    }
+    if (profile.dailyGoalCurrent < profile.dailyGoalTarget) {
+      activeCount++;
+    }
+    final allCount = scheduledCount + activeCount + overdueCount;
+
     return Scaffold(
       backgroundColor: AppColors.bgCanvas,
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-            horizontal: DesignTokens.horizontalPadding, vertical: 16.0),
+        padding: const EdgeInsets.fromLTRB(
+          DesignTokens.horizontalPadding,
+          16.0,
+          DesignTokens.horizontalPadding,
+          96.0, // Detached floating bottom nav spacing
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── 1. Horizontal Calendar Strip (Component 5.2) ─────────────────
-            const BentoCalendarStrip(),
-
-            const SizedBox(height: DesignTokens.verticalSectionGap),
-
-            // ── 2. Featured Lesson Card ("Map the Path" Component 5.3) ───────
-            FeaturedLessonCard(
-              title: nextLesson.title,
-              subtitle: '${activeChapter.title} • ${nextLesson.durationMinutes} mins',
-              progress: dailyFraction,
-              timeLabel: '${(dailyFraction * 100).toInt()}% • +${nextLesson.xpReward} XP',
-              rating: 5.0,
-              onResume: () {
+            // ── 1. Dynamic Recent Lecture Card (Section 4) ───────────────────
+            RecentLectureCard(
+              recentLecture: state.recentLecture,
+              onBrowseSubjects: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => LessonScreen(
-                      lesson: nextLesson!,
-                      chapter: activeChapter,
-                    ),
-                  ),
-                );
-              },
-              onCopyLink: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => LessonScreen(
-                      lesson: nextLesson!,
-                      chapter: activeChapter,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const LearnScreen()),
                 );
               },
             ),
 
             const SizedBox(height: DesignTokens.verticalSectionGap),
 
-            // ── 3. 2x2 To-Do Bento Grid (Component 5.6) ──────────────────────
+            // ── 2. 2x2 Dynamic To-Do Bento Grid (Section 5) ──────────────────
             Text(
               'Tasks & Study Goals',
               style: AppTypography.sectionHeader(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 12),
             BentoTodoGrid(
-              allCount: activeChapter.lessons.length * 3,
-              scheduledCount: 13,
-              activeCount: profile.streakDays,
-              overdueCount: 2,
+              allCount: allCount,
+              scheduledCount: scheduledCount,
+              activeCount: activeCount,
+              overdueCount: overdueCount,
               onTileTap: (category) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Filtered tasks: $category',
-                      style: AppTypography.bodySmall(color: Colors.white),
-                    ),
-                    backgroundColor: AppColors.bgSurfaceOnyx,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                TaskCategoryFilter filter;
+                switch (category.toLowerCase()) {
+                  case 'scheduled':
+                    filter = TaskCategoryFilter.scheduled;
+                    break;
+                  case 'active':
+                    filter = TaskCategoryFilter.active;
+                    break;
+                  case 'overdue':
+                    filter = TaskCategoryFilter.overdue;
+                    break;
+                  case 'all':
+                  default:
+                    filter = TaskCategoryFilter.all;
+                    break;
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TasksScreen(initialCategory: filter),
                   ),
                 );
               },
@@ -161,47 +178,9 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-            const SizedBox(height: DesignTokens.verticalSectionGap),
-
-            // ── 7. 3-Column Gamified Offer Tiles ("Hot Offers" Component 5.5) ─
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Hot Offers & Power-Ups',
-                    style:
-                        AppTypography.sectionHeader(color: AppColors.textPrimary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentRose.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(9999),
-                  ),
-                  child: Text(
-                    'PROMO',
-                    style: AppTypography.caption(color: AppColors.accentRose)
-                        .copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            BentoHotOffersGrid(
-              activeIndex: _selectedOfferIndex,
-              onTileTap: (index) {
-                setState(() => _selectedOfferIndex = index);
-              },
-            ),
-
             const SizedBox(height: 28),
 
-            // ── 8. Chapter Learning Path Header ──────────────────────────────
+            // ── 7. Chapter Learning Path Header (Section 2.1 Offers & Power-ups removed) ─
             _buildChapterHeader(context, activeChapter),
 
             const SizedBox(height: 18),
@@ -220,61 +199,55 @@ class _HomeScreenState extends State<HomeScreen> {
   // ── Subject Chips ─────────────────────────────────────────────────────────
   Widget _buildSubjectChips(StudentState state, String selectedSubId) {
     return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: MockData.subjects.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final sub = MockData.subjects[index];
-          final isSelected = sub.id == selectedSubId;
+      height: 42,
+      child: BlurredEdgeScroll(
+        fadeWidth: 20,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: MockData.subjects.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final sub = MockData.subjects[index];
+            final isSelected = sub.id == selectedSubId;
 
-          return GestureDetector(
-            onTap: () => state.setSubject(sub.id),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-              decoration: BoxDecoration(
+            return ChoiceChip(
+              avatar: Icon(
+                sub.icon,
+                size: 15,
+                color: isSelected ? Colors.white : sub.primaryColor,
+              ),
+              label: Text(sub.name),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  HapticFeedback.selectionClick();
+                  state.setSubject(sub.id);
+                }
+              },
+              selectedColor: AppColors.bgSurfaceOnyx,
+              backgroundColor: AppColors.bgSurfaceSoft,
+              side: BorderSide(
                 color: isSelected
                     ? AppColors.bgSurfaceOnyx
-                    : AppColors.bgSurfaceSoft,
+                    : const Color(0xFFE2E8F0),
+                width: isSelected ? 1.5 : 1.0,
+              ),
+              elevation: isSelected ? 2 : 0,
+              pressElevation: 1,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(9999),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: AppColors.bgSurfaceOnyx.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    sub.icon,
-                    size: 14,
-                    color: isSelected
-                        ? AppColors.textOnOnyx
-                        : AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    sub.name,
-                    style: AppTypography.pillLabel(
-                      color: isSelected
-                          ? AppColors.textOnOnyx
-                          : AppColors.textPrimary,
-                    ).copyWith(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600),
-                  ),
-                ],
+              labelStyle: TextStyle(
+                fontFamily: AppTypography.primaryFont,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                fontSize: 12.5,
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -415,10 +388,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           } else {
+            final subject = MockData.subjects.firstWhere(
+              (s) => s.id == chapter.subjectId,
+              orElse: () => MockData.subjects.first,
+            );
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => LessonScreen(lesson: lesson, chapter: chapter),
+                builder: (_) => ClassroomScreen(
+                  subject: subject,
+                  chapter: chapter,
+                  lesson: lesson,
+                ),
               ),
             );
           }

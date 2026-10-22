@@ -257,17 +257,27 @@ class TopNavigationBar extends StatelessWidget implements PreferredSizeWidget {
 
               const SizedBox(width: 8),
 
-              // Student Mascot Profile Avatar
+              // Student Profile Avatar
               GestureDetector(
                 onTap: onProfileTap,
                 child: Container(
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.eagerGreen, width: 2),
                   ),
-                  child: const MascotAvatar(
-                    size: 36,
-                    expression: MascotExpression.happy,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/default_icon.png',
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const MascotAvatar(
+                        size: 36,
+                        expression: MascotExpression.happy,
+                      ),
+                    ),
                   ),
                 ),
               ),

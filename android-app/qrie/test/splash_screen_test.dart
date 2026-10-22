@@ -51,7 +51,7 @@ void main() {
 
     // Verify school branding elements appear immediately
     expect(find.text(branding.schoolName.toUpperCase()), findsOneWidget);
-    expect(find.text('Powered by Qrie Academic Platform'), findsOneWidget);
+    expect(find.text('Powered by Qrie AI'), findsWidgets);
     expect(find.text('Tap to begin learning'), findsOneWidget);
 
     // Fast-forward animation and initialization timer

@@ -443,6 +443,18 @@ class HomeworkAssignment {
   String get instructions => teacherInstructions;
   List<HomeworkResource> get linkedResources => resources;
 
+  String get formattedDueText {
+    final now = DateTime.now();
+    final difference = dueDate.difference(now);
+    if (difference.isNegative) {
+      return 'Overdue by ${(-difference.inDays).clamp(1, 999)}d';
+    } else if (difference.inHours < 24) {
+      return 'Due in ${difference.inHours}h';
+    } else {
+      return 'Due in ${difference.inDays}d (${dueDate.day}/${dueDate.month})';
+    }
+  }
+
   /// Compute student-specific status based on progress and due date
   HomeworkStatus computeStatus(HomeworkStudentProgress? progress) {
     final now = DateTime.now();

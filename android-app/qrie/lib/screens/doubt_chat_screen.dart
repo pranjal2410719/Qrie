@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/doubt_message.dart';
 import '../state/student_state.dart';
 import '../theme/app_colors.dart';
@@ -6,6 +7,8 @@ import '../theme/app_typography.dart';
 import '../theme/design_tokens.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
+import '../widgets/app_chip.dart';
+import '../widgets/dynamic_wavy_blob.dart';
 
 /// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
 /// Doubt Chat Screen with High-Contrast Onyx student bubbles,
@@ -270,15 +273,9 @@ class _DoubtChatScreenState extends State<DoubtChatScreen>
             ),
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF38BDF8),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.psychology_rounded,
-                      color: Colors.white, size: 22),
+                const DynamicWavyBlob(
+                  size: 40,
+                  hasActiveContext: true,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -364,22 +361,25 @@ class _DoubtChatScreenState extends State<DoubtChatScreen>
             ),
           ),
 
-          // ── Quick Suggestion Chips ─────────────────────────────────────────
+          // ── Quick Suggestion Chips with Blurred Edge Fade ──────────────────
           SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildSuggestionChip('Explain cell membrane', state),
-                const SizedBox(width: 8),
-                _buildSuggestionChip('Solve 3x - 5 = 16', state),
-                const SizedBox(width: 8),
-                _buildSuggestionChip('Photosynthesis equation', state),
-                const SizedBox(width: 8),
-                _buildSuggestionChip('Formula of pressure', state),
-              ],
+            height: 40,
+            child: BlurredEdgeScroll(
+              fadeWidth: 20,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildSuggestionChip('Explain cell membrane', state),
+                  const SizedBox(width: 8),
+                  _buildSuggestionChip('Solve 3x - 5 = 16', state),
+                  const SizedBox(width: 8),
+                  _buildSuggestionChip('Photosynthesis equation', state),
+                  const SizedBox(width: 8),
+                  _buildSuggestionChip('Formula of pressure', state),
+                ],
+              ),
             ),
           ),
 
@@ -505,20 +505,26 @@ class _DoubtChatScreenState extends State<DoubtChatScreen>
   }
 
   Widget _buildSuggestionChip(String label, StudentState state) {
-    return GestureDetector(
-      onTap: () => _sendMessage(state, label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: AppColors.bgSurfaceSoft,
-          borderRadius: BorderRadius.circular(9999),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.caption(color: AppColors.textPrimary)
-              .copyWith(fontWeight: FontWeight.w600),
-        ),
+    return ChoiceChip(
+      avatar: const Icon(
+        Icons.auto_awesome_rounded,
+        size: 14,
+        color: AppColors.accentCobalt,
       ),
+      label: Text(label),
+      selected: false,
+      onSelected: (_) {
+        HapticFeedback.selectionClick();
+        _sendMessage(state, label);
+      },
+      backgroundColor: const Color(0xFFF1F5F9),
+      side: const BorderSide(color: Color(0xFFE2E8F0)),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(9999),
+      ),
+      labelStyle: AppTypography.caption(color: AppColors.textPrimary)
+          .copyWith(fontWeight: FontWeight.w600, fontSize: 12),
     );
   }
 
@@ -540,12 +546,19 @@ class _DoubtChatScreenState extends State<DoubtChatScreen>
             Container(
               width: 32,
               height: 32,
-              decoration: const BoxDecoration(
-                color: Color(0xFF38BDF8),
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
-              child: const Icon(Icons.psychology_rounded,
-                  color: Colors.white, size: 18),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/Q_logo.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(width: 8),
           ],

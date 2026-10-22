@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qrie/main.dart';
-import 'package:qrie/screens/lesson_screen.dart';
 import 'package:qrie/screens/quiz_solver_screen.dart';
 import 'package:qrie/state/student_state.dart';
 import 'package:qrie/widgets/bottom_nav_bar.dart';
@@ -16,35 +15,27 @@ void main() {
     expect(find.textContaining('Class'), findsWidgets);
 
     // Verify navigation tabs
+    expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Home')), findsOneWidget);
     expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Learn')), findsOneWidget);
-    expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Practice')), findsOneWidget);
-    expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Homework')), findsOneWidget);
     expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Library')), findsOneWidget);
     expect(find.descendant(of: find.byType(BottomNavBar), matching: find.text('Profile')), findsOneWidget);
 
-    // Verify Hero card Resume CTA
-    expect(find.text('Resume'), findsOneWidget);
+    // Verify Recent Lecture CTA
+    expect(find.text('Continue learning'), findsOneWidget);
   });
 
   testWidgets('Bottom navigation switches between student views smoothly', (WidgetTester tester) async {
     await tester.pumpWidget(const QrieApp(skipSplash: true));
     await tester.pumpAndSettle();
 
-    // Tap Practice tab
+    // Tap Learn tab (now opens Syllabus & Subject library)
     await tester.tap(find.descendant(
       of: find.byType(BottomNavBar),
-      matching: find.text('Practice'),
+      matching: find.text('Learn'),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('PRACTICE & MASTERY'), findsOneWidget);
-
-    // Tap Homework tab
-    await tester.tap(find.descendant(
-      of: find.byType(BottomNavBar),
-      matching: find.text('Homework'),
-    ));
-    await tester.pumpAndSettle();
-    expect(find.text('Homework & Tasks'), findsOneWidget);
+    expect(find.text('LEARNING LIBRARY'), findsOneWidget);
+    expect(find.text('Syllabus & Subjects'), findsOneWidget);
 
     // Tap Library tab
     await tester.tap(find.descendant(
@@ -62,30 +53,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Weekly Study Activity'), findsOneWidget);
 
-    // Return to Learn tab
+    // Return to Home tab
     await tester.tap(find.descendant(
       of: find.byType(BottomNavBar),
-      matching: find.text('Learn'),
+      matching: find.text('Home'),
     ));
     await tester.pumpAndSettle();
     expect(find.text('Tasks & Study Goals'), findsOneWidget);
   });
 
-  testWidgets('Resume Lesson opens LessonScreen with concept details', (WidgetTester tester) async {
+  testWidgets('Resume Lesson opens ClassroomScreen with lecture details', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
     await tester.pumpWidget(const QrieApp(skipSplash: true));
     await tester.pumpAndSettle();
 
-    // Tap Resume button
-    await tester.tap(find.text('Resume'));
+    // Tap Continue learning button
+    await tester.tap(find.text('Continue learning'));
     await tester.pumpAndSettle();
 
-    // Verify LessonScreen opened
-    expect(find.byType(LessonScreen), findsOneWidget);
+    // Verify Classroom opened
+    expect(find.text('QRIE LIVE CLASSROOM'), findsOneWidget);
 
     // Pop back to home via back button
     await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pumpAndSettle();
-    expect(find.byType(LessonScreen), findsNothing);
+    expect(find.text('QRIE LIVE CLASSROOM'), findsNothing);
   });
 
   testWidgets('Quiz solver loads questions and handles answer submission', (WidgetTester tester) async {

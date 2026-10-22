@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import 'dynamic_wavy_blob.dart';
 
 enum MascotExpression {
   happy,
@@ -30,10 +31,20 @@ class MascotAvatar extends StatelessWidget {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Mascot Body Canvas
-          CustomPaint(
-            size: Size(size, size),
-            painter: _MascotPainter(expression: expression),
+          // Circular Qrie AI Blob with Dynamic Wavy Boundary
+          DynamicWavyBlob(
+            size: size,
+            hasActiveContext: showBadge,
+            centerChild: Image.asset(
+              'assets/Q_logo.png',
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => CustomPaint(
+                size: Size(size, size),
+                painter: _MascotPainter(expression: expression),
+              ),
+            ),
           ),
           if (showBadge)
             Positioned(
