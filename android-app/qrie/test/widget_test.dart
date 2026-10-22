@@ -51,7 +51,7 @@ void main() {
       matching: find.text('Profile'),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Weekly Study Activity'), findsOneWidget);
+    expect(find.text('Student Profile'), findsOneWidget);
 
     // Return to Home tab
     await tester.tap(find.descendant(
