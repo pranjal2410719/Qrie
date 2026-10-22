@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../school_branding/models/school_branding_config.dart';
 import '../../school_branding/presentation/widgets/school_logo.dart';
 import '../application/auth_controller.dart';
@@ -8,18 +7,20 @@ import '../../../theme/app_typography.dart';
 import '../../../theme/design_tokens.dart';
 
 /// EdTech Mobile UI Design System ("Pastel Bento & Onyx")
-/// 5.8 Onboarding Split-Screen Layout
+/// Student Onboarding Split-Screen Layout:
 /// - Top 58%: Pure white background (#FFFFFF) with school branding,
 ///   editorial headline, and a Skip pill button (#F4F5F7).
 /// - Bottom 42%: Pastel lilac surface (#DF96F7) with floating vector sparkles
 ///   and a 64x64 solid Onyx (#0D0D11) circular orbital CTA button with outer arc.
-class StudentSplashScreen extends StatefulWidget {
+///
+/// NOTE: Clean, institutional onboarding without third-party or powered-by clutter.
+class StudentOnboardingScreen extends StatefulWidget {
   final AuthController authController;
   final SchoolBrandingConfig branding;
   final VoidCallback onInitialized;
   final Duration splashDuration;
 
-  const StudentSplashScreen({
+  const StudentOnboardingScreen({
     super.key,
     required this.authController,
     required this.branding,
@@ -28,10 +29,14 @@ class StudentSplashScreen extends StatefulWidget {
   });
 
   @override
-  State<StudentSplashScreen> createState() => _StudentSplashScreenState();
+  State<StudentOnboardingScreen> createState() =>
+      _StudentOnboardingScreenState();
 }
 
-class _StudentSplashScreenState extends State<StudentSplashScreen>
+/// Backwards compatibility alias for existing test runners
+typedef StudentSplashScreen = StudentOnboardingScreen;
+
+class _StudentOnboardingScreenState extends State<StudentOnboardingScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
@@ -103,7 +108,7 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header row with logo, school branding + Powered by Qrie AI and Skip pill
+                        // Header row with school crest, school name, and Skip pill
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -119,7 +124,8 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text(
@@ -133,24 +139,17 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 2),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'Powered by Qrie AI',
-                                              style: AppTypography.caption(
-                                                      color: AppColors.textSecondary)
-                                                  .copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                      fontSize: 11),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            SvgPicture.asset(
-                                              'assets/Qrielogo.svg',
-                                              width: 14,
-                                              height: 14,
-                                            ),
-                                          ],
+                                        Text(
+                                          branding.motto.isNotEmpty
+                                              ? branding.motto
+                                              : 'Academic Portal',
+                                          style: AppTypography.caption(
+                                                  color: AppColors.textSecondary)
+                                              .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 11),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ],
                                     ),
@@ -180,46 +179,22 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
 
                         const Spacer(),
 
-                        // School pill tag with Powered by Qrie AI badge
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.accentCobalt.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(9999),
-                              ),
-                              child: Text(
-                                branding.schoolName.toUpperCase(),
-                                style: AppTypography.caption(
-                                        color: AppColors.accentCobalt)
-                                    .copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.6),
-                              ),
-                            ),
-                            const Spacer(),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Powered by Qrie AI',
-                                  style: AppTypography.caption(
-                                          color: AppColors.textSecondary)
-                                      .copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 11),
-                                ),
-                                const SizedBox(width: 5),
-                                SvgPicture.asset(
-                                  'assets/Qrielogo.svg',
-                                  width: 18,
-                                  height: 18,
-                                ),
-                              ],
-                            ),
-                          ],
+                        // School pill tag
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentCobalt.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                          child: Text(
+                            branding.schoolName.toUpperCase(),
+                            style: AppTypography.caption(
+                                    color: AppColors.accentCobalt)
+                                .copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.6),
+                          ),
                         ),
 
                         const SizedBox(height: 12),
@@ -275,30 +250,34 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                         top: 24,
                         left: 36,
                         child: _Sparkle(
-                            size: 18, color: Colors.white.withValues(alpha: 0.85)),
+                            size: 18,
+                            color: Colors.white.withValues(alpha: 0.85)),
                       ),
                       Positioned(
                         top: 48,
                         right: 48,
                         child: _Sparkle(
                             size: 14,
-                            color: AppColors.accentCobalt.withValues(alpha: 0.6)),
+                            color:
+                                AppColors.accentCobalt.withValues(alpha: 0.6)),
                       ),
                       Positioned(
                         bottom: 32,
                         left: 54,
                         child: _Sparkle(
                             size: 12,
-                            color: AppColors.accentMustard.withValues(alpha: 0.7)),
+                            color:
+                                AppColors.accentMustard.withValues(alpha: 0.7)),
                       ),
                       Positioned(
                         bottom: 60,
                         right: 36,
                         child: _Sparkle(
-                            size: 16, color: Colors.white.withValues(alpha: 0.8)),
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.8)),
                       ),
 
-                      // Orbital CTA and footer
+                      // Orbital CTA
                       SafeArea(
                         top: false,
                         child: Center(
@@ -312,27 +291,6 @@ class _StudentSplashScreenState extends State<StudentSplashScreen>
                                 style: AppTypography.caption(
                                         color: AppColors.bgSurfaceOnyx)
                                     .copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Powered by Qrie AI',
-                                    style: AppTypography.caption(
-                                            color: AppColors.bgSurfaceOnyx
-                                                .withValues(alpha: 0.75))
-                                        .copyWith(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  SvgPicture.asset(
-                                    'assets/Qrielogo.svg',
-                                    width: 20,
-                                    height: 20,
-                                  ),
-                                ],
                               ),
                             ],
                           ),
@@ -364,37 +322,41 @@ class _OrbitalCtaButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 82,
-        height: 82,
+        width: 86,
+        height: 86,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Partial orbital stroke arc (1.5px solid #111216, ~240 degrees)
+            // 240-degree orbital track arc around button
             CustomPaint(
               size: const Size(78, 78),
-              painter: _OrbitalArcPainter(),
+              painter: _OrbitalArcPainter(
+                trackColor: AppColors.bgSurfaceOnyx.withValues(alpha: 0.15),
+                arcColor: AppColors.bgSurfaceOnyx,
+                sweepAngleDegrees: 240,
+                strokeWidth: 2.2,
+              ),
             ),
-            // Solid 64x64 Onyx button
+
+            // Inner 64x64 solid Onyx button
             Container(
               width: 64,
               height: 64,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.bgSurfaceOnyx,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x330D0D11),
-                    blurRadius: 16,
-                    offset: Offset(0, 8),
+                    color: AppColors.bgSurfaceOnyx.withValues(alpha: 0.35),
+                    offset: const Offset(0, 8),
+                    blurRadius: 18,
                   ),
                 ],
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white,
-                  size: 26,
-                ),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+                size: 26,
               ),
             ),
           ],
@@ -404,18 +366,50 @@ class _OrbitalCtaButton extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 240-degree orbital arc painter
+// ─────────────────────────────────────────────────────────────────────────────
 class _OrbitalArcPainter extends CustomPainter {
+  final Color trackColor;
+  final Color arcColor;
+  final double sweepAngleDegrees;
+  final double strokeWidth;
+
+  _OrbitalArcPainter({
+    required this.trackColor,
+    required this.arcColor,
+    required this.sweepAngleDegrees,
+    required this.strokeWidth,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.bgSurfaceOnyx
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Full subtle track circle
+    final trackPaint = Paint()
+      ..color = trackColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
+      ..strokeWidth = strokeWidth;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // Dynamic 240-degree progress arc
+    final arcPaint = Paint()
+      ..color = arcColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth + 0.6
       ..strokeCap = StrokeCap.round;
 
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    // Spanning ~240 degrees (4.18 radians) around the left side
-    canvas.drawArc(rect, 2.3, 4.18, false, paint);
+    const startAngle = -1.5708; // -90 degrees in radians (top of circle)
+    final sweepAngle = (sweepAngleDegrees * 3.1415926535) / 180;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      arcPaint,
+    );
   }
 
   @override
@@ -423,7 +417,7 @@ class _OrbitalArcPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4-point sparkle vector garnish
+// Four-pointed vector sparkle
 // ─────────────────────────────────────────────────────────────────────────────
 class _Sparkle extends StatelessWidget {
   final double size;
@@ -443,7 +437,7 @@ class _Sparkle extends StatelessWidget {
 class _SparklePainter extends CustomPainter {
   final Color color;
 
-  const _SparklePainter({required this.color});
+  _SparklePainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -451,18 +445,18 @@ class _SparklePainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
 
-    final path = Path();
     final w = size.width;
     final h = size.height;
     final cx = w / 2;
     final cy = h / 2;
 
-    path.moveTo(cx, 0);
-    path.quadraticBezierTo(cx, cy, w, cy);
-    path.quadraticBezierTo(cx, cy, cx, h);
-    path.quadraticBezierTo(cx, cy, 0, cy);
-    path.quadraticBezierTo(cx, cy, cx, 0);
-    path.close();
+    final path = Path()
+      ..moveTo(cx, 0)
+      ..quadraticBezierTo(cx, cy, w, cy)
+      ..quadraticBezierTo(cx, cy, cx, h)
+      ..quadraticBezierTo(cx, cy, 0, cy)
+      ..quadraticBezierTo(cx, cy, cx, 0)
+      ..close();
 
     canvas.drawPath(path, paint);
   }

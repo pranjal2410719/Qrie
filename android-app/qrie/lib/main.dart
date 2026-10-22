@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/network/api_client.dart';
 import 'core/storage/secure_storage.dart';
 import 'features/auth/application/auth_controller.dart';
+import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/presentation/student_splash_screen.dart';
 import 'features/auth/presentation/welcome_screen.dart';
 import 'features/school_branding/data/school_branding_repository.dart';
@@ -49,7 +50,8 @@ class _QrieAppState extends State<QrieApp> {
   late final SchoolBrandingRepository _brandingRepo;
   final SchoolThemeProvider _themeProvider = SchoolThemeProvider();
 
-  bool _initialized = true;
+  bool _splashComplete = false;
+  bool _onboardingComplete = false;
 
   @override
   void initState() {
@@ -65,7 +67,8 @@ class _QrieAppState extends State<QrieApp> {
     _loadInitialBranding();
 
     if (widget.skipSplash) {
-      _initialized = true;
+      _splashComplete = true;
+      _onboardingComplete = true;
       if (!widget.showOnboarding) {
         // Default to authenticated guest/demo session for direct test harnesses
         if (!_authController.isAuthenticated) {
@@ -73,7 +76,8 @@ class _QrieAppState extends State<QrieApp> {
         }
       }
     } else {
-      _initialized = false;
+      _splashComplete = false;
+      _onboardingComplete = false;
     }
   }
 
@@ -103,30 +107,37 @@ class _QrieAppState extends State<QrieApp> {
             title: 'Qrie',
             debugShowCheckedModeBanner: false,
             theme: _themeProvider.themeData,
-            home: !_initialized
-                ? StudentSplashScreen(
+            home: !_splashComplete
+                ? SplashScreen(
                     authController: _authController,
-                    branding: _themeProvider.branding,
                     onInitialized: () {
-                      setState(() => _initialized = true);
+                      setState(() => _splashComplete = true);
                     },
                   )
-                : (_authController.isAuthenticated
-                    ? MainScaffold(
-                        themeProvider: _themeProvider,
+                : (!_onboardingComplete
+                    ? StudentOnboardingScreen(
                         authController: _authController,
-                        onSignOut: () async {
-                          _studentState.resetSession();
-                          await _authController.signOut();
+                        branding: _themeProvider.branding,
+                        onInitialized: () {
+                          setState(() => _onboardingComplete = true);
                         },
                       )
-                    : WelcomeScreen(
-                        authController: _authController,
-                        themeProvider: _themeProvider,
-                        onLoginSuccess: () {
-                          setState(() {});
-                        },
-                      )),
+                    : (_authController.isAuthenticated
+                        ? MainScaffold(
+                            themeProvider: _themeProvider,
+                            authController: _authController,
+                            onSignOut: () async {
+                              _studentState.resetSession();
+                              await _authController.signOut();
+                            },
+                          )
+                        : WelcomeScreen(
+                            authController: _authController,
+                            themeProvider: _themeProvider,
+                            onLoginSuccess: () {
+                              setState(() {});
+                            },
+                          ))),
           ),
         );
       },
