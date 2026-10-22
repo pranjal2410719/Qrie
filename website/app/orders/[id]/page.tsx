@@ -1,10 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { CheckCircle2, Clock, Package, Download, ShieldCheck, Mail } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export async function generateStaticParams() {
   return [{ id: "sample" }];

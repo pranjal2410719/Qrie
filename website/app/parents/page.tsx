@@ -1,14 +1,11 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { LavenderFeatureBand } from "@/components/ui/LavenderFeatureBand";
 import {
   HeartHandshake,
-  ShieldCheck,
   Activity,
-  CheckCircle2,
   Clock,
   Lock,
 } from "lucide-react";

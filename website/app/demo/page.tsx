@@ -5,15 +5,8 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import {
-  Sparkles,
   BookOpen,
-  Calendar,
   CheckCircle2,
-  Clock,
-  Award,
-  Smartphone,
-  PlayCircle,
-  HelpCircle,
   Flame,
 } from "lucide-react";
 

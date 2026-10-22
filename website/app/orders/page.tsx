@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Search, Package, ArrowRight, ShieldCheck } from "lucide-react";
+import { Search, Package, ArrowRight } from "lucide-react";
 
 export default function OrdersPage() {
   const [orderQuery, setOrderQuery] = useState("");
