@@ -2,6 +2,10 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { authenticate } from '../../middleware/auth.js';
 import { config } from '../../config/index.js';
 import { BadRequestError, NotFoundError, AppError } from '../../shared/errors.js';
+import { incomingEventsSchema, normalizeEvent } from './contracts.js';
+import { insertEvents } from './event-store.js';
+import { relayPendingEvents } from './relay.js';
+import type { RelaySummary } from './relay.js';
 
 interface SchoolBranding {
   school_id: string;
@@ -113,27 +117,84 @@ export async function studentRoutes(app: FastifyInstance) {
 
   /**
    * Offline Interaction Outbox Batch Synchronization
-   * Idempotently accepts learning interactions (e.g. answer attempts).
+   *
+   * The batch is persisted first and acknowledged second. The client may delete
+   * its local copy as soon as this returns 200, so a 200 that did not survive
+   * the write would lose evidence permanently. Relay to LAM is best-effort and
+   * happens after the write; it can never turn a stored batch into an error.
    */
   app.post(
     '/sync/events',
     { preHandler: [authenticate] },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const body = request.body as any;
-      const events = body?.events;
-      if (!Array.isArray(events)) {
-        throw new BadRequestError('events must be an array');
+      const user = request.user!;
+      const parsed = incomingEventsSchema.safeParse(request.body);
+      if (!parsed.success) {
+        const issue = parsed.error.issues[0];
+        throw new BadRequestError(
+          issue ? `${issue.path.join('.') || 'body'}: ${issue.message}` : 'Invalid sync payload',
+        );
       }
 
-      // All received event IDs are confirmed synchronized.
-      // TODO(issue-1): persist to the ledger and relay to LAM; this is an
-      // acknowledgement stub, not evidence ingestion.
-      const syncedIds = events.map((e: { id: string }) => e.id);
+      // A repeated id inside one batch is one event. Order is preserved for the
+      // response; the database is the real idempotency boundary.
+      const seen = new Set<string>();
+      const events = parsed.data.events
+        .filter((event) => {
+          if (seen.has(event.id)) return false;
+          seen.add(event.id);
+          return true;
+        })
+        .map((event) => normalizeEvent(event, user.id));
 
+      let insertedIds: string[] = [];
+      if (events.length > 0) {
+        try {
+          insertedIds = await insertEvents(user.schoolId, user.id, events);
+        } catch (error) {
+          request.log.error(error, 'Failed to persist sync events');
+          throw new AppError(
+            503,
+            'Event store unavailable; the batch was not persisted and should be retried.',
+            'SYNC_STORE_UNAVAILABLE',
+          );
+        }
+      }
+
+      let relay: RelaySummary & { enabled: boolean; deferred?: boolean } = {
+        enabled: config.LAM_RELAY_ENABLED,
+        attempted: 0,
+        relayed: 0,
+        skipped: 0,
+        failed: 0,
+      };
+
+      if (config.LAM_RELAY_ENABLED) {
+        try {
+          relay = { enabled: true, ...(await relayPendingEvents(user.schoolId, user.id)) };
+        } catch (error) {
+          // The events are durably stored. A queue-drain failure is deferred,
+          // not a client error: reporting 5xx here would make the client retry
+          // a batch that is already safe.
+          request.log.error(error, 'Failed to drain the LAM relay queue');
+          relay = {
+            enabled: true,
+            attempted: 0,
+            relayed: 0,
+            skipped: 0,
+            failed: 0,
+            deferred: true,
+          };
+        }
+      }
+
+      const acceptedIds = events.map((event) => event.eventId);
       return reply.status(200).send({
         status: 'success',
-        synced_count: syncedIds.length,
-        synced_ids: syncedIds,
+        synced_count: acceptedIds.length,
+        synced_ids: acceptedIds,
+        duplicates: acceptedIds.length - insertedIds.length,
+        relay,
       });
     },
   );

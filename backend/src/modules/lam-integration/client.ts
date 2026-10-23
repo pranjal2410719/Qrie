@@ -41,10 +41,12 @@ export interface LamRecommendationResponse {
 export class LamAdapterClient {
   private baseUrl: string;
   private secret: string;
+  private timeoutMs: number;
 
-  constructor(baseUrl?: string, secret?: string) {
+  constructor(baseUrl?: string, secret?: string, timeoutMs?: number) {
     this.baseUrl = baseUrl || config.LAM_BASE_URL;
     this.secret = secret || config.LAM_JWT_SECRET;
+    this.timeoutMs = timeoutMs ?? config.LAM_TIMEOUT_MS;
   }
 
   /**
@@ -87,7 +89,7 @@ export class LamAdapterClient {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(event),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(this.timeoutMs),
       });
 
       if (!response.ok) {
@@ -118,7 +120,7 @@ export class LamAdapterClient {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(req),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(this.timeoutMs),
       });
 
       if (!response.ok) {

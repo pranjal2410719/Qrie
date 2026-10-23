@@ -34,6 +34,17 @@ const configSchema = z
     LAM_JWT_SECRET: z.string().min(32).default(DEV_DEFAULTS.LAM_JWT_SECRET),
 
     /**
+     * Day 2 relay behaviour. Persisting an event is the durable part; relaying
+     * it to LAM is best-effort and must never fail the client's sync. Set
+     * `LAM_RELAY_ENABLED=false` for a local run with no LAM service.
+     */
+    LAM_RELAY_ENABLED: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((value) => value === 'true'),
+    LAM_TIMEOUT_MS: z.coerce.number().int().min(100).max(30000).default(2000),
+
+    /**
      * The current `POST /auth/session` endpoint mints a demo JWT without
      * verifying any credential. It is useful for local UI work and must never
      * be reachable in production, so it is explicit, default-on only for local

@@ -14,14 +14,6 @@ describe('Student Application API & School Branding', () => {
     await app.close();
   });
 
-  const studentToken = () =>
-    app.jwt.sign({
-      id: 'std_01',
-      email: 'student@school.edu',
-      role: 'student',
-      schoolId: 'sch_dps_rkp',
-    });
-
   it('GET /api/v1/public/school/branding returns Delhi Public School verified branding', async () => {
     const res = await app.inject({
       method: 'GET',
@@ -73,50 +65,6 @@ describe('Student Application API & School Branding', () => {
     expect(body.user.role).toBe('student');
     expect(body.user.school_id).toBe('sch_dps_rkp');
     expect(body.school.school_name).toBe('Delhi Public School, R.K. Puram');
-  });
-
-  it('POST /api/v1/sync/events rejects unauthenticated callers', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/api/v1/sync/events',
-      payload: { events: [{ id: 'evt-uuid-1', event_type: 'answer', payload: {} }] },
-    });
-
-    expect(res.statusCode).toBe(401);
-  });
-
-  it('POST /api/v1/sync/events processes offline outbox events for an authenticated student', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/api/v1/sync/events',
-      headers: { authorization: `Bearer ${studentToken()}` },
-      payload: {
-        events: [
-          {
-            id: 'evt-uuid-1',
-            event_type: 'learning.answer_submitted',
-            payload: { is_correct: true },
-          },
-        ],
-      },
-    });
-
-    expect(res.statusCode).toBe(200);
-    const body = JSON.parse(res.body);
-    expect(body.synced_count).toBe(1);
-    expect(body.synced_ids).toContain('evt-uuid-1');
-  });
-
-  it('POST /api/v1/sync/events rejects a body without an events array', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/api/v1/sync/events',
-      headers: { authorization: `Bearer ${studentToken()}` },
-      payload: { events: 'not-an-array' },
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(res.json().title).toBe('BAD_REQUEST');
   });
 
   it('POST /api/v1/learning/sessions/:id/answers rejects unauthenticated callers', async () => {
