@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import sensible from '@fastify/sensible';
 import crypto from 'crypto';
+import { ZodError } from 'zod';
 
 import { config } from './config/index.js';
 import { AppError } from './shared/errors.js';
@@ -58,6 +59,24 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
         instance: request.url,
         requestId,
         details: error.validation,
+      });
+    }
+
+    // Handlers use `schema.parse`, which throws ZodError rather than the
+    // Fastify `validation` shape. Without this branch a bad request body is
+    // reported as a 500 outage.
+    if (error instanceof ZodError) {
+      return reply.status(422).send({
+        type: 'about:blank',
+        title: 'VALIDATION_ERROR',
+        status: 422,
+        detail: 'Request body failed validation',
+        instance: request.url,
+        requestId,
+        details: error.issues.map((issue) => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+        })),
       });
     }
 
