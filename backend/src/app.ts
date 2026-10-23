@@ -61,6 +61,21 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
       });
     }
 
+    // Client errors raised by Fastify itself (malformed JSON, unsupported media
+    // type, payload too large, ...) must keep their 4xx status. Collapsing them
+    // into 500 hides a caller mistake and reports a false outage.
+    const statusCode = typeof error?.statusCode === 'number' ? error.statusCode : 500;
+    if (statusCode >= 400 && statusCode < 500) {
+      return reply.status(statusCode).send({
+        type: 'about:blank',
+        title: error.code || 'REQUEST_ERROR',
+        status: statusCode,
+        detail: error.message,
+        instance: request.url,
+        requestId,
+      });
+    }
+
     // Unhandled 500
     request.log.error(error, `Unhandled internal error on ${request.method} ${request.url}`);
     return reply.status(500).send({
@@ -70,6 +85,18 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
       detail: 'An unexpected internal error occurred.',
       instance: request.url,
       requestId,
+    });
+  });
+
+  // Unknown routes use the same RFC 7807 envelope as every other error.
+  app.setNotFoundHandler((request, reply) => {
+    return reply.status(404).send({
+      type: 'about:blank',
+      title: 'NOT_FOUND',
+      status: 404,
+      detail: `Route ${request.method}:${request.url} not found`,
+      instance: request.url,
+      requestId: request.id,
     });
   });
 
