@@ -20,6 +20,12 @@ export class AppError extends Error {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string = 'Malformed request') {
+    super(400, message, 'BAD_REQUEST');
+  }
+}
+
 export class UnauthorizedError extends AppError {
   constructor(message: string = 'Authentication required') {
     super(401, message, 'UNAUTHORIZED');
