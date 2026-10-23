@@ -10,7 +10,7 @@ import {
   BookOpen,
   GraduationCap,
   Server,
-  CheckCircle,
+  CheckCircle, School,
 } from "lucide-react";
 
 export const metadata: Metadata = {

@@ -68,8 +68,8 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Desktop Navigation: Charlie Text 14px weight 400 #101214 */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Desktop Navigation: centered */}
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-1">
             {siteConfig.mainNav.map((item) => {
               const hasChildren = item.children && item.children.length > 0;
               const isActive =
@@ -93,12 +93,7 @@ export function Header() {
               }
 
               return (
-                <div
-                  key={item.title}
-                  className="relative"
-                  onMouseEnter={() => setOpenDropdown(item.title)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
+                <div key={item.title} className="relative" onMouseEnter={() => setOpenDropdown(item.title)} onMouseLeave={() => setOpenDropdown(null)}>
                   <button
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-[20px] text-[14px] font-normal transition-colors ${
                       isActive
@@ -115,7 +110,7 @@ export function Header() {
                     />
                   </button>
 
-                  {/* Dropdown Menu Container (20px radius, subtle navy micro-shadow) */}
+                  {/* Dropdown Menu Container */}
                   {openDropdown === item.title && (
                     <div className="absolute top-full left-0 w-80 p-2 bg-white rounded-[20px] border border-[#f0f1f2] shadow-[rgba(9,30,66,0.31)_0px_0px_1px_0px,rgba(9,30,66,0.25)_0px_2px_4px_0px] z-50">
                       <div className="space-y-1">
@@ -151,55 +146,18 @@ export function Header() {
           </nav>
 
           {/* Right Action Area */}
-          <div className="hidden sm:flex items-center gap-3">
-            {/* Sign in text-link in #1868db, 14px as in design.md */}
-            <Link
-              href="/demo"
-              className="text-[14px] font-medium text-[#1868db] hover:underline px-2 py-1"
-            >
+          <div className="hidden sm:flex items-center gap-3 ml-auto">
+            {/* Primary Demo Button */}
+
+
+            {/* Sign In */}
+            <Button href="/demo" variant="outline" size="sm" className="text-base">
               Sign In
-            </Link>
-
-            {/* Cart Icon Button */}
-            <Link
-              href="/cart"
-              className="relative p-2 rounded-full text-[#101214] hover:bg-[#f0f1f2] transition-colors"
-              title="View Cart"
-            >
-              <ShoppingCart className="w-4 h-4 text-[#101214]" />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#1868db] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {count}
-                </span>
-              )}
-            </Link>
-
-            {/* School Demo Primary Action Button (Pill radius 28px, #1868db) */}
-            <Button
-              href="/school-demo"
-              variant="primary"
-              size="sm"
-              icon={<School className="w-3.5 h-3.5" />}
-            >
-              Request School Demo
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <Link
-              href="/cart"
-              className="relative p-2 rounded-full text-[#101214] hover:bg-[#f0f1f2]"
-              title="Cart"
-            >
-              <ShoppingCart className="w-5 h-5 text-[#101214]" />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#1868db] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {count}
-                </span>
-              )}
-            </Link>
-
+          <div className="flex items-center gap-2 lg:hidden" id="mobile-menu-button" aria-controls="mobile-drawer">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-[8px] text-[#101214] hover:bg-[#f0f1f2] focus:outline-none"
@@ -213,7 +171,7 @@ export function Header() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-[#f0f1f2] bg-white px-4 pt-3 pb-6 space-y-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
+        <div id="mobile-drawer" className="lg:hidden border-t border-[#f0f1f2] bg-white px-4 pt-3 pb-6 space-y-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
           <div className="space-y-1">
             {siteConfig.mainNav.map((item) => {
               if (!item.children) {
@@ -221,7 +179,7 @@ export function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="block px-3 py-2 rounded-[12px] text-[14px] font-medium text-[#101214] hover:bg-[#f0f1f2]"
+                    className="block px-3 py-2 rounded-[12px] text-base font-medium text-[#101214] hover:bg-[#f0f1f2]"
                   >
                     {item.title}
                   </Link>
@@ -230,7 +188,7 @@ export function Header() {
 
               return (
                 <div key={item.title} className="py-2">
-                  <div className="px-3 text-[11px] font-bold text-[#42526e] uppercase tracking-wider">
+                  <div className="px-3 text-xs font-bold text-[#42526e] uppercase tracking-wider">
                     {item.title}
                   </div>
                   <div className="mt-1 pl-2 space-y-0.5">
@@ -238,7 +196,7 @@ export function Header() {
                       <Link
                         key={child.href}
                         href={child.href}
-                        className="block px-3 py-2 rounded-[12px] text-[14px] font-normal text-[#101214] hover:bg-[#f0f1f2]"
+                        className="block px-3 py-2 rounded-[12px] text-base font-normal text-[#101214] hover:bg-[#f0f1f2]"
                       >
                         <div className="flex items-center justify-between">
                           <span>{child.title}</span>
@@ -248,6 +206,11 @@ export function Header() {
                             </span>
                           )}
                         </div>
+                        {child.description && (
+                          <p className="text-sm text-[#42526e] mt-0.5 line-clamp-2 leading-relaxed font-normal">
+                            {child.description}
+                          </p>
+                        )}
                       </Link>
                     ))}
                   </div>
