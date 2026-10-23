@@ -12,6 +12,10 @@
 > lists the P0/P1 defects fixed in the accompanying commits. It makes **no
 > production-readiness claim**. Anything described as "mock", "demo", or "not
 > implemented" is intentionally out of scope for this sprint slice.
+>
+> Day 2 changes (durable sync outbox + LAM relay) are recorded separately in
+> `docs/audit/2026-10-23-issue-1-day-2-contracts.md`; the capability table below
+> remains the Day 1 snapshot.
 
 ---
 
