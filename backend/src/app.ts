@@ -12,6 +12,39 @@ import { teacherRoutes } from './modules/teacher/routes.js';
 import { adminRoutes } from './modules/admin/routes.js';
 import { studentRoutes } from './modules/student/routes.js';
 
+/**
+ * Build the CORS origin option from the configured allowlist.
+ *
+ * Rules:
+ *  - Production with an explicit list → only those origins are reflected back.
+ *  - Development/test with an explicit list → same, respect the list.
+ *  - Development/test with an empty list → allow localhost on any port so
+ *    a fresh clone works without extra configuration.
+ *  - Production with an empty list → the config layer already throws, so this
+ *    branch should never be reached; we default to `false` (deny all) as a
+ *    belt-and-suspenders guard.
+ */
+function buildCorsOrigin(
+  allowedOrigins: string[],
+  nodeEnv: string,
+): string | string[] | false | ((origin: string | undefined, cb: (err: Error | null, allow: boolean) => void) => void) {
+  if (allowedOrigins.length > 0) {
+    return allowedOrigins;
+  }
+  if (nodeEnv === 'production') {
+    // Config validation should have already thrown, but be explicit here.
+    return false;
+  }
+  // Development / test: allow localhost on any port without requiring explicit config.
+  return (origin, cb) => {
+    if (!origin || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  };
+}
+
 export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
   const app = Fastify({
     genReqId: (req) => {
@@ -24,7 +57,12 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
   });
 
   // Plugins
-  app.register(cors, { origin: true });
+  app.register(cors, {
+    origin: buildCorsOrigin(config.ALLOWED_ORIGINS, config.NODE_ENV),
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+    credentials: true,
+  });
   app.register(sensible);
   app.register(jwt, {
     secret: config.JWT_SECRET,

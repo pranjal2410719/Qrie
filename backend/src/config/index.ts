@@ -54,6 +54,28 @@ const configSchema = z
       .enum(['true', 'false'])
       .default('true')
       .transform((value) => value === 'true'),
+
+    /**
+     * Comma-separated list of origins that are allowed to make cross-origin
+     * requests.  Example: "https://app.qrie.in,https://staging.qrie.in"
+     *
+     * In development an empty value is treated as "allow localhost:* only"
+     * so a fresh clone works without extra configuration.  In production this
+     * must be explicitly set; the superRefine guard below rejects an empty
+     * list when NODE_ENV === 'production'.
+     *
+     * Origins are trimmed and empty strings are filtered out, so trailing
+     * commas and extra spaces are harmless.
+     */
+    ALLOWED_ORIGINS: z
+      .string()
+      .default('')
+      .transform((val) =>
+        val
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0),
+      ),
   })
   .superRefine((cfg, ctx) => {
     if (cfg.NODE_ENV !== 'production') return;
@@ -84,6 +106,14 @@ const configSchema = z
         code: z.ZodIssueCode.custom,
         path: ['ALLOW_DEMO_AUTH'],
         message: 'ALLOW_DEMO_AUTH must be false in production; demo session minting has no credential check.',
+      });
+    }
+    if (cfg.ALLOWED_ORIGINS.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['ALLOWED_ORIGINS'],
+        message:
+          'ALLOWED_ORIGINS must contain at least one origin in production. Set a comma-separated list of allowed origins.',
       });
     }
   });

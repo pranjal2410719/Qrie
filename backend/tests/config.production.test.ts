@@ -12,6 +12,7 @@ function productionEnv(overrides: Record<string, string> = {}) {
     LAM_JWT_SECRET: 'l'.repeat(48),
     DATABASE_URL: 'postgresql://qrie:secret@db.internal:5432/qrie',
     ALLOW_DEMO_AUTH: 'false',
+    ALLOWED_ORIGINS: 'https://app.qrie.in',
     ...overrides,
   } as NodeJS.ProcessEnv;
 }
@@ -21,6 +22,7 @@ describe('Production configuration guard', () => {
     const config = parseConfig(productionEnv());
     expect(config.NODE_ENV).toBe('production');
     expect(config.ALLOW_DEMO_AUTH).toBe(false);
+    expect(config.ALLOWED_ORIGINS).toEqual(['https://app.qrie.in']);
   });
 
   it('refuses to start with the development JWT secret', () => {
@@ -39,9 +41,21 @@ describe('Production configuration guard', () => {
     expect(() => parseConfig(productionEnv({ ALLOW_DEMO_AUTH: 'true' }))).toThrow(/ALLOW_DEMO_AUTH/);
   });
 
+  it('refuses an empty ALLOWED_ORIGINS in production', () => {
+    expect(() => parseConfig(productionEnv({ ALLOWED_ORIGINS: '' }))).toThrow(/ALLOWED_ORIGINS/);
+  });
+
+  it('parses ALLOWED_ORIGINS as a trimmed array', () => {
+    const config = parseConfig(
+      productionEnv({ ALLOWED_ORIGINS: ' https://app.qrie.in , https://staging.qrie.in ' }),
+    );
+    expect(config.ALLOWED_ORIGINS).toEqual(['https://app.qrie.in', 'https://staging.qrie.in']);
+  });
+
   it('still permits development defaults outside production', () => {
     const config = parseConfig({ NODE_ENV: 'development' } as NodeJS.ProcessEnv);
     expect(config.JWT_SECRET).toBe(DEV_JWT_SECRET);
     expect(config.ALLOW_DEMO_AUTH).toBe(true);
+    expect(config.ALLOWED_ORIGINS).toEqual([]); // empty is fine in dev
   });
 });

@@ -33,6 +33,42 @@ interface PendingRow {
 }
 
 /**
+ * Determine what JSON to persist in the `payload` column.
+ *
+ * Priority:
+ *  1. If the event was eligible, `lamEvent` holds all normalised fields —
+ *     store that so the relay can forward it without re-normalising.
+ *  2. If the event is ineligible (`lamEvent` is null), fall back to the
+ *     original `event.payload` merged with any top-level fields that were
+ *     extracted during normalisation (sessionId, eventType, occurredAt).
+ *     This preserves diagnostic context (concept_ids, item_id, correctness,
+ *     etc.) that the caller may have sent at the top level rather than
+ *     inside the payload envelope, ensuring ineligible events are not
+ *     silently stripped of the information needed to diagnose why they were
+ *     rejected.
+ *
+ * Data minimisation: we do not duplicate the entire incoming request;
+ * we store only the fields that were actually resolved during normalisation.
+ */
+export function buildStoredPayload(event: NormalizedEvent): Record<string, any> {
+  if (event.lamEvent !== null) {
+    return event.lamEvent;
+  }
+
+  // Ineligible path: merge the original payload with the top-level fields
+  // that normaliseEvent resolved from the flat event shape so nothing is lost.
+  return {
+    ...event.payload,
+    // Add resolved scalar fields only when they are non-null; avoids
+    // polluting the stored document with explicit nulls.
+    ...(event.sessionId !== null ? { session_id: event.sessionId } : {}),
+    ...(event.occurredAt !== null ? { timestamp: event.occurredAt } : {}),
+    // ineligibleReason is diagnostic metadata — useful for debugging.
+    ...(event.ineligibleReason !== null ? { _ineligible_reason: event.ineligibleReason } : {}),
+  };
+}
+
+/**
  * Inserts a batch, ignoring ids that already exist for this tenant.
  * Returns only the ids that were newly inserted.
  */
@@ -52,7 +88,7 @@ export async function insertEvents(
       event.eventId,
       event.sessionId,
       event.eventType,
-      JSON.stringify(event.lamEvent ?? event.payload),
+      JSON.stringify(buildStoredPayload(event)),
       event.occurredAt,
     );
     return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}::jsonb, $${base + 7})`;
