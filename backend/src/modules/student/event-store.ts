@@ -52,7 +52,7 @@ export async function insertEvents(
       event.eventId,
       event.sessionId,
       event.eventType,
-      JSON.stringify(event.payload),
+      JSON.stringify(event.lamEvent ?? event.payload),
       event.occurredAt,
     );
     return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}::jsonb, $${base + 7})`;
