@@ -107,8 +107,8 @@ export async function insertEvents(
 }
 
 /**
- * Retryable rows for one student, oldest first. Scoped by org AND user so one
- * student's queue can never drain another's.
+ * Reads pending rows for inspection or diagnostic tests without modifying state.
+ * Scoped by org AND user so one student's queue can never inspect another's.
  */
 export async function listPendingEvents(
   orgId: string,
@@ -121,10 +121,53 @@ export async function listPendingEvents(
        from public.sync_event
       where org_id = $1
         and user_id = $2
-        and relay_status = 'pending'
+        and relay_status in ('pending', 'processing')
         and relay_attempts < $3
       order by received_at asc
       limit $4`,
+    [orgId, userId, MAX_RELAY_ATTEMPTS, bounded],
+  );
+
+  return result.rows.map((row) => ({
+    eventId: row.event_id,
+    sessionId: row.session_id,
+    eventType: row.event_type,
+    occurredAt: row.occurred_at ? new Date(row.occurred_at).toISOString() : null,
+    payload: row.payload ?? {},
+  }));
+}
+
+/**
+ * Atomically claims retryable rows for relay forwarding, oldest first.
+ *
+ * Uses `UPDATE ... FOR UPDATE SKIP LOCKED` so concurrent relay executions
+ * cannot select and forward identical events simultaneously.
+ */
+export async function claimPendingEvents(
+  orgId: string,
+  userId: string,
+  limit: number,
+): Promise<PendingEventRow[]> {
+  const bounded = Math.max(1, Math.min(100, Math.trunc(limit)));
+  const result = await Database.query<PendingRow>(
+    `update public.sync_event
+        set relay_status = 'processing',
+            last_error = 'CLAIMED_FOR_RELAY'
+      where (org_id, event_id) in (
+        select org_id, event_id
+          from public.sync_event
+         where org_id = $1
+           and user_id = $2
+           and (
+             relay_status = 'pending'
+             or (relay_status = 'processing' and received_at < now() - interval '60 seconds')
+           )
+           and relay_attempts < $3
+         order by received_at asc
+         limit $4
+         for update skip locked
+      )
+     returning event_id, session_id, event_type, occurred_at, payload`,
     [orgId, userId, MAX_RELAY_ATTEMPTS, bounded],
   );
 

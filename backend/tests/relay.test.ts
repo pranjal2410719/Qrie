@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../src/modules/student/event-store.js', () => ({
   listPendingEvents: vi.fn(),
+  claimPendingEvents: vi.fn(),
   markRelayed: vi.fn(),
   markSkipped: vi.fn(),
   markFailed: vi.fn(),
@@ -10,6 +11,7 @@ vi.mock('../src/modules/student/event-store.js', () => ({
 import * as store from '../src/modules/student/event-store.js';
 import { relayPendingEvents } from '../src/modules/student/relay.js';
 
+const claimPending = vi.mocked(store.claimPendingEvents);
 const listPending = vi.mocked(store.listPendingEvents);
 const markRelayed = vi.mocked(store.markRelayed);
 const markSkipped = vi.mocked(store.markSkipped);
@@ -29,6 +31,7 @@ function pendingRow(overrides: Record<string, unknown> = {}) {
 describe('LAM relay drain', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    claimPending.mockResolvedValue([]);
     listPending.mockResolvedValue([]);
     markRelayed.mockResolvedValue();
     markSkipped.mockResolvedValue();
@@ -36,7 +39,7 @@ describe('LAM relay drain', () => {
   });
 
   it('relays an eligible event and marks it relayed', async () => {
-    listPending.mockResolvedValue([pendingRow()]);
+    claimPending.mockResolvedValue([pendingRow()]);
     const forwardEvent = vi.fn().mockResolvedValue({ status: 'ingested', event_id: 'evt_1' });
 
     const summary = await relayPendingEvents('sch_1', 'std_1', { forwardEvent });
@@ -57,7 +60,7 @@ describe('LAM relay drain', () => {
   });
 
   it('skips an ineligible event without calling LAM', async () => {
-    listPending.mockResolvedValue([
+    claimPending.mockResolvedValue([
       pendingRow({ payload: { question_id: 'q4', is_correct: true } }),
     ]);
     const forwardEvent = vi.fn();
@@ -70,7 +73,7 @@ describe('LAM relay drain', () => {
   });
 
   it('keeps the event retryable when LAM is unreachable', async () => {
-    listPending.mockResolvedValue([pendingRow()]);
+    claimPending.mockResolvedValue([pendingRow()]);
     const forwardEvent = vi.fn().mockResolvedValue({ status: 'relay_queued', event_id: 'evt_1' });
 
     const summary = await relayPendingEvents('sch_1', 'std_1', { forwardEvent });
@@ -81,7 +84,7 @@ describe('LAM relay drain', () => {
   });
 
   it('records a transport exception instead of throwing', async () => {
-    listPending.mockResolvedValue([pendingRow()]);
+    claimPending.mockResolvedValue([pendingRow()]);
     const forwardEvent = vi.fn().mockRejectedValue(new Error('socket hang up'));
 
     const summary = await relayPendingEvents('sch_1', 'std_1', { forwardEvent });
@@ -94,7 +97,7 @@ describe('LAM relay drain', () => {
     const forwardEvent = vi.fn().mockResolvedValue({ status: 'ingested', event_id: 'evt_1' });
     await relayPendingEvents('sch_other', 'std_other', { forwardEvent }, 7);
 
-    expect(listPending).toHaveBeenCalledWith('sch_other', 'std_other', 7);
+    expect(claimPending).toHaveBeenCalledWith('sch_other', 'std_other', 7);
   });
 
   it('does nothing for an empty queue', async () => {

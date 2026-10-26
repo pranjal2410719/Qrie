@@ -37,12 +37,13 @@ create table if not exists public.sync_event (
   occurred_at timestamptz,
   received_at timestamptz not null default now(),
 
-  -- pending   - stored, eligible or not yet attempted, retryable
-  -- relayed   - accepted by LAM
-  -- skipped   - stored but ineligible to become evidence (terminal)
-  -- failed    - retry budget exhausted (terminal)
+  -- pending    - stored, eligible or not yet attempted, retryable
+  -- processing - claimed by an active relay execution (in flight)
+  -- relayed    - accepted by LAM
+  -- skipped    - stored but ineligible to become evidence (terminal)
+  -- failed     - retry budget exhausted (terminal)
   relay_status text not null default 'pending'
-    check (relay_status in ('pending', 'relayed', 'skipped', 'failed')),
+    check (relay_status in ('pending', 'processing', 'relayed', 'skipped', 'failed')),
   relay_attempts integer not null default 0 check (relay_attempts >= 0),
   relayed_at timestamptz,
   last_error text,

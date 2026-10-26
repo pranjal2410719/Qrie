@@ -1,7 +1,7 @@
 import { LamAdapterClient } from '../lam-integration/client.js';
 import type { LamEventPayload } from '../lam-integration/client.js';
 import { normalizeEvent } from './contracts.js';
-import { listPendingEvents, markFailed, markRelayed, markSkipped } from './event-store.js';
+import { claimPendingEvents, markFailed, markRelayed, markSkipped } from './event-store.js';
 
 /**
  * Best-effort forwarding of persisted events to LAM.
@@ -47,7 +47,7 @@ export async function relayPendingEvents(
   transport: RelayTransport = new LamAdapterClient(),
   limit: number = DEFAULT_LIMIT,
 ): Promise<RelaySummary> {
-  const rows = await listPendingEvents(orgId, userId, limit);
+  const rows = await claimPendingEvents(orgId, userId, limit);
   const summary: RelaySummary = {
     attempted: rows.length,
     relayed: 0,

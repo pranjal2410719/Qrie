@@ -48,10 +48,15 @@ class OutboxSyncWorker {
       }
 
       final eventsPayload = pending.map((e) {
+        final payload = jsonDecode(e['payload_json'] as String) as Map<String, dynamic>;
         return {
           'id': e['id'],
           'event_type': e['event_type'],
-          'payload': jsonDecode(e['payload_json'] as String),
+          'session_id': payload['session_id'],
+          'item_id': payload['item_id'] ?? payload['question_id'],
+          'concept_ids': payload['concept_ids'],
+          'correctness': payload['is_correct'],
+          'payload': payload,
           'created_at': e['created_at'],
         };
       }).toList();
@@ -63,16 +68,11 @@ class OutboxSyncWorker {
         );
 
         if (response is Map<String, dynamic>) {
-          final syncedIds = (response['synced_ids'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-              pending.map((e) => e['id'] as String).toList();
-
-          await localDb.markEventsSynced(syncedIds);
-          totalSynced = syncedIds.length;
-        } else {
-          // Fallback if backend returns 200 OK without explicit IDs
-          final allIds = pending.map((e) => e['id'] as String).toList();
-          await localDb.markEventsSynced(allIds);
-          totalSynced = allIds.length;
+          final syncedIds = (response['synced_ids'] as List<dynamic>?)?.map((e) => e.toString()).toList();
+          if (syncedIds != null && syncedIds.isNotEmpty) {
+            await localDb.markEventsSynced(syncedIds);
+            totalSynced = syncedIds.length;
+          }
         }
       } on ProblemDetails catch (e) {
         if (e.status == 401) {

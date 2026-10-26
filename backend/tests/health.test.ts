@@ -44,6 +44,30 @@ describe('Health and Diagnostic Probes', () => {
     expect(res.json()).toEqual({ status: 'unavailable', database: 'disconnected' });
   });
 
+  it('GET /health/status returns operational diagnostic metrics', async () => {
+    vi.spyOn(Database, 'healthCheck').mockResolvedValue(true);
+    vi.spyOn(Database, 'query').mockResolvedValue({
+      rows: [
+        { relay_status: 'pending', count: '5' },
+        { relay_status: 'relayed', count: '42' },
+      ],
+    } as any);
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/health/status',
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.service).toBe('Qrie AI Application Backend');
+    expect(body.status).toBe('ready');
+    expect(body.database).toBe('connected');
+    expect(body.outbox_backlog.pending).toBe(5);
+    expect(body.outbox_backlog.relayed).toBe(42);
+    expect(body.timestamp).toBeDefined();
+  });
+
   it('GET / returns root service information', async () => {
     const res = await app.inject({
       method: 'GET',

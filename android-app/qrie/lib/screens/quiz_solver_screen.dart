@@ -36,10 +36,12 @@ class _QuizSolverScreenState extends State<QuizSolverScreen> {
   // Adaptive Assistance Ladder
   int _assistanceRung = 0;
   DateTime _questionStartTime = DateTime.now();
+  late final String _sessionId;
 
   @override
   void initState() {
     super.initState();
+    _sessionId = 'sess_' + DateTime.now().millisecondsSinceEpoch.toString();
     if (widget.subjectId != null) {
       final filtered = MockData.quizQuestions
           .where((q) => q.subjectId == widget.subjectId)
@@ -92,7 +94,10 @@ class _QuizSolverScreenState extends State<QuizSolverScreen> {
       await _localDb.enqueueEvent(
         eventType: 'learning.answer_submitted',
         payload: {
+          'session_id': _sessionId,
           'question_id': currentQuestion.id,
+          'item_id': currentQuestion.id,
+          'concept_ids': [currentQuestion.topic ?? ('ncert.' + currentQuestion.subjectId + '.' + currentQuestion.id)],
           'subject_id': currentQuestion.subjectId,
           'is_correct': isCorrect,
           'selected_option': _selectedOptionIndex,

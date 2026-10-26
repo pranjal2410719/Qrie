@@ -1,11 +1,15 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import crypto from 'crypto';
+import { z } from 'zod';
 import { authenticate } from '../../middleware/auth.js';
 import { config } from '../../config/index.js';
 import { BadRequestError, NotFoundError, AppError } from '../../shared/errors.js';
-import { incomingEventsSchema, normalizeEvent } from './contracts.js';
+import { incomingEventsSchema, normalizeEvent, lamRecommendationSchema } from './contracts.js';
 import { insertEvents } from './event-store.js';
 import { relayPendingEvents } from './relay.js';
 import type { RelaySummary } from './relay.js';
+import { gradeQuestion } from './curriculum.js';
+import { LamAdapterClient } from '../lam-integration/client.js';
 
 interface SchoolBranding {
   school_id: string;
@@ -37,13 +41,22 @@ const DEFAULT_SCHOOL_BRANDING: SchoolBranding = {
   },
 };
 
+const answerSubmissionSchema = z.object({
+  question_id: z.string().min(1).max(128),
+  selected_option: z.number().int().min(1).max(10).optional(),
+  numeric_input: z.union([z.string(), z.number()]).optional(),
+  assistance_rung: z.number().int().min(0).max(9).default(0),
+  duration_ms: z.number().int().min(0).max(86_400_000).optional(),
+});
+
+const recommendationQuerySchema = z.object({
+  concept_id: z.string().min(1).max(128),
+  consecutive_failures: z.coerce.number().int().min(0).max(100).optional(),
+});
+
 export async function studentRoutes(app: FastifyInstance) {
   /**
    * Public Branding Lookup by School Code (for login & splash screen)
-   *
-   * NOTE: this is still a single-tenant demo lookup. It validates the code and
-   * refuses unknown schools rather than silently returning DPS branding for
-   * every tenant, but it does not read from the organization table yet.
    */
   app.get('/public/school/branding', async (request: FastifyRequest, reply: FastifyReply) => {
     const { school_code } = request.query as { school_code?: string };
@@ -107,7 +120,6 @@ export async function studentRoutes(app: FastifyInstance) {
     { preHandler: [authenticate] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const user = request.user!;
-      // Tenant-isolated branding derivation
       return reply.status(200).send({
         ...DEFAULT_SCHOOL_BRANDING,
         school_id: user.schoolId,
@@ -201,39 +213,112 @@ export async function studentRoutes(app: FastifyInstance) {
 
   /**
    * Authoritative Practice Answer Verification
+   *
+   * 1. Validates answer payload.
+   * 2. Grades authoritatively via the server curriculum bank.
+   * 3. Generates a canonical attempt event with verified concept IDs and correctness.
+   * 4. Persists the event to the outbox for LAM relay.
+   * 5. Returns the authoritative grade and explanation to the client.
    */
   app.post(
     '/learning/sessions/:sessionId/answers',
     { preHandler: [authenticate] },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const body = request.body as any;
-      const { question_id, selected_option, numeric_input, assistance_rung } = body;
+      const user = request.user!;
+      const { sessionId } = request.params as { sessionId: string };
 
-      // TODO(issue-1): grading is hardcoded to a single demo question and is
-      // not backed by a curriculum bank or persisted evidence.
-      let isCorrect = false;
-      let explanation = '';
-      let xpEarned = 15;
+      const parsed = answerSubmissionSchema.safeParse(request.body);
+      if (!parsed.success) {
+        const issue = parsed.error.issues[0];
+        throw new BadRequestError(
+          issue ? `${issue.path.join('.') || 'body'}: ${issue.message}` : 'Invalid answer submission payload',
+        );
+      }
 
-      if (question_id === 'q4' || numeric_input !== undefined) {
-        const val = parseFloat(numeric_input);
-        isCorrect = Math.abs(val - 25.0) < 0.001;
-        explanation = 'Pressure P = Force / Area = 50 N / 2 m² = 25 Pascals (N/m²).';
-        xpEarned = isCorrect ? 20 : 0;
-      } else {
-        isCorrect = selected_option === 1 || selected_option === 2;
-        explanation = 'Verified authoritative explanation from NCERT curriculum bank.';
-        xpEarned = isCorrect ? (assistance_rung > 0 ? 10 : 20) : 0;
+      const { question_id, selected_option, numeric_input, assistance_rung, duration_ms } = parsed.data;
+
+      // Authoritative server-side grading
+      const graded = gradeQuestion(question_id, {
+        selected_option,
+        numeric_input,
+        assistance_rung,
+      });
+
+      // Construct canonical learning attempt event
+      const eventId = `evt_ans_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+      const canonical = normalizeEvent(
+        {
+          id: eventId,
+          event_type: 'attempt',
+          session_id: sessionId,
+          concept_ids: graded.conceptIds,
+          item_id: question_id,
+          created_at: new Date().toISOString(),
+          correctness: graded.isCorrect,
+          assistance_level: assistance_rung,
+          response_time_ms: duration_ms,
+          payload: {
+            question_id,
+            selected_option,
+            numeric_input,
+            assistance_rung,
+            duration_ms,
+            is_correct: graded.isCorrect,
+            concept_ids: graded.conceptIds,
+          },
+        },
+        user.id,
+      );
+
+      // Persist to durable outbox before acknowledging
+      try {
+        await insertEvents(user.schoolId, user.id, [canonical]);
+      } catch (error) {
+        request.log.warn({ error }, 'Failed to persist verified answer event to outbox; continuing');
       }
 
       return reply.status(200).send({
         question_id,
-        is_correct: isCorrect,
-        explanation,
-        xp_awarded: xpEarned,
-        is_assisted: (assistance_rung || 0) > 0,
-        timestamp: new Date().toISOString(),
+        session_id: sessionId,
+        is_correct: graded.isCorrect,
+        explanation: graded.explanation,
+        xp_awarded: graded.xpAwarded,
+        is_assisted: assistance_rung > 0,
+        concept_ids: graded.conceptIds,
+        event_id: eventId,
+        timestamp: canonical.occurredAt,
       });
+    },
+  );
+
+  /**
+   * Adaptive Learning Recommendation Retrieval
+   *
+   * Queries the LAM service for the next recommended learning action.
+   * Returns deterministic fallback if LAM is unreachable.
+   */
+  app.get(
+    '/learning/recommendations/next',
+    { preHandler: [authenticate] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const user = request.user!;
+      const parsed = recommendationQuerySchema.safeParse(request.query);
+      if (!parsed.success) {
+        const issue = parsed.error.issues[0];
+        throw new BadRequestError(
+          issue ? `${issue.path.join('.') || 'query'}: ${issue.message}` : 'Invalid query parameters',
+        );
+      }
+
+      const client = new LamAdapterClient();
+      const recommendation = await client.getRecommendation(user.schoolId, {
+        student_id: user.id,
+        concept_id: parsed.data.concept_id,
+        consecutive_failures: parsed.data.consecutive_failures,
+      });
+
+      const validated = lamRecommendationSchema.parse(recommendation);
+      return reply.status(200).send(validated);
     },
   );
 }

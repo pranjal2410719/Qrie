@@ -66,6 +66,14 @@ export function buildApp(opts: FastifyServerOptions = {}): FastifyInstance {
   app.register(sensible);
   app.register(jwt, {
     secret: config.JWT_SECRET,
+    sign: {
+      iss: config.JWT_ISSUER,
+      aud: config.JWT_AUDIENCE,
+    },
+    verify: {
+      allowedIss: config.JWT_ISSUER,
+      allowedAud: config.JWT_AUDIENCE,
+    },
   });
 
   // Attach correlation ID to all outgoing responses

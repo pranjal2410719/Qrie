@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { config } from '../../config/index.js';
+import { CircuitBreaker, CircuitState } from './circuit-breaker.js';
 
 export interface LamEventPayload {
   event_id: string;
@@ -42,11 +43,21 @@ export class LamAdapterClient {
   private baseUrl: string;
   private secret: string;
   private timeoutMs: number;
+  private circuitBreaker: CircuitBreaker;
 
   constructor(baseUrl?: string, secret?: string, timeoutMs?: number) {
     this.baseUrl = baseUrl || config.LAM_BASE_URL;
     this.secret = secret || config.LAM_JWT_SECRET;
     this.timeoutMs = timeoutMs ?? config.LAM_TIMEOUT_MS;
+    this.circuitBreaker = new CircuitBreaker({
+      failureThreshold: 5,
+      resetTimeoutMs: 15000,
+      halfOpenMaxCalls: 2,
+    });
+  }
+
+  public getCircuitState(): CircuitState {
+    return this.circuitBreaker.getState();
   }
 
   /**
@@ -105,44 +116,47 @@ export class LamAdapterClient {
 
   /**
    * Queries LAM for the next adaptive pedagogical activity.
-   * Returns deterministic fallback if LAM is unreachable.
+   * Returns deterministic fallback if LAM is unreachable or if circuit breaker is OPEN.
    */
   public async getRecommendation(
     tenantId: string,
     req: LamRecommendationRequest
   ): Promise<LamRecommendationResponse> {
-    const token = this.generateLamToken(tenantId);
-    try {
-      const response = await fetch(`${this.baseUrl}/v1/recommendations`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(req),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
+    return this.circuitBreaker.execute(
+      async () => {
+        const token = this.generateLamToken(tenantId);
+        const response = await fetch(`${this.baseUrl}/v1/recommendations`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(req),
+          signal: AbortSignal.timeout(this.timeoutMs),
+        });
 
-      if (!response.ok) {
-        throw new Error(`LAM returned HTTP ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`LAM returned HTTP ${response.status}`);
+        }
 
-      return (await response.json()) as LamRecommendationResponse;
-    } catch (err: any) {
-      console.warn(`[LAM Adapter] Recommendation retrieval failed (${err.message}). Returning safe fallback.`);
-      return {
-        recommendation_id: `fallback_${Date.now()}`,
-        action_type: 'independent_practice',
-        target_concept_id: req.concept_id,
-        assistance_level: 0,
-        priority_tier: 'tier_safe_fallback',
-        reason_code: 'LAM_UNREACHABLE_FALLBACK',
-        suggested_strategy: 'continue_current_topic',
-        rationale: 'Deterministic fallback engaged while LAM service is recovering.',
-        policy_version: 'fallback-v1',
-        safe_fallback: true,
-        uncertainty: 0.5,
-      };
-    }
+        return (await response.json()) as LamRecommendationResponse;
+      },
+      (err: Error) => {
+        console.warn(`[LAM Adapter] Recommendation retrieval failed (${err.message}). Returning safe fallback.`);
+        return {
+          recommendation_id: `fallback_${Date.now()}`,
+          action_type: 'independent_practice',
+          target_concept_id: req.concept_id,
+          assistance_level: 0,
+          priority_tier: 'tier_safe_fallback',
+          reason_code: 'LAM_UNREACHABLE_FALLBACK',
+          suggested_strategy: 'continue_current_topic',
+          rationale: 'Deterministic fallback engaged while LAM service is recovering.',
+          policy_version: 'fallback-v1',
+          safe_fallback: true,
+          uncertainty: 0.5,
+        };
+      },
+    );
   }
 }
