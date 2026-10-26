@@ -1,16 +1,12 @@
 /**
- * Pure unit tests for buildStoredPayload.
+ * Pure unit tests for event-store logic.
  *
- * These tests do NOT require a database connection.  They exercise the payload-
- * construction logic in isolation from the persistence layer so the fix can be
- * verified immediately without provisioning PostgreSQL.
- *
- * Database-round-trip verification lives in event_persistence.test.ts and
- * event_store_regression.test.ts; those are marked as integration tests and
- * skipped automatically when no database is reachable.
+ * Exercises payload construction, claim queries, and relay recovery logic
+ * without requiring an active database connection.
  */
-import { describe, it, expect } from 'vitest';
-import { buildStoredPayload } from '../src/modules/student/event-store.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { buildStoredPayload, claimPendingEvents } from '../src/modules/student/event-store.js';
+import { Database } from '../src/database/index.js';
 import type { NormalizedEvent } from '../src/modules/student/contracts.js';
 
 function makeEligibleEvent(overrides: Partial<NormalizedEvent> = {}): NormalizedEvent {
@@ -53,31 +49,15 @@ function makeIneligibleEvent(overrides: Partial<NormalizedEvent> = {}): Normaliz
   };
 }
 
-describe('buildStoredPayload – eligible events', () => {
-  it('stores the lamEvent object directly', () => {
+describe('buildStoredPayload – eligible event', () => {
+  it('stores lamEvent directly when eligible', () => {
     const event = makeEligibleEvent();
     const result = buildStoredPayload(event);
-    expect(result).toEqual(event.lamEvent);
-  });
-
-  it('includes concept_ids, item_id, and correctness from lamEvent', () => {
-    const event = makeEligibleEvent();
-    const result = buildStoredPayload(event);
-    expect(result.concept_ids).toEqual(['c1', 'c2']);
-    expect(result.item_id).toBe('itm_1');
-    expect(result.correctness).toBe(true);
-  });
-
-  it('does NOT use the raw payload when lamEvent is present', () => {
-    const event = makeEligibleEvent({
-      payload: { unrelated: 'field' },
-    });
-    const result = buildStoredPayload(event);
-    expect(result).not.toHaveProperty('unrelated');
+    expect(result).toBe(event.lamEvent);
   });
 });
 
-describe('buildStoredPayload – ineligible events (lamEvent is null)', () => {
+describe('buildStoredPayload – ineligible event', () => {
   it('preserves concept_ids from the original payload', () => {
     const event = makeIneligibleEvent();
     const result = buildStoredPayload(event);
@@ -96,7 +76,7 @@ describe('buildStoredPayload – ineligible events (lamEvent is null)', () => {
     expect(result.correctness).toBe(false);
   });
 
-  it('preserves arbitrary payload fields (data minimisation: keep what was sent)', () => {
+  it('preserves arbitrary payload fields', () => {
     const event = makeIneligibleEvent();
     const result = buildStoredPayload(event);
     expect(result.arbitrary_field).toBe('keep_me');
@@ -138,9 +118,28 @@ describe('buildStoredPayload – ineligible events (lamEvent is null)', () => {
   });
 
   it('does not add _ineligible_reason when ineligibleReason is null', () => {
-    // Edge-case: an ineligible event that somehow has no reason set.
     const event = makeIneligibleEvent({ ineligibleReason: null });
     const result = buildStoredPayload(event);
     expect(result).not.toHaveProperty('_ineligible_reason');
+  });
+});
+
+describe('claimPendingEvents recovery and query safety', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('updates claimed_at to now() and only reclaims processing events after 60s of claim', async () => {
+    let capturedSql = '';
+    vi.spyOn(Database, 'query').mockImplementation(async (sql: string) => {
+      capturedSql = sql;
+      return { rows: [] } as any;
+    });
+
+    await claimPendingEvents('sch_1', 'std_1', 10);
+
+    expect(capturedSql).toContain('claimed_at = now()');
+    expect(capturedSql).toContain("claimed_at < now() - interval '60 seconds'");
+    expect(capturedSql).not.toContain("received_at < now() - interval '60 seconds'");
   });
 });

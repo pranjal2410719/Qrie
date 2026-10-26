@@ -1,24 +1,7 @@
 import { Database } from '../../database/index.js';
 import type { NormalizedEvent } from './contracts.js';
 
-/**
- * Persistence for the mobile outbox handoff (`public.sync_event`).
- *
- * The primary key is `(org_id, event_id)`, so `on conflict do nothing` is the
- * idempotency guarantee: a replayed batch does not insert twice and does not
- * produce a second relay. That property is enforced by the database, not by a
- * read-then-write in application code.
- */
-
 export const MAX_RELAY_ATTEMPTS = 10;
-
-export interface PendingEventRow {
-  eventId: string;
-  sessionId: string | null;
-  eventType: string;
-  occurredAt: string | null;
-  payload: Record<string, any>;
-}
 
 interface InsertedRow {
   event_id: string;
@@ -28,7 +11,15 @@ interface PendingRow {
   event_id: string;
   session_id: string | null;
   event_type: string;
-  occurred_at: Date | string | null;
+  occurred_at: string | Date | null;
+  payload: Record<string, any>;
+}
+
+export interface PendingEventRow {
+  eventId: string;
+  sessionId: string | null;
+  eventType: string;
+  occurredAt: string | null;
   payload: Record<string, any>;
 }
 
@@ -142,6 +133,9 @@ export async function listPendingEvents(
  *
  * Uses `UPDATE ... FOR UPDATE SKIP LOCKED` so concurrent relay executions
  * cannot select and forward identical events simultaneously.
+ *
+ * Updates `claimed_at = now()` so in-flight events are not immediately re-claimed.
+ * If a worker crashes or hangs for > 60s, stale processing events are safely reclaimed.
  */
 export async function claimPendingEvents(
   orgId: string,
@@ -152,6 +146,7 @@ export async function claimPendingEvents(
   const result = await Database.query<PendingRow>(
     `update public.sync_event
         set relay_status = 'processing',
+            claimed_at = now(),
             last_error = 'CLAIMED_FOR_RELAY'
       where (org_id, event_id) in (
         select org_id, event_id
@@ -160,7 +155,7 @@ export async function claimPendingEvents(
            and user_id = $2
            and (
              relay_status = 'pending'
-             or (relay_status = 'processing' and received_at < now() - interval '60 seconds')
+             or (relay_status = 'processing' and claimed_at < now() - interval '60 seconds')
            )
            and relay_attempts < $3
          order by received_at asc
@@ -186,6 +181,7 @@ export async function markRelayed(orgId: string, eventIds: string[]): Promise<vo
     `update public.sync_event
         set relay_status = 'relayed',
             relayed_at = now(),
+            claimed_at = null,
             last_error = null
       where org_id = $1
         and event_id = any($2::text[])`,
@@ -201,6 +197,7 @@ export async function markSkipped(
   await Database.query(
     `update public.sync_event
         set relay_status = 'skipped',
+            claimed_at = null,
             last_error = $3
       where org_id = $1
         and event_id = $2`,
@@ -221,6 +218,7 @@ export async function markFailed(
   await Database.query(
     `update public.sync_event
         set relay_attempts = relay_attempts + 1,
+            claimed_at = null,
             last_error = $3,
             relay_status = case
               when relay_attempts + 1 >= $4 then 'failed'

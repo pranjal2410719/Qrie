@@ -45,6 +45,7 @@ create table if not exists public.sync_event (
   relay_status text not null default 'pending'
     check (relay_status in ('pending', 'processing', 'relayed', 'skipped', 'failed')),
   relay_attempts integer not null default 0 check (relay_attempts >= 0),
+  claimed_at timestamptz,
   relayed_at timestamptz,
   last_error text,
 
@@ -54,7 +55,7 @@ create table if not exists public.sync_event (
 -- The drain query: one student's retryable rows, oldest first.
 create index if not exists sync_event_pending
   on public.sync_event (org_id, user_id, received_at)
-  where relay_status = 'pending';
+  where relay_status in ('pending', 'processing');
 
 -- RLS with NO policies on purpose. The backend connects with the table owner
 -- role, which bypasses RLS; `anon` and `authenticated` get nothing. Adding a
