@@ -277,6 +277,13 @@ export async function studentRoutes(app: FastifyInstance) {
         request.log.warn({ error }, 'Failed to persist verified answer event to outbox; continuing');
       }
 
+      // Non-blocking asynchronous relay kick to LAM if relay is enabled
+      if (config.LAM_RELAY_ENABLED) {
+        relayPendingEvents(user.schoolId, user.id).catch((err) => {
+          request.log.warn({ err }, 'Background relay kick failed for answer submission; will retry on next sync');
+        });
+      }
+
       return reply.status(200).send({
         question_id,
         session_id: sessionId,

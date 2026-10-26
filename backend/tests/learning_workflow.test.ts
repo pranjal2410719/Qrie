@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { lamRecommendationSchema } from '../src/modules/student/contracts.js';
+import * as relayModule from '../src/modules/student/relay.js';
 
 describe('Authoritative Learning Workflow & Recommendations', () => {
   const app = buildApp();
@@ -165,6 +166,31 @@ describe('Authoritative Learning Workflow & Recommendations', () => {
       expect(body.xp_awarded).toBe(10); // Reduced due to assistance
       expect(body.is_assisted).toBe(true);
       expect(body.concept_ids).toEqual(['physics.mechanics.force']);
+    });
+
+    it('triggers non-blocking relayPendingEvents after persisting answer event', async () => {
+      const relaySpy = vi.spyOn(relayModule, 'relayPendingEvents').mockResolvedValue({
+        attempted: 1,
+        relayed: 1,
+        skipped: 0,
+        failed: 0,
+      });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/v1/learning/sessions/sess_relay_test/answers',
+        headers: {
+          authorization: `Bearer ${studentToken}`,
+        },
+        payload: {
+          question_id: 'q4',
+          numeric_input: 25,
+          assistance_rung: 0,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(relaySpy).toHaveBeenCalledWith('sch_dps_rkp', 'std_aarav_patel');
     });
   });
 });

@@ -39,21 +39,45 @@ export interface LamRecommendationResponse {
   uncertainty: number;
 }
 
+/**
+ * Shared CircuitBreaker instance for the application process.
+ * Ensures failure accumulation across distinct HTTP requests so the circuit
+ * breaker trips globally when the upstream LAM service is degraded.
+ */
+let sharedCircuitBreaker = new CircuitBreaker({
+  failureThreshold: 5,
+  resetTimeoutMs: 15000,
+  halfOpenMaxCalls: 2,
+});
+
+export function getSharedCircuitBreaker(): CircuitBreaker {
+  return sharedCircuitBreaker;
+}
+
+export function resetSharedCircuitBreaker(newBreaker?: CircuitBreaker): void {
+  if (newBreaker) {
+    sharedCircuitBreaker = newBreaker;
+  } else {
+    sharedCircuitBreaker.reset();
+  }
+}
+
 export class LamAdapterClient {
   private baseUrl: string;
   private secret: string;
   private timeoutMs: number;
   private circuitBreaker: CircuitBreaker;
 
-  constructor(baseUrl?: string, secret?: string, timeoutMs?: number) {
+  constructor(
+    baseUrl?: string,
+    secret?: string,
+    timeoutMs?: number,
+    circuitBreaker?: CircuitBreaker,
+  ) {
     this.baseUrl = baseUrl || config.LAM_BASE_URL;
     this.secret = secret || config.LAM_JWT_SECRET;
     this.timeoutMs = timeoutMs ?? config.LAM_TIMEOUT_MS;
-    this.circuitBreaker = new CircuitBreaker({
-      failureThreshold: 5,
-      resetTimeoutMs: 15000,
-      halfOpenMaxCalls: 2,
-    });
+    this.circuitBreaker = circuitBreaker ?? sharedCircuitBreaker;
   }
 
   public getCircuitState(): CircuitState {

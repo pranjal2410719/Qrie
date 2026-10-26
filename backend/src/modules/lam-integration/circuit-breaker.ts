@@ -44,6 +44,13 @@ export class CircuitBreaker {
     this.halfOpenCalls = 0;
   }
 
+  public reset(): void {
+    this.failureCount = 0;
+    this.state = 'CLOSED';
+    this.lastFailureTime = 0;
+    this.halfOpenCalls = 0;
+  }
+
   public recordFailure(): void {
     this.failureCount += 1;
     this.lastFailureTime = Date.now();

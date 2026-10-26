@@ -1,5 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CircuitBreaker } from '../src/modules/lam-integration/circuit-breaker.js';
+import {
+  LamAdapterClient,
+  getSharedCircuitBreaker,
+  resetSharedCircuitBreaker,
+} from '../src/modules/lam-integration/client.js';
 
 describe('CircuitBreaker for LAM integration', () => {
   it('starts in CLOSED state and allows successful executions', async () => {
@@ -76,5 +81,56 @@ describe('CircuitBreaker for LAM integration', () => {
     // Probe fails
     await cb.execute(failOp, fallback);
     expect(cb.getState()).toBe('OPEN');
+  });
+
+  it('resets breaker state and failures with explicit reset() call', () => {
+    const cb = new CircuitBreaker({ failureThreshold: 2 });
+    cb.recordFailure();
+    cb.recordFailure();
+    expect(cb.getState()).toBe('OPEN');
+
+    cb.reset();
+    expect(cb.getState()).toBe('CLOSED');
+    expect(cb.canExecute()).toBe(true);
+  });
+});
+
+describe('Shared CircuitBreaker across LamAdapterClient instances', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    resetSharedCircuitBreaker(new CircuitBreaker({ failureThreshold: 3, resetTimeoutMs: 100 }));
+  });
+
+  it('accumulates failures across distinct LamAdapterClient instances and trips shared breaker', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('connection timeout'));
+
+    // 1st request through instance 1
+    const client1 = new LamAdapterClient();
+    const rec1 = await client1.getRecommendation('sch_test', { student_id: 'std_1', concept_id: 'c1' });
+    expect(rec1.safe_fallback).toBe(true);
+    expect(getSharedCircuitBreaker().getState()).toBe('CLOSED');
+
+    // 2nd request through instance 2
+    const client2 = new LamAdapterClient();
+    const rec2 = await client2.getRecommendation('sch_test', { student_id: 'std_1', concept_id: 'c1' });
+    expect(rec2.safe_fallback).toBe(true);
+    expect(getSharedCircuitBreaker().getState()).toBe('CLOSED');
+
+    // 3rd request through instance 3 -> hits failureThreshold: 3 and trips
+    const client3 = new LamAdapterClient();
+    const rec3 = await client3.getRecommendation('sch_test', { student_id: 'std_1', concept_id: 'c1' });
+    expect(rec3.safe_fallback).toBe(true);
+    expect(getSharedCircuitBreaker().getState()).toBe('OPEN');
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
+
+    // 4th request through instance 4: breaker is OPEN, skips network call completely
+    const client4 = new LamAdapterClient();
+    const rec4 = await client4.getRecommendation('sch_test', { student_id: 'std_1', concept_id: 'c1' });
+    expect(rec4.safe_fallback).toBe(true);
+    expect(fetchSpy).toHaveBeenCalledTimes(3); // still 3, fast-failed without calling fetch
+
+    // Reset restores normal operation
+    resetSharedCircuitBreaker();
+    expect(getSharedCircuitBreaker().getState()).toBe('CLOSED');
   });
 });
