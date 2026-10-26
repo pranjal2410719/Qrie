@@ -1,8 +1,23 @@
 -- Bootstrap schema definitions for vanilla PostgreSQL (CI / local testing)
--- Stubs out the Supabase-managed auth and storage extensions.
+-- Stubs out Supabase-managed roles, auth, storage, and cron extensions.
 
 create extension if not exists "pgcrypto";
 
+-- 1. Standard Supabase Roles
+do $$
+begin
+  if not exists (select from pg_roles where rolname = 'anon') then
+    create role anon;
+  end if;
+  if not exists (select from pg_roles where rolname = 'authenticated') then
+    create role authenticated;
+  end if;
+  if not exists (select from pg_roles where rolname = 'service_role') then
+    create role service_role;
+  end if;
+end $$;
+
+-- 2. Auth Schema
 create schema if not exists auth;
 
 create table if not exists auth.users (
@@ -22,6 +37,7 @@ as $$
   select null::uuid;
 $$;
 
+-- 3. Storage Schema
 create schema if not exists storage;
 
 create table if not exists storage.buckets (
@@ -45,3 +61,8 @@ create table if not exists storage.objects (
   last_accessed_at timestamptz default now(),
   metadata jsonb
 );
+
+-- 4. Cron Schema Stubs (fallback when pg_cron binary is not loaded)
+create schema if not exists cron;
+create or replace function cron.schedule(text, text, text) returns bigint language sql as $$ select 1::bigint; $$;
+create or replace function cron.unschedule(text) returns boolean language sql as $$ select true; $$;

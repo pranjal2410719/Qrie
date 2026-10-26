@@ -5,7 +5,13 @@
  * without requiring an active database connection.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildStoredPayload, claimPendingEvents } from '../src/modules/student/event-store.js';
+import {
+  buildStoredPayload,
+  claimPendingEvents,
+  markRelayed,
+  markSkipped,
+  markFailed,
+} from '../src/modules/student/event-store.js';
 import { Database } from '../src/database/index.js';
 import type { NormalizedEvent } from '../src/modules/student/contracts.js';
 
@@ -139,7 +145,26 @@ describe('claimPendingEvents recovery and query safety', () => {
     await claimPendingEvents('sch_1', 'std_1', 10);
 
     expect(capturedSql).toContain('claimed_at = now()');
-    expect(capturedSql).toContain("claimed_at < now() - interval '60 seconds'");
+    expect(capturedSql).toContain("claimed_at is null or claimed_at < now() - interval '60 seconds'");
     expect(capturedSql).not.toContain("received_at < now() - interval '60 seconds'");
+  });
+
+  it('resets claimed_at to null on terminal status updates (relayed, skipped, failed)', async () => {
+    let lastSql = '';
+    vi.spyOn(Database, 'query').mockImplementation(async (sql: string) => {
+      lastSql = sql;
+      return { rows: [] } as any;
+    });
+
+    await markRelayed('sch_1', ['evt_1']);
+    expect(lastSql).toContain("relay_status = 'relayed'");
+    expect(lastSql).toContain('claimed_at = null');
+
+    await markSkipped('sch_1', 'evt_1', 'INELIGIBLE');
+    expect(lastSql).toContain("relay_status = 'skipped'");
+    expect(lastSql).toContain('claimed_at = null');
+
+    await markFailed('sch_1', 'evt_1', 'NETWORK_TIMEOUT');
+    expect(lastSql).toContain('claimed_at = null');
   });
 });

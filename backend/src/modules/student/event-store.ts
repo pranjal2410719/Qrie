@@ -155,7 +155,10 @@ export async function claimPendingEvents(
            and user_id = $2
            and (
              relay_status = 'pending'
-             or (relay_status = 'processing' and claimed_at < now() - interval '60 seconds')
+             or (
+               relay_status = 'processing'
+               and (claimed_at is null or claimed_at < now() - interval '60 seconds')
+             )
            )
            and relay_attempts < $3
          order by received_at asc

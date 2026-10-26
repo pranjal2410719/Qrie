@@ -52,6 +52,9 @@ create table if not exists public.sync_event (
   primary key (org_id, event_id)
 );
 
+-- Idempotently ensure claimed_at exists on pre-existing tables
+alter table public.sync_event add column if not exists claimed_at timestamptz;
+
 -- The drain query: one student's retryable rows, oldest first.
 create index if not exists sync_event_pending
   on public.sync_event (org_id, user_id, received_at)
