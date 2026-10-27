@@ -224,6 +224,30 @@ describe('Learning event contract', () => {
     expect(event.lamEvent?.difficulty).toBeUndefined();
   });
 
+  it('derives a safe assessment mode when persisted mode is invalid', () => {
+    const event = normalizeEvent(
+      {
+        id: 'evt_invalid_mode_with_assistance',
+        event_type: 'attempt',
+        session_id: 'sess_1',
+        concept_ids: ['c1'],
+        item_id: 'i1',
+        timestamp: '2026-10-23T10:00:00.000Z',
+        correctness: true,
+        payload: {
+          assistance_level: 2,
+          assessment_mode: 'unknown-mode',
+          lamEvent: { assessment_mode: 'unknown-mode' },
+        },
+      },
+      'std_1',
+    );
+
+    expect(event.ineligibleReason).toBeNull();
+    expect(event.lamEvent?.assistance_level).toBe(2);
+    expect(event.lamEvent?.assessment_mode).toBe('assisted');
+  });
+
   it('allows a hint event without a correctness verdict', () => {
     const event = normalizeEvent(
       {
