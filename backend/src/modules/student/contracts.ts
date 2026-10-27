@@ -87,9 +87,26 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
 
-function asRung(value: unknown): number | undefined {
+function asBoundedInteger(value: unknown, min: number, max: number): number | undefined {
   const n = asNumber(value);
-  return n !== undefined && Number.isInteger(n) && n >= 0 && n <= 9 ? n : undefined;
+  return n !== undefined && Number.isInteger(n) && n >= min && n <= max ? n : undefined;
+}
+
+function asBoundedNumber(value: unknown, min: number, max: number): number | undefined {
+  const n = asNumber(value);
+  return n !== undefined && n >= min && n <= max ? n : undefined;
+}
+
+function asRung(value: unknown): number | undefined {
+  return asBoundedInteger(value, 0, 9);
+}
+
+type AssessmentMode = NonNullable<LamEventPayload['assessment_mode']>;
+
+function asAssessmentMode(value: unknown): AssessmentMode | undefined {
+  return value === 'independent' || value === 'assisted' || value === 'delayed' || value === 'transfer'
+    ? value
+    : undefined;
 }
 
 function isIsoDateTime(value: string | undefined): string | undefined {
@@ -176,32 +193,30 @@ export function normalizeEvent(input: IncomingEvent, studentId: string): Normali
     asRung(persistedLamEvent?.assistance_level) ??
     asRung(payload.assistance_level) ??
     asRung(payload.assistance_rung);
+  // Validate optional values at normalization time as well as at intake.
+  // Persisted JSON may predate the current schema or bypass the HTTP parser.
   const attemptNumber =
-    asNumber(input.attempt_number) ??
-    asNumber(persistedLamEvent?.attempt_number) ??
-    asNumber(payload.attempt_number);
+    asBoundedInteger(input.attempt_number, 0, 1000) ??
+    asBoundedInteger(persistedLamEvent?.attempt_number, 0, 1000) ??
+    asBoundedInteger(payload.attempt_number, 0, 1000);
   const hintsUsed =
-    asNumber(input.hints_used) ??
-    asNumber(persistedLamEvent?.hints_used) ??
-    asNumber(payload.hints_used);
+    asBoundedInteger(input.hints_used, 0, 100) ??
+    asBoundedInteger(persistedLamEvent?.hints_used, 0, 100) ??
+    asBoundedInteger(payload.hints_used, 0, 100);
   const responseTimeMs =
-    asNumber(input.response_time_ms) ??
-    asNumber(persistedLamEvent?.response_time_ms) ??
-    asNumber(payload.response_time_ms) ??
-    asNumber(payload.duration_ms);
+    asBoundedInteger(input.response_time_ms, 0, 86_400_000) ??
+    asBoundedInteger(persistedLamEvent?.response_time_ms, 0, 86_400_000) ??
+    asBoundedInteger(payload.response_time_ms, 0, 86_400_000) ??
+    asBoundedInteger(payload.duration_ms, 0, 86_400_000);
   const difficulty =
-    typeof input.difficulty === 'number'
-      ? input.difficulty
-      : typeof persistedLamEvent?.difficulty === 'number'
-        ? persistedLamEvent.difficulty
-        : typeof payload.difficulty === 'number'
-          ? payload.difficulty
-          : undefined;
+    asBoundedNumber(input.difficulty, 0, 1) ??
+    asBoundedNumber(persistedLamEvent?.difficulty, 0, 1) ??
+    asBoundedNumber(payload.difficulty, 0, 1);
 
   const assessmentMode =
-    input.assessment_mode ??
-    ((asString(persistedLamEvent?.assessment_mode) as LamEventPayload['assessment_mode'] | undefined)) ??
-    ((asString(payload.assessment_mode) as LamEventPayload['assessment_mode'] | undefined)) ??
+    asAssessmentMode(input.assessment_mode) ??
+    asAssessmentMode(persistedLamEvent?.assessment_mode) ??
+    asAssessmentMode(payload.assessment_mode) ??
     (mappedType === 'attempt' || mappedType === 'assessment'
       ? assistanceLevel !== undefined && assistanceLevel > 0
         ? 'assisted'
