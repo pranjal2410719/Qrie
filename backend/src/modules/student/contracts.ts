@@ -218,9 +218,11 @@ export function normalizeEvent(input: IncomingEvent, studentId: string): Normali
     asAssessmentMode(persistedLamEvent?.assessment_mode) ??
     asAssessmentMode(payload.assessment_mode) ??
     (mappedType === 'attempt' || mappedType === 'assessment'
-      ? assistanceLevel !== undefined && assistanceLevel > 0
-        ? 'assisted'
-        : 'independent'
+      ? assistanceLevel === undefined
+        ? undefined
+        : assistanceLevel > 0
+          ? 'assisted'
+          : 'independent'
       : undefined);
 
   let ineligibleReason: IneligibleReason | null = null;
