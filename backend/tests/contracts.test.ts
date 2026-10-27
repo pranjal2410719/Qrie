@@ -185,6 +185,45 @@ describe('Learning event contract', () => {
     expect(event.lamEvent?.correctness).toBe(false);
   });
 
+  it('does not forward invalid optional metadata from persisted JSON', () => {
+    const event = normalizeEvent(
+      {
+        id: 'evt_invalid_persisted_metadata',
+        event_type: 'attempt',
+        session_id: 'sess_1',
+        concept_ids: ['c1'],
+        item_id: 'i1',
+        timestamp: '2026-10-23T10:00:00.000Z',
+        correctness: true,
+        payload: {
+          attempt_number: -1,
+          hints_used: 101,
+          response_time_ms: -5,
+          difficulty: 1.5,
+          assessment_mode: 'invented-mode',
+          lamEvent: {
+            attempt_number: 1.5,
+            hints_used: -1,
+            response_time_ms: 86_400_001,
+            difficulty: -0.1,
+            assessment_mode: 'not-a-real-mode',
+          },
+        },
+      },
+      'std_1',
+    );
+
+    expect(event.lamEvent).toMatchObject({
+      event_type: 'attempt',
+      correctness: true,
+      assessment_mode: 'independent',
+    });
+    expect(event.lamEvent?.attempt_number).toBeUndefined();
+    expect(event.lamEvent?.hints_used).toBeUndefined();
+    expect(event.lamEvent?.response_time_ms).toBeUndefined();
+    expect(event.lamEvent?.difficulty).toBeUndefined();
+  });
+
   it('allows a hint event without a correctness verdict', () => {
     const event = normalizeEvent(
       {
